@@ -64,7 +64,7 @@ const LoginForm = () => {
                     </div>
                     <Input
                       type="email"
-                      placeholder="your.email@company.com"
+                      placeholder="email@company.com"
                       className="h-9 sm:h-10 pl-9 sm:pl-10 text-sm"
                       {...field}
                     />
@@ -134,6 +134,7 @@ const LoginForm = () => {
             )}
           />
           <Button
+            disabled={!form.formState.isDirty}
             type="submit"
             className="w-full h-9 sm:h-10 text-sm sm:text-base font-medium bg-primary hover:bg-primary/90 flex items-center justify-center gap-1.5 sm:gap-2 mt-5 sm:mt-6"
           >
