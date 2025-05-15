@@ -2,13 +2,13 @@
 
 const Layout = () => {
   return (
-    <div className="bg-[#edf2f7] w-full flex flex-col h-[100dvh]">
+    <div className='flex h-[100dvh] w-full flex-col bg-[#edf2f7]'>
       <div>Header</div>
-      <main className="flex-1 overflow-y-scroll overflow-x-hidden">
+      <main className='flex-1 overflow-x-hidden overflow-y-scroll'>
         <div>Main part</div>
       </main>
     </div>
-  );
-};
+  )
+}
 
-export default Layout;
+export default Layout
