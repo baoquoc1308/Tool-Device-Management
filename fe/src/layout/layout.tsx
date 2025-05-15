@@ -5,6 +5,7 @@ import Cookies from "js-cookie";
 const Layout = () => {
   const sidebarState = Cookies.get("sidebar_state") === "true";
   return (
+
     <SidebarProvider defaultOpen={sidebarState}>
       <AppSidebar />
       <main>
@@ -14,4 +15,4 @@ const Layout = () => {
   );
 };
 
-export default Layout;
+export default Layout
