@@ -1,42 +1,47 @@
-import { httpRequest } from "@/lib";
+import { HttpRequest } from "@/lib";
 import { useState } from "react";
+import { tryCatch } from "@/utils";
 const DashboardPage = () => {
   const [data, setData] = useState<Array<any>>([]);
   const [response, setResponse] = useState(null);
   const [error, setError] = useState(null);
-  const api = new httpRequest();
+  const api = new HttpRequest();
   const getUser = async () => {
-    const response = await api.get("/user");
-    if (!response.success) {
+    const response = await tryCatch(api.get("/user"));
+    if (response.error) {
       setError(response.data);
       return;
     }
-    return setData(response.data);
+    return setData(response.data.data);
   };
   const addUser = async () => {
-    const response = await api.post("/user", { name: "Quoc Dinh", age: 20 });
-    if (!response.success) {
+    const response = await tryCatch(
+      api.post("/user", { name: "Quoc Dinh", age: 20 })
+    );
+    if (response.error) {
       setError(response.data);
       return;
     }
-    return setResponse(response.data);
+    return setResponse(response.data.data);
   };
 
   const updateUser = async () => {
-    const response = await api.put("/user/1", { name: "Quoc Dinh 1" });
-    if (!response.success) {
+    const response = await tryCatch(
+      api.put("/user/3", { name: "Quoc Dinh 1" })
+    );
+    if (response.error) {
       setError(response.data);
       return;
     }
-    return setResponse(response.data);
+    return setResponse(response.data.data);
   };
   const deleteUser = async () => {
-    const response = await api.delete("/user/1");
-    if (!response.success) {
+    const response = await tryCatch(api.delete("/user/3"));
+    if (response.error) {
       setError(response.data);
       return;
     }
-    return setResponse(response.data);
+    return setResponse(response.data.data);
   };
   return (
     <div className="flex flex-col gap-4 p-4">
