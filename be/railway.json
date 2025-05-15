@@ -1,0 +1,10 @@
+{
+    "build": {
+      "builder": "go",
+      "buildCommand": "go build -o server ./cmd/server"
+    },
+    "start": {
+      "command": "./server"
+    }
+  }
+  

@@ -28,5 +28,5 @@ func LoadEnv() {
 	SmtpPasswd = os.Getenv("SMTP_PASSWORD")
 	BASE_URL_FRONTEND = os.Getenv("BASE_URL_FRONTEND")
 	BASE_URL_BACKEND = os.Getenv("BASE_URL_BACKEND")
-	DB_DNS = os.Getenv("DB_DNS")
+	DB_DNS = os.Getenv("DATABASE_URL")
 }
