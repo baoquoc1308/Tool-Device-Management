@@ -25,6 +25,10 @@ const LoginForm = () => {
       toast.error('User is inactive, please go to email and verify your account')
       return
     }
+    if (result.data.is_activate === false) {
+      toast.error('User is inactive, please go to email and verify your account')
+      return
+    }
     toast.success('Login successfully')
     navigate('/')
   }
