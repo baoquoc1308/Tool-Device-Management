@@ -1,0 +1,342 @@
+definitions:
+  dto.CheckPasswordReset:
+    properties:
+      email:
+        type: string
+      redirectUrl:
+        type: string
+    required:
+    - email
+    - redirectUrl
+    type: object
+  dto.CreateCategoryRequest:
+    properties:
+      category_name:
+        type: string
+    type: object
+  dto.CreateDepartmentRequest:
+    properties:
+      department_name:
+        type: string
+      location_id:
+        type: integer
+    type: object
+  dto.CreateLocationRequest:
+    properties:
+      location_name:
+        type: string
+    type: object
+  dto.RefreshRequest:
+    properties:
+      refresh_token:
+        type: string
+    required:
+    - refresh_token
+    type: object
+  dto.UserLoginRequest:
+    properties:
+      email:
+        type: string
+      password:
+        type: string
+    required:
+    - email
+    - password
+    type: object
+  dto.UserRegisterRequest:
+    properties:
+      email:
+        type: string
+      first_name:
+        type: string
+      last_name:
+        type: string
+      password:
+        type: string
+      redirectUrl:
+        type: string
+    required:
+    - email
+    - first_name
+    - last_name
+    - password
+    - redirectUrl
+    type: object
+  dto.UserRequestResetPassword:
+    properties:
+      new_password:
+        type: string
+      token:
+        type: string
+    required:
+    - new_password
+    - token
+    type: object
+info:
+  contact: {}
+paths:
+  /api/auth/login:
+    post:
+      consumes:
+      - application/json
+      description: Login
+      parameters:
+      - description: Data
+        in: body
+        name: user
+        required: true
+        schema:
+          $ref: '#/definitions/dto.UserLoginRequest'
+      produces:
+      - application/json
+      responses: {}
+      summary: Login
+      tags:
+      - auth
+  /api/auth/logout:
+    post:
+      consumes:
+      - application/json
+      description: Logout
+      produces:
+      - application/json
+      responses: {}
+      summary: Logout
+      tags:
+      - auth
+  /api/auth/refresh:
+    post:
+      consumes:
+      - application/json
+      description: Refresh Token
+      parameters:
+      - description: Data
+        in: body
+        name: refresh_token
+        required: true
+        schema:
+          $ref: '#/definitions/dto.RefreshRequest'
+      produces:
+      - application/json
+      responses: {}
+      summary: Refresh Token
+      tags:
+      - auth
+  /api/auth/register:
+    post:
+      consumes:
+      - application/json
+      description: Register user
+      parameters:
+      - description: Data
+        in: body
+        name: user
+        required: true
+        schema:
+          $ref: '#/definitions/dto.UserRegisterRequest'
+      produces:
+      - application/json
+      responses: {}
+      summary: Register user
+      tags:
+      - auth
+  /api/categories:
+    get:
+      consumes:
+      - application/json
+      description: Get all categories
+      produces:
+      - application/json
+      responses: {}
+      summary: Get all categories
+      tags:
+      - categories
+    post:
+      consumes:
+      - application/json
+      description: Create categories
+      parameters:
+      - description: Data
+        in: body
+        name: category
+        required: true
+        schema:
+          $ref: '#/definitions/dto.CreateCategoryRequest'
+      produces:
+      - application/json
+      responses: {}
+      summary: Create categories
+      tags:
+      - categories
+  /api/categories/{id}:
+    delete:
+      consumes:
+      - application/json
+      description: Delete category via id
+      parameters:
+      - description: id
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses: {}
+      summary: Delete category
+      tags:
+      - categories
+  /api/departments:
+    get:
+      consumes:
+      - application/json
+      description: Get all departments
+      produces:
+      - application/json
+      responses: {}
+      summary: Get all departments
+      tags:
+      - departments
+    post:
+      consumes:
+      - application/json
+      description: Create departments
+      parameters:
+      - description: Data
+        in: body
+        name: department
+        required: true
+        schema:
+          $ref: '#/definitions/dto.CreateDepartmentRequest'
+      produces:
+      - application/json
+      responses: {}
+      summary: Create departments
+      tags:
+      - departments
+  /api/departments/{id}:
+    delete:
+      consumes:
+      - application/json
+      description: Delete department via id
+      parameters:
+      - description: id
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses: {}
+      summary: Delete department
+      tags:
+      - departments
+  /api/locations:
+    get:
+      consumes:
+      - application/json
+      description: Get all location
+      produces:
+      - application/json
+      responses: {}
+      summary: Get all location
+      tags:
+      - locations
+    post:
+      consumes:
+      - application/json
+      description: Create location
+      parameters:
+      - description: Data
+        in: body
+        name: location
+        required: true
+        schema:
+          $ref: '#/definitions/dto.CreateLocationRequest'
+      produces:
+      - application/json
+      responses: {}
+      summary: Create Location
+      tags:
+      - locations
+  /api/locations/{id}:
+    delete:
+      consumes:
+      - application/json
+      description: Delete location via id
+      parameters:
+      - description: id
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses: {}
+      summary: Delete location
+      tags:
+      - locations
+  /api/user/{email}:
+    delete:
+      consumes:
+      - application/json
+      description: Delete user via email
+      parameters:
+      - description: email
+        in: path
+        name: email
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses: {}
+      summary: Delete user
+      tags:
+      - users
+  /api/user/forget-password:
+    post:
+      consumes:
+      - application/json
+      description: Email reset password
+      parameters:
+      - description: Data
+        in: body
+        name: Email_Reset_Password
+        required: true
+        schema:
+          $ref: '#/definitions/dto.CheckPasswordReset'
+      produces:
+      - application/json
+      responses: {}
+      summary: Email reset password
+      tags:
+      - users
+  /api/user/password-reset:
+    patch:
+      consumes:
+      - application/json
+      description: reset password
+      parameters:
+      - description: Data
+        in: body
+        name: Password-reset
+        required: true
+        schema:
+          $ref: '#/definitions/dto.UserRequestResetPassword'
+      produces:
+      - application/json
+      responses: {}
+      summary: Password-reset
+      tags:
+      - users
+  /api/user/session:
+    get:
+      consumes:
+      - application/json
+      description: Get session
+      produces:
+      - application/json
+      responses: {}
+      summary: Get session
+      tags:
+      - users
+swagger: "2.0"

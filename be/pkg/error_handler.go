@@ -41,22 +41,32 @@ func PanicExeption(responseKey constant.ResponseStatus, customMessage ...string)
 	PanicExeption_(responseKey.GetResponseStatus(), message)
 }
 
+func capitalizeFirst(s string) string {
+	if len(s) == 0 {
+		return s
+	}
+	return strings.ToUpper(s[:1]) + s[1:]
+}
+
 func PanicHandler(c *gin.Context) {
 	if err := recover(); err != nil {
 		str := fmt.Sprint(err)
 		strArr := strings.SplitN(str, ":", 2)
 
 		key := strArr[0]
-		msg := strings.Trim(strArr[1], " ")
+		msg := capitalizeFirst(strings.Trim(strArr[1], " "))
 		switch key {
 		case constant.DataNotFound.GetResponseStatus():
-			c.JSON(http.StatusBadRequest, BuildReponse_(key, msg, Null()))
+			c.JSON(http.StatusBadRequest, BuildReponseFail(http.StatusBadRequest, msg))
 			c.Abort()
 		case constant.Unauthorized.GetResponseStatus():
-			c.JSON(http.StatusUnauthorized, BuildReponse_(key, msg, Null()))
+			c.JSON(http.StatusUnauthorized, BuildReponseFail(http.StatusUnauthorized, msg))
+			c.Abort()
+		case constant.StatusForbidden.GetResponseStatus():
+			c.JSON(http.StatusForbidden, BuildReponseFail(http.StatusForbidden, msg))
 			c.Abort()
 		default:
-			c.JSON(http.StatusInternalServerError, BuildReponse_(key, msg, Null()))
+			c.JSON(http.StatusInternalServerError, BuildReponseFail(http.StatusInternalServerError, msg))
 			c.Abort()
 		}
 	}
