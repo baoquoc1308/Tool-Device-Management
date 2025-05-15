@@ -1,14 +1,18 @@
 // import { Outlet } from "react-router-dom";
-
+import { SidebarProvider, SidebarTrigger } from "@/components/ui";
+import { AppSidebar } from "@/components/ui";
+import Cookies from "js-cookie";
 const Layout = () => {
+  const sidebarState = Cookies.get("sidebar_state") === "true";
   return (
-    <div className='flex h-[100dvh] w-full flex-col bg-[#edf2f7]'>
-      <div>Header</div>
-      <main className='flex-1 overflow-x-hidden overflow-y-scroll'>
-        <div>Main part</div>
+
+    <SidebarProvider defaultOpen={sidebarState}>
+      <AppSidebar />
+      <main>
+        <SidebarTrigger />
       </main>
-    </div>
-  )
-}
+    </SidebarProvider>
+  );
+};
 
 export default Layout
