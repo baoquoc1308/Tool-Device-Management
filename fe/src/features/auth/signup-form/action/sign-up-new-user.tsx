@@ -3,7 +3,7 @@ import type { DataSignupType } from '../model'
 
 export const signUpNewUser = async (dataSignUp: DataSignupType) => {
   const data = await tryCatch(
-    httpRequest.post('/register', {
+    httpRequest.post('/auth/register', {
       email: dataSignUp.email,
       first_name: dataSignUp.firstName,
       last_name: dataSignUp.lastName,

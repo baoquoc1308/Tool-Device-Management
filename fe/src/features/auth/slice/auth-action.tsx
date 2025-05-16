@@ -1,6 +1,8 @@
 import { createAsyncThunk } from '@reduxjs/toolkit'
 import { tryCatch } from '@/utils'
 import { httpRequest } from '@/utils'
+import Cookies from 'js-cookie'
+import type { AxiosError } from 'axios'
 
 // create async thunk to handle when user log in
 type DataLogInType = {
@@ -11,11 +13,31 @@ type DataLogInType = {
 export const logIn = createAsyncThunk('user/logIn', async (value: DataLogInType, thunkAPI) => {
   try {
     const { data, error } = await tryCatch(
-      httpRequest.post('/login', {
+      httpRequest.post('/auth/login', {
         email: value.email,
         password: value.password,
       })
     )
+    if (error) {
+      return {
+        success: false,
+        data: error,
+      }
+    }
+    Cookies.set('accessToken', data.data.data.access_token)
+    Cookies.set('refreshToken', data.data.data.refresh_token)
+    return {
+      success: true,
+      data: data.data.data,
+    }
+  } catch (error) {
+    return thunkAPI.rejectWithValue(error)
+  }
+})
+
+export const getSession = createAsyncThunk('user/getSession', async (_, thunkAPI) => {
+  try {
+    const { data, error } = await tryCatch(httpRequest.get('/user/session'))
 
     if (error) {
       return {
@@ -23,7 +45,6 @@ export const logIn = createAsyncThunk('user/logIn', async (value: DataLogInType,
         data: error,
       }
     }
-
     return {
       success: true,
       data: data.data.data,

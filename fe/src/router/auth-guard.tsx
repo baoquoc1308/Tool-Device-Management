@@ -1,14 +1,16 @@
 import { Navigate, Outlet } from 'react-router-dom'
+import Cookies from 'js-cookie'
+import { useGetSession } from '@/hooks/use-get-session'
+import { Skeleton } from '@/components'
 
 export const ProtectedRoute = () => {
-  //  const { loading } = useGetSession();
-  //   if (loading) return;
-
-  const user = localStorage.getItem('userId')
-  return user ? <Outlet /> : <Navigate to={'/login'} />
+  const { loading } = useGetSession()
+  if (loading) return <Skeleton className='size-full' />
+  const token = Cookies.get('accessToken')
+  return token ? <Outlet /> : <Navigate to={'/login'} />
 }
 
 export const AuthRoute = () => {
-  const user = localStorage.getItem('userId')
-  return user ? <Navigate to={'/'} /> : <Outlet />
+  const token = Cookies.get('accessToken')
+  return token ? <Navigate to={'/'} /> : <Outlet />
 }
