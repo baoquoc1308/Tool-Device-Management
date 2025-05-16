@@ -1,5 +1,5 @@
 import { createBrowserRouter } from "react-router-dom";
-import { DashboardPage, LoginPage } from "@/pages";
+import { DashboardPage, LoginPage, SignupPage } from "@/pages";
 import { ProtectedRoute, AuthRoute } from "./auth-guard";
 import Layout from "@/layout/layout";
 
@@ -21,12 +21,16 @@ export const router = createBrowserRouter([
     ],
   },
   {
-    path: "/login",
+    path: "",
     element: <AuthRoute />,
     children: [
       {
-        path: "",
+        path: "login",
         element: <LoginPage />,
+      },
+      {
+        path: "signup",
+        element: <SignupPage />,
       },
     ],
   },

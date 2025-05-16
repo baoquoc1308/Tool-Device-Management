@@ -1,10 +1,10 @@
-import { Outlet } from "react-router-dom";
-import { SidebarProvider, SidebarTrigger } from "@/components/ui";
-import { AppSidebar } from "@/components/ui";
-import Cookies from "js-cookie";
+import { Outlet } from 'react-router-dom'
+import { SidebarProvider, SidebarTrigger } from '@/components/ui'
+import { AppSidebar } from '@/components/ui'
+import Cookies from 'js-cookie'
 
 const Layout = () => {
-  const sidebarState = Cookies.get("sidebar_state") === "true";
+  const sidebarState = Cookies.get('sidebar_state') === 'true'
   return (
     <SidebarProvider defaultOpen={sidebarState}>
       <AppSidebar />
@@ -13,7 +13,7 @@ const Layout = () => {
         <Outlet />
       </main>
     </SidebarProvider>
-  );
-};
+  )
+}
 
 export default Layout
