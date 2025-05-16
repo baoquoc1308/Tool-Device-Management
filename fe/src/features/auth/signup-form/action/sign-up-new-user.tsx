@@ -1,5 +1,6 @@
 import { httpRequest, tryCatch } from '@/utils'
 import type { DataSignupType } from '../model'
+
 export const signUpNewUser = async (dataSignUp: DataSignupType) => {
   const data = await tryCatch(
     httpRequest.post('/register', {
@@ -10,6 +11,6 @@ export const signUpNewUser = async (dataSignUp: DataSignupType) => {
       redirectUrl: 'http://localhost:5173/login',
     })
   )
-  if (data.error) return { success: false, error: data.error.message }
+  if (data.error) return { success: false, error: data.error }
   return { success: true, data: data.data.data }
 }

@@ -16,11 +16,14 @@ export const logIn = createAsyncThunk('user/logIn', async (value: DataLogInType,
         password: value.password,
       })
     )
+
     if (error) {
-      return thunkAPI.rejectWithValue(error.message)
+      return {
+        success: false,
+        data: error,
+      }
     }
 
-    localStorage.setItem('userId', JSON.stringify(data.data.data.id))
     return {
       success: true,
       data: data.data.data,
