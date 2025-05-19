@@ -1,13 +1,26 @@
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { type DataLoginType, loginSchema } from './model/schema'
-import { FormField, FormItem, Label, FormControl, FormMessage, Input, Button, Form, Checkbox } from '@/components/ui'
+import {
+  FormField,
+  FormItem,
+  Label,
+  FormControl,
+  FormMessage,
+  Input,
+  Button,
+  Form,
+  Checkbox,
+  LoadingSpinner,
+} from '@/components/ui'
 import { Link, useNavigate } from 'react-router-dom'
 import { toast } from 'sonner'
 import { useAppDispatch } from '@/hooks'
 import { logIn } from '../slice'
+import { useTransition } from 'react'
 
 const LoginForm = () => {
+  const [isPending, startTransition] = useTransition()
   const dispatch = useAppDispatch()
   const navigate = useNavigate()
   const form = useForm<DataLoginType>({
@@ -20,17 +33,19 @@ const LoginForm = () => {
   })
 
   const onSubmit = async (data: DataLoginType) => {
-    const result = await dispatch(logIn(data)).unwrap()
-    if (!result.success) {
-      toast.error((result.error as any)?.msg)
-      return
-    }
-    if (result.data.is_active === false) {
-      toast.error('User is inactive, please go to email and verify your account')
-      return
-    }
-    toast.success('Login successfully')
-    navigate('/')
+    startTransition(async () => {
+      const result = await dispatch(logIn(data)).unwrap()
+      if (!result.success) {
+        toast.error((result.error as any)?.msg)
+        return
+      }
+      if (result.data.is_active === false) {
+        toast.error('User is inactive, please go to email and verify your account')
+        return
+      }
+      toast.success('Login successfully')
+      navigate('/')
+    })
   }
   return (
     <div>
@@ -83,7 +98,7 @@ const LoginForm = () => {
                 <div className='flex items-center justify-between'>
                   <Label className='text-sm font-medium'>Password</Label>
                   <Link
-                    to='#'
+                    to='/forget-password'
                     className='text-primary text-xs hover:underline'
                   >
                     Forgot password?
@@ -140,24 +155,30 @@ const LoginForm = () => {
             type='submit'
             className='bg-primary hover:bg-primary/90 mt-5 flex h-9 w-full items-center justify-center gap-1.5 text-sm font-medium sm:mt-6 sm:h-10 sm:gap-2 sm:text-base'
           >
-            <svg
-              xmlns='http://www.w3.org/2000/svg'
-              viewBox='0 0 20 20'
-              fill='currentColor'
-              className='h-4 w-4 sm:h-5 sm:w-5'
-            >
-              <path
-                fillRule='evenodd'
-                d='M3 4.25A2.25 2.25 0 015.25 2h5.5A2.25 2.25 0 0113 4.25v2a.75.75 0 01-1.5 0v-2a.75.75 0 00-.75-.75h-5.5a.75.75 0 00-.75.75v11.5c0 .414.336.75.75.75h5.5a.75.75 0 00.75-.75v-2a.75.75 0 011.5 0v2A2.25 2.25 0 0110.75 18h-5.5A2.25 2.25 0 013 15.75V4.25z'
-                clipRule='evenodd'
-              />
-              <path
-                fillRule='evenodd'
-                d='M19 10a.75.75 0 00-.75-.75H8.704l1.048-.943a.75.75 0 10-1.004-1.114l-2.5 2.25a.75.75 0 000 1.114l2.5 2.25a.75.75 0 101.004-1.114l-1.048-.943h9.546A.75.75 0 0019 10z'
-                clipRule='evenodd'
-              />
-            </svg>
-            Sign In
+            {isPending ? (
+              <LoadingSpinner className='h-4 w-4 animate-spin' />
+            ) : (
+              <>
+                <svg
+                  xmlns='http://www.w3.org/2000/svg'
+                  viewBox='0 0 20 20'
+                  fill='currentColor'
+                  className='h-4 w-4 sm:h-5 sm:w-5'
+                >
+                  <path
+                    fillRule='evenodd'
+                    d='M3 4.25A2.25 2.25 0 015.25 2h5.5A2.25 2.25 0 0113 4.25v2a.75.75 0 01-1.5 0v-2a.75.75 0 00-.75-.75h-5.5a.75.75 0 00-.75.75v11.5c0 .414.336.75.75.75h5.5a.75.75 0 00.75-.75v-2a.75.75 0 011.5 0v2A2.25 2.25 0 0110.75 18h-5.5A2.25 2.25 0 013 15.75V4.25z'
+                    clipRule='evenodd'
+                  />
+                  <path
+                    fillRule='evenodd'
+                    d='M19 10a.75.75 0 00-.75-.75H8.704l1.048-.943a.75.75 0 10-1.004-1.114l-2.5 2.25a.75.75 0 000 1.114l2.5 2.25a.75.75 0 101.004-1.114l-1.048-.943h9.546A.75.75 0 0019 10z'
+                    clipRule='evenodd'
+                  />
+                </svg>
+                Sign In
+              </>
+            )}
           </Button>{' '}
           <div className='text-muted-foreground mt-4 text-center text-xs sm:text-sm'>
             Don't have an account?{' '}

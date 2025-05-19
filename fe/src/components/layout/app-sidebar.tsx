@@ -48,7 +48,7 @@ const items = [
 
 export function AppSidebar() {
   const signOut = async () => {
-    const response = await fetch('/auth/logout')
+    await fetch('/auth/logout')
     Cookies.remove('accessToken')
     Cookies.remove('refreshToken')
     window.location.href = '/login'

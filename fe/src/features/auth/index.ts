@@ -1,3 +1,5 @@
 export * from './login-form'
 export * from './signup-form'
 export * from './slice'
+export * from './forget-password-form'
+export * from './reset-password-form'

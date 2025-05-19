@@ -16,5 +16,9 @@ class HttpRequest {
   async delete(endpoint: string) {
     return await httpClient.delete(endpoint)
   }
+
+  async patch(endpoint: string, data: unknown) {
+    return await httpClient.patch(endpoint, data)
+  }
 }
 export const httpRequest = new HttpRequest()

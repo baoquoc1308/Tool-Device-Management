@@ -32,10 +32,13 @@ httpClient.interceptors.response.use(
     const refreshToken = Cookies.get('refreshToken')
     const status = error.response?.data.status
     const message = error.response?.data.msg
-    if (status === 401 && message === 'Access Token expired') {
+    if ((status === 401 && message === 'Access Token expired') || message === 'Access Token Invoked') {
       const { data, error } = await tryCatch(httpRequest.post('/auth/refresh', { refresh_token: refreshToken }))
       if (error) {
-        if ((error as any).response?.data.msg === 'Refresh token was expired') {
+        if (
+          (error as any).response?.data.msg === 'Refresh token was expired' ||
+          (error as any).response?.data.msg === 'Refresh token was invoked'
+        ) {
           Cookies.remove('accessToken')
           Cookies.remove('refreshToken')
           window.location.href = '/login'
