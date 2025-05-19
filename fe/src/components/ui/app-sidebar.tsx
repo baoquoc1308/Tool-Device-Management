@@ -1,12 +1,4 @@
-import {
-  Calendar,
-  Home,
-  Inbox,
-  Search,
-  Settings,
-  User2,
-  ChevronUp,
-} from "lucide-react";
+import { Calendar, Home, Inbox, Search, Settings, User2, ChevronUp } from 'lucide-react'
 
 import {
   Sidebar,
@@ -22,40 +14,47 @@ import {
   DropdownMenuTrigger,
   DropdownMenuContent,
   DropdownMenuItem,
-} from "@/components";
+} from '@/components'
+import Cookies from 'js-cookie'
 
 // Menu items.
 const items = [
   {
-    title: "Home",
-    url: "#",
+    title: 'Home',
+    url: '#',
     icon: Home,
   },
   {
-    title: "Inbox",
-    url: "#",
+    title: 'Inbox',
+    url: '#',
     icon: Inbox,
   },
   {
-    title: "Calendar",
-    url: "#",
+    title: 'Calendar',
+    url: '#',
     icon: Calendar,
   },
   {
-    title: "Search",
-    url: "#",
+    title: 'Search',
+    url: '#',
     icon: Search,
   },
   {
-    title: "Settings",
-    url: "#",
+    title: 'Settings',
+    url: '#',
     icon: Settings,
   },
-];
+]
 
 export function AppSidebar() {
+  const signOut = async () => {
+    const response = await fetch('/auth/logout')
+    Cookies.remove('accessToken')
+    Cookies.remove('refreshToken')
+    window.location.href = '/login'
+  }
   return (
-    <Sidebar collapsible="icon">
+    <Sidebar collapsible='icon'>
       <SidebarContent>
         <SidebarGroup>
           <SidebarGroupLabel>Application</SidebarGroupLabel>
@@ -82,18 +81,18 @@ export function AppSidebar() {
               <DropdownMenuTrigger asChild>
                 <SidebarMenuButton>
                   <User2 /> Username
-                  <ChevronUp className="ml-auto" />
+                  <ChevronUp className='ml-auto' />
                 </SidebarMenuButton>
               </DropdownMenuTrigger>
               <DropdownMenuContent
-                side="top"
-                className="w-[--radix-popper-anchor-width]"
+                side='top'
+                className='w-[--radix-popper-anchor-width]'
               >
                 <DropdownMenuItem>
                   <span>Account</span>
                 </DropdownMenuItem>
                 <DropdownMenuItem>
-                  <span>Sign out</span>
+                  <span onClick={signOut}>Sign out</span>
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
@@ -101,5 +100,5 @@ export function AppSidebar() {
         </SidebarMenu>
       </SidebarFooter>
     </Sidebar>
-  );
+  )
 }

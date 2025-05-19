@@ -1,3 +1,3 @@
 export * from './auth-action'
-export { default as userReducer } from './reducer'
+export { default as authReducer } from './reducer'
 export * from './reducer'

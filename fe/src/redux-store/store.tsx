@@ -1,7 +1,7 @@
 import { configureStore } from '@reduxjs/toolkit'
-import { userReducer } from '@/features/auth'
+import { authReducer } from '@/features/auth'
 export const store = configureStore({
-  reducer: { user: userReducer },
+  reducer: { auth: authReducer },
 })
 // Get the type of store variable
 export type AppStore = typeof store

@@ -1,5 +1,6 @@
 import { createSlice } from '@reduxjs/toolkit'
-import { logIn } from './auth-action'
+import { logIn, getSession } from './auth-action'
+import { access } from 'fs'
 
 const initialState = {
   user: {
@@ -8,6 +9,8 @@ const initialState = {
     firstName: '',
     lastName: '',
   },
+  accessToken: '',
+  refreshToken: '',
   loading: false,
 }
 
@@ -22,6 +25,21 @@ const userSlice = createSlice({
       })
       .addCase(logIn.fulfilled, (state, action) => {
         if (action.payload.success) {
+          state.accessToken = action.payload.data.access_token
+          state.refreshToken = action.payload.data.refresh_token
+          state.loading = false
+        } else {
+          state.loading = false
+        }
+      })
+      .addCase(logIn.rejected, (state, _) => {
+        state.loading = false
+      })
+      .addCase(getSession.pending, (state) => {
+        state.loading = true
+      })
+      .addCase(getSession.fulfilled, (state, action) => {
+        if (action.payload.success) {
           state.user.email = action.payload.data.email
           state.user.firstName = action.payload.data.first_name
           state.user.lastName = action.payload.data.last_name
@@ -31,7 +49,7 @@ const userSlice = createSlice({
           state.loading = false
         }
       })
-      .addCase(logIn.rejected, (state, action) => {
+      .addCase(getSession.rejected, (state, _) => {
         state.loading = false
       })
   },
