@@ -23,7 +23,7 @@ const SignupForm = () => {
   const onSubmit = async (data: DataSignupType) => {
     const response = await signUpNewUser(data)
     if (!response.success) {
-      toast.error((response.error as any)?.response?.data?.response_message || 'An error occurred during sign up.')
+      toast.error((response.error as any)?.data?.msg || 'An error occurred during sign up.')
       return
     }
     toast.success('Account created successfully, please verify your email')

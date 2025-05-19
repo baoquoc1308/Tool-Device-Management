@@ -22,14 +22,13 @@ const LoginForm = () => {
   const onSubmit = async (data: DataLoginType) => {
     const result = await dispatch(logIn(data)).unwrap()
     if (!result.success) {
-      toast.error(result.data.response.data.response_message || 'An error occurred during log in.')
+      toast.error((result.error as any)?.msg)
       return
     }
-    if (result.data.is_activate === false) {
+    if (result.data.is_active === false) {
       toast.error('User is inactive, please go to email and verify your account')
       return
     }
-    localStorage.setItem('userId', JSON.stringify(result.data.id))
     toast.success('Login successfully')
     navigate('/')
   }

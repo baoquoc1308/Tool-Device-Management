@@ -28,14 +28,24 @@ httpClient.interceptors.response.use(
     return response
   },
   async (error) => {
-    console.log('error', error)
-    if (error.status === 401) {
-      const { data, error } = await tryCatch(httpRequest.get('/auth/refresh'))
+    const config = error.config
+    const refreshToken = Cookies.get('refreshToken')
+    const status = error.response?.data.status
+    const message = error.response?.data.msg
+    if (status === 401 && message === 'Access Token expired') {
+      const { data, error } = await tryCatch(httpRequest.post('/auth/refresh', { refresh_token: refreshToken }))
       if (error) {
-        return Promise.reject(error)
+        if ((error as any).response?.data.msg === 'Refresh token was expired') {
+          Cookies.remove('accessToken')
+          Cookies.remove('refreshToken')
+          window.location.href = '/login'
+          return Promise.reject(error)
+        } else return Promise.reject(error)
       }
-      console.log('data', data)
-      Cookies.set('accessToken', data?.data?.access_token)
+      Cookies.set('accessToken', data?.data?.data.access_token)
+      config.headers.Authorization = `Bearer ${data?.data?.data.access_token}`
+
+      return await httpClient(config)
     }
     return Promise.reject(error)
   }

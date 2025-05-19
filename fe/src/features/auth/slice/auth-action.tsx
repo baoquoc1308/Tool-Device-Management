@@ -21,7 +21,7 @@ export const logIn = createAsyncThunk('user/logIn', async (value: DataLogInType,
     if (error) {
       return {
         success: false,
-        data: error,
+        error: (error as AxiosError).response?.data,
       }
     }
     Cookies.set('accessToken', data.data.data.access_token)
@@ -38,7 +38,6 @@ export const logIn = createAsyncThunk('user/logIn', async (value: DataLogInType,
 export const getSession = createAsyncThunk('user/getSession', async (_, thunkAPI) => {
   try {
     const { data, error } = await tryCatch(httpRequest.get('/user/session'))
-
     if (error) {
       return {
         success: false,
