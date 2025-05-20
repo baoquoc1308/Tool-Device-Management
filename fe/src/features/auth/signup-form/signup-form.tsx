@@ -2,12 +2,24 @@ import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import type { DataSignupType } from './model/schema'
 import { signupSchema } from './model/schema'
-import { FormField, FormItem, Label, FormControl, FormMessage, Input, Button, Form } from '@/components/ui'
+import {
+  FormField,
+  FormItem,
+  Label,
+  FormControl,
+  FormMessage,
+  Input,
+  Button,
+  Form,
+  LoadingSpinner,
+} from '@/components/ui'
 import { Link, useNavigate } from 'react-router-dom'
 import { signUpNewUser } from './action'
 import { toast } from 'sonner'
+import { useTransition } from 'react'
 
 const SignupForm = () => {
+  const [isPending, startTransition] = useTransition()
   const navigate = useNavigate()
   const form = useForm<DataSignupType>({
     resolver: zodResolver(signupSchema),
@@ -20,14 +32,16 @@ const SignupForm = () => {
     },
   })
 
-  const onSubmit = async (data: DataSignupType) => {
-    const response = await signUpNewUser(data)
-    if (!response.success) {
-      toast.error((response.error as any)?.data?.msg || 'An error occurred during sign up.')
-      return
-    }
-    toast.success('Account created successfully, please verify your email')
-    navigate('/login')
+  const onSubmit = (data: DataSignupType) => {
+    startTransition(async () => {
+      const result = await signUpNewUser(data)
+      if (!result.success) {
+        toast.error((result.error as any)?.data.msg)
+        return
+      }
+      toast.success('Account created successfully')
+      navigate('/login')
+    })
   }
 
   return (
@@ -212,15 +226,21 @@ const SignupForm = () => {
             type='submit'
             className='bg-primary hover:bg-primary/90 mt-5 flex h-9 w-full items-center justify-center gap-1.5 text-sm font-medium sm:mt-6 sm:h-10 sm:gap-2 sm:text-base'
           >
-            <svg
-              xmlns='http://www.w3.org/2000/svg'
-              viewBox='0 0 20 20'
-              fill='currentColor'
-              className='h-4 w-4 sm:h-5 sm:w-5'
-            >
-              <path d='M10.75 4.75a.75.75 0 00-1.5 0v4.5h-4.5a.75.75 0 000 1.5h4.5v4.5a.75.75 0 001.5 0v-4.5h4.5a.75.75 0 000-1.5h-4.5v-4.5z' />
-            </svg>
-            Create Account
+            {isPending ? (
+              <LoadingSpinner className='mr-2 h-4 w-4 animate-spin' />
+            ) : (
+              <>
+                <svg
+                  xmlns='http://www.w3.org/2000/svg'
+                  viewBox='0 0 20 20'
+                  fill='currentColor'
+                  className='h-4 w-4 sm:h-5 sm:w-5'
+                >
+                  <path d='M10.75 4.75a.75.75 0 00-1.5 0v4.5h-4.5a.75.75 0 000 1.5h4.5v4.5a.75.75 0 001.5 0v-4.5h4.5a.75.75 0 000-1.5h-4.5v-4.5z' />
+                </svg>
+                Create Account
+              </>
+            )}
           </Button>
 
           <div className='text-muted-foreground mt-4 text-center text-xs sm:text-sm'>

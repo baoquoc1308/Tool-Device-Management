@@ -1,19 +1,19 @@
-import { createBrowserRouter } from "react-router-dom";
-import { DashboardPage, LoginPage, SignupPage } from "@/pages";
-import { ProtectedRoute, AuthRoute } from "./auth-guard";
-import Layout from "@/layout/layout";
+import { createBrowserRouter } from 'react-router-dom'
+import { DashboardPage, LoginPage, SignupPage, ForgetPasswordPage, ResetPasswordPage } from '@/pages'
+import { ProtectedRoute, AuthRoute } from './auth-guard'
+import Layout from '@/layout/layout'
 
 export const router = createBrowserRouter([
   {
-    path: "/",
+    path: '/',
     element: <Layout />,
     children: [
       {
-        path: "/",
+        path: '/',
         element: <ProtectedRoute />,
         children: [
           {
-            path: "",
+            path: '',
             element: <DashboardPage />,
           },
         ],
@@ -21,17 +21,25 @@ export const router = createBrowserRouter([
     ],
   },
   {
-    path: "",
+    path: '',
     element: <AuthRoute />,
     children: [
       {
-        path: "login",
+        path: 'login',
         element: <LoginPage />,
       },
       {
-        path: "signup",
+        path: 'signup',
         element: <SignupPage />,
+      },
+      {
+        path: 'forget-password',
+        element: <ForgetPasswordPage />,
+      },
+      {
+        path: 'reset-password',
+        element: <ResetPasswordPage />,
       },
     ],
   },
-]);
+])
