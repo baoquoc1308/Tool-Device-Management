@@ -44,6 +44,7 @@ export const getSession = createAsyncThunk('user/getSession', async (_, thunkAPI
         data: error,
       }
     }
+
     return {
       success: true,
       data: data.data.data,
