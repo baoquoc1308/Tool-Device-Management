@@ -1,5 +1,3 @@
-import { Calendar, Home, Inbox, Search, Settings, User2, ChevronUp } from 'lucide-react'
-
 import {
   Sidebar,
   SidebarContent,
@@ -15,44 +13,11 @@ import {
   DropdownMenuContent,
   DropdownMenuItem,
 } from '@/components'
-import Cookies from 'js-cookie'
-
-// Menu items.
-const items = [
-  {
-    title: 'Home',
-    url: '#',
-    icon: Home,
-  },
-  {
-    title: 'Inbox',
-    url: '#',
-    icon: Inbox,
-  },
-  {
-    title: 'Calendar',
-    url: '#',
-    icon: Calendar,
-  },
-  {
-    title: 'Search',
-    url: '#',
-    icon: Search,
-  },
-  {
-    title: 'Settings',
-    url: '#',
-    icon: Settings,
-  },
-]
+import { User2, ChevronUp } from 'lucide-react'
+import { SignOut } from '@/features/auth'
+import { items } from './sidebar-item'
 
 export function AppSidebar() {
-  const signOut = async () => {
-    await fetch('/auth/logout')
-    Cookies.remove('accessToken')
-    Cookies.remove('refreshToken')
-    window.location.href = '/login'
-  }
   return (
     <Sidebar collapsible='icon'>
       <SidebarContent>
@@ -92,7 +57,7 @@ export function AppSidebar() {
                   <span>Account</span>
                 </DropdownMenuItem>
                 <DropdownMenuItem>
-                  <span onClick={signOut}>Sign out</span>
+                  <SignOut />
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
