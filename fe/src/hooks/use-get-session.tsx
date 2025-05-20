@@ -5,7 +5,6 @@ import { useEffect } from 'react'
 export const useGetSession = () => {
   const dispatch = useAppDispatch()
   const data = useAppSelector((state) => state.auth)
-  console.log('data', data)
   useEffect(() => {
     dispatch(getSession()).unwrap()
   }, [])
