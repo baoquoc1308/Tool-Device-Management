@@ -1,6 +1,5 @@
 import { createSlice } from '@reduxjs/toolkit'
 import { logIn, getSession } from './auth-action'
-import { access } from 'fs'
 
 const initialState = {
   user: {
