@@ -51,8 +51,9 @@ httpClient.interceptors.response.use(
             (error as any).response?.data.msg === 'Refresh token was expired' ||
             (error as any).response?.data.msg === 'Refresh token was invoked'
           ) {
-            Cookies.remove('accessToken')
-            Cookies.remove('refreshToken')
+            Object.keys(Cookies.get()).forEach(function (cookieName) {
+              Cookies.remove(cookieName)
+            })
             window.location.href = '/login'
             return Promise.reject(error)
           } else return Promise.reject(error)

@@ -1,6 +1,5 @@
 import { Outlet } from 'react-router-dom'
-import { SidebarProvider, SidebarTrigger } from '@/components/ui'
-import { AppSidebar } from '@/components/ui'
+import { SidebarProvider, AppSidebar, Header } from '@/components'
 import Cookies from 'js-cookie'
 
 const Layout = () => {
@@ -8,8 +7,8 @@ const Layout = () => {
   return (
     <SidebarProvider defaultOpen={sidebarState}>
       <AppSidebar />
-      <main>
-        <SidebarTrigger />
+      <main className='flex flex-1 flex-col gap-4 p-4 pt-0'>
+        <Header />
         <Outlet />
       </main>
     </SidebarProvider>
