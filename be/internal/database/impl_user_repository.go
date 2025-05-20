@@ -46,6 +46,11 @@ func (r *PostgreSQLUserRepository) Update(users *entity.Users) error {
 	return result.Error
 }
 
+func (r *PostgreSQLUserRepository) UpdatePassword(users *entity.Users) error {
+	result := r.db.Model(&entity.Users{}).Where("email = ?", users.Email).Update("password", users.Password)
+	return result.Error
+}
+
 func (r *PostgreSQLUserRepository) FindByEmail(email string) (*entity.Users, error) {
 	users := &entity.Users{}
 	result := r.db.Model(entity.Users{}).Where("email = ?", email).First(&users)
@@ -53,4 +58,22 @@ func (r *PostgreSQLUserRepository) FindByEmail(email string) (*entity.Users, err
 		return nil, result.Error
 	}
 	return users, nil
+}
+
+func (r *PostgreSQLUserRepository) FindByUserId(userId int64) (*entity.Users, error) {
+	users := &entity.Users{}
+	result := r.db.Model(entity.Users{}).Where("id = ?", userId).First(&users)
+	if result.Error != nil {
+		return nil, result.Error
+	}
+	return users, nil
+}
+
+func (r *PostgreSQLUserRepository) DeleteUser(email string) error {
+	result := r.db.Where("email = ?", email).Delete(&entity.Users{})
+	return result.Error
+}
+
+func (r *PostgreSQLUserRepository) GetDB() *gorm.DB {
+	return r.db
 }

@@ -1,20 +1,25 @@
 package middleware
 
 import (
+	"BE_Manage_device/constant"
+	"BE_Manage_device/internal/domain/repository"
+	"BE_Manage_device/pkg"
+	"fmt"
 	"net/http"
+	"strconv"
+	"strings"
 	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt/v5"
+	"github.com/sirupsen/logrus"
 )
 
-func AuthMiddleware(secretKey string) gin.HandlerFunc {
+func AuthMiddleware(secretKey string, session repository.UsersSessionRepository) gin.HandlerFunc {
 	return func(c *gin.Context) {
-		tokenString, err := c.Cookie("access_token")
-		if err != nil {
-			c.JSON(http.StatusUnauthorized, gin.H{"error": "Unauthorized"})
-			c.Abort()
-		}
+		defer pkg.PanicHandler(c)
+		authHeader := c.GetHeader("Authorization")
+		tokenString := strings.TrimPrefix(authHeader, "Bearer ")
 		token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
 			if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
 				return nil, http.ErrAbortHandler
@@ -22,21 +27,41 @@ func AuthMiddleware(secretKey string) gin.HandlerFunc {
 			return []byte(secretKey), nil
 		})
 		if err != nil || !token.Valid {
-			c.JSON(http.StatusUnauthorized, gin.H{"error": "Unauthorized"})
+			pkg.PanicExeption(constant.Unauthorized, "Access Token expired")
 			c.Abort()
 			return
 		}
 		if claims, ok := token.Claims.(jwt.MapClaims); ok && token.Valid {
 			if exp, ok := claims["exp"].(float64); ok {
 				if int64(exp) < time.Now().Unix() {
-					c.JSON(http.StatusUnauthorized, gin.H{"error": "Token expired"})
+					pkg.PanicExeption(constant.Unauthorized, "Access Token expired")
 					c.Abort()
 					return
 				}
 			}
-			c.Set("userID", claims["id"])
+			a := claims["userId"]
+			logrus.Info(a)
+			c.Set("userID", claims["userId"])
+			userID, exists := c.Get("userID")
+			if !exists {
+				pkg.PanicExeption(constant.UnknownError, "Happened error add auth")
+			}
+			str := fmt.Sprint(userID)
+
+			userIdConvert, _ := strconv.ParseInt(str, 10, 64)
+
+			if !session.CheckUserInSession(userIdConvert) {
+				pkg.PanicExeption(constant.Unauthorized, "Unauthorized Access Token")
+				c.Abort()
+				return
+			}
+			if session.CheckTokenWasInVoked(tokenString) {
+				pkg.PanicExeption(constant.Unauthorized, "Access Token was revoked")
+				c.Abort()
+				return
+			}
 		} else {
-			c.JSON(http.StatusUnauthorized, gin.H{"error": "Unauthorized"})
+			pkg.PanicExeption(constant.Unauthorized, "Unauthorized Access Token")
 			c.Abort()
 			return
 		}
