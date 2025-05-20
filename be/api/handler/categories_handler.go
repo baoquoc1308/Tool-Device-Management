@@ -23,11 +23,16 @@ func NewCategoriesHandler(service *service.CategoriesService) *CategoriesHandler
 // User godoc
 // @Summary      Create categories
 // @Description  Create categories
-// @Tags         categories
+// @Tags         Categories
 // @Accept       json
 // @Produce      json
 // @Param        category   body    dto.CreateCategoryRequest   true  "Data"
+// @param Authorization header string true "Authorization"
 // @Router       /api/categories [POST]
+// @securityDefinitions.apiKey token
+// @in header
+// @name Authorization
+// @Security JWT
 func (h *CategoriesHandler) Create(c *gin.Context) {
 	defer pkg.PanicHandler(c)
 	var request dto.CreateCategoryRequest
@@ -38,7 +43,7 @@ func (h *CategoriesHandler) Create(c *gin.Context) {
 	location, err := h.service.Create(request.CategoryName)
 	if err != nil {
 		log.Error("Happened error when create category. Error", err)
-		pkg.PanicExeption(constant.UnknownError)
+		pkg.PanicExeption(constant.UnknownError, "Happened error when create category")
 	}
 	c.JSON(http.StatusCreated, pkg.BuildReponseSuccess(http.StatusCreated, constant.Success, location))
 }
@@ -46,10 +51,15 @@ func (h *CategoriesHandler) Create(c *gin.Context) {
 // User godoc
 // @Summary      Get all categories
 // @Description  Get all categories
-// @Tags         categories
+// @Tags         Categories
 // @Accept       json
 // @Produce      json
+// @param Authorization header string true "Authorization"
 // @Router       /api/categories [GET]
+// @securityDefinitions.apiKey token
+// @in header
+// @name Authorization
+// @Security JWT
 func (h *CategoriesHandler) GetAll(c *gin.Context) {
 	defer pkg.PanicHandler(c)
 	categories, err := h.service.GetAll()
@@ -63,12 +73,18 @@ func (h *CategoriesHandler) GetAll(c *gin.Context) {
 // User godoc
 // @Summary      Delete category
 // @Description   Delete category via id
-// @Tags         categories
+// @Tags         Categories
 // @Accept       json
 // @Produce      json
 // @Param		id	path		string				true	"id"
+// @param Authorization header string true "Authorization"
 // @Router       /api/categories/{id} [DELETE]
+// @securityDefinitions.apiKey token
+// @in header
+// @name Authorization
+// @Security JWT
 func (h *CategoriesHandler) Delete(c *gin.Context) {
+	defer pkg.PanicHandler(c)
 	id := c.Param("id")
 	IdConvert, err := strconv.ParseInt(id, 10, 64)
 	if err != nil {

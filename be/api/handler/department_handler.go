@@ -23,11 +23,16 @@ func NewDepartmentsHandler(service *service.DepartmentsService) *DepartmentsHand
 // User godoc
 // @Summary      Create departments
 // @Description  Create departments
-// @Tags         departments
+// @Tags         Departments
 // @Accept       json
 // @Produce      json
 // @Param        department   body    dto.CreateDepartmentRequest   true  "Data"
+// @param Authorization header string true "Authorization"
 // @Router       /api/departments [POST]
+// @securityDefinitions.apiKey token
+// @in header
+// @name Authorization
+// @Security JWT
 func (h *DepartmentsHandler) Create(c *gin.Context) {
 	defer pkg.PanicHandler(c)
 	var request dto.CreateDepartmentRequest
@@ -38,18 +43,28 @@ func (h *DepartmentsHandler) Create(c *gin.Context) {
 	department, err := h.service.Create(request.DepartmentName, request.LocationId)
 	if err != nil {
 		log.Error("Happened error when create department. Error", err)
-		pkg.PanicExeption(constant.UnknownError)
+		pkg.PanicExeption(constant.UnknownError, "Happened error when create department")
 	}
-	c.JSON(http.StatusCreated, pkg.BuildReponseSuccess(http.StatusCreated, constant.Success, department))
+	departmentResponse := dto.DepartmentResponse{}
+	departmentResponse.ID = department.Id
+	departmentResponse.DepartmentName = department.DepartmentName
+	departmentResponse.Location.ID = department.Location.Id
+	departmentResponse.Location.LocationName = department.Location.LocationName
+	c.JSON(http.StatusCreated, pkg.BuildReponseSuccess(http.StatusCreated, constant.Success, departmentResponse))
 }
 
 // User godoc
 // @Summary      Get all departments
 // @Description  Get all departments
-// @Tags         departments
+// @Tags         Departments
 // @Accept       json
 // @Produce      json
+// @param Authorization header string true "Authorization"
 // @Router       /api/departments [GET]
+// @securityDefinitions.apiKey token
+// @in header
+// @name Authorization
+// @Security JWT
 func (h *DepartmentsHandler) GetAll(c *gin.Context) {
 	defer pkg.PanicHandler(c)
 	departments, err := h.service.GetAll()
@@ -57,18 +72,33 @@ func (h *DepartmentsHandler) GetAll(c *gin.Context) {
 		log.Error("Happened error when get all departments. Error", err)
 		pkg.PanicExeption(constant.UnknownError, "Happened error when get all departments")
 	}
-	c.JSON(http.StatusOK, pkg.BuildReponseSuccess(http.StatusOK, constant.Success, departments))
+	var departmentResponses []dto.DepartmentResponse
+	for _, department := range departments {
+		departmentResponse := dto.DepartmentResponse{}
+		departmentResponse.ID = department.Id
+		departmentResponse.DepartmentName = department.DepartmentName
+		departmentResponse.Location.ID = department.Location.Id
+		departmentResponse.Location.LocationName = department.Location.LocationName
+		departmentResponses = append(departmentResponses, departmentResponse)
+	}
+	c.JSON(http.StatusOK, pkg.BuildReponseSuccess(http.StatusOK, constant.Success, departmentResponses))
 }
 
 // User godoc
 // @Summary      Delete department
 // @Description   Delete department via id
-// @Tags         departments
+// @Tags         Departments
 // @Accept       json
 // @Produce      json
 // @Param		id	path		string				true	"id"
+// @param Authorization header string true "Authorization"
 // @Router       /api/departments/{id} [DELETE]
+// @securityDefinitions.apiKey token
+// @in header
+// @name Authorization
+// @Security JWT
 func (h *DepartmentsHandler) Delete(c *gin.Context) {
+	defer pkg.PanicHandler(c)
 	id := c.Param("id")
 	IdConvert, err := strconv.ParseInt(id, 10, 64)
 	if err != nil {

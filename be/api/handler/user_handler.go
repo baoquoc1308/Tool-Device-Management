@@ -8,6 +8,7 @@ import (
 	"BE_Manage_device/pkg"
 	"BE_Manage_device/pkg/utils"
 	"net/http"
+	"strconv"
 	"time"
 
 	"github.com/golang-jwt/jwt/v5"
@@ -27,11 +28,13 @@ func NewUserHandler(service *service.UserService) *UserHandler {
 // User godoc
 // @Summary      Register user
 // @Description  Register user
-// @Tags         auth
+// @Tags         Auth
 // @Accept       json
 // @Produce      json
 // @Param        user   body    dto.UserRegisterRequest   true  "Data"
 // @Router       /api/auth/register [post]
+// @Success      201   {object}  dto.ApiResponseSuccessNoData
+// @Failure      500   {object}  dto.ApiResponseFail
 func (h *UserHandler) Register(c *gin.Context) {
 	defer pkg.PanicHandler(c)
 	var user dto.UserRegisterRequest
@@ -50,11 +53,13 @@ func (h *UserHandler) Register(c *gin.Context) {
 // User godoc
 // @Summary      Login
 // @Description  Login
-// @Tags         auth
+// @Tags         Auth
 // @Accept       json
 // @Produce      json
 // @Param        user   body    dto.UserLoginRequest   true  "Data"
 // @Router       /api/auth/login [post]
+// @Success      200   {object}  dto.ApiResponseSuccessStruct
+// @Failure      500   {object}  dto.ApiResponseFail
 func (h *UserHandler) Login(c *gin.Context) {
 	defer pkg.PanicHandler(c)
 	var user dto.UserLoginRequest
@@ -68,10 +73,18 @@ func (h *UserHandler) Login(c *gin.Context) {
 		log.Error("Happened error when login. Error", err)
 		pkg.PanicExeption(constant.Invalidemailorpassword)
 	}
-	dataResponese := map[string]interface{}{
-		"access_token":  accessToken,
-		"refresh_token": refreshToken,
-		"is_active":     userLogin.IsActive,
+	dataResponese := map[string]interface{}{}
+	if userLogin.IsActive {
+		dataResponese = map[string]interface{}{
+			"access_token":  accessToken,
+			"refresh_token": refreshToken,
+			"is_active":     userLogin.IsActive,
+			"roleSlug":      userLogin.Role.Slug,
+		}
+	} else {
+		dataResponese = map[string]interface{}{
+			"is_active": userLogin.IsActive,
+		}
 	}
 	c.JSON(http.StatusOK, pkg.BuildReponseSuccess(http.StatusOK, constant.Success, dataResponese))
 }
@@ -99,11 +112,15 @@ func (h *UserHandler) Activate(c *gin.Context) {
 // User godoc
 // @Summary      Refresh Token
 // @Description  Refresh Token
-// @Tags         auth
+// @Tags         Auth
 // @Accept       json
 // @Produce      json
 // @Param        refresh_token   body    dto.RefreshRequest   true  "Data"
 // @Router       /api/auth/refresh [POST]
+// @Success      200   {object}  dto.ApiResponseSuccessStruct
+// @Failure      401   {object}  dto.ApiResponseFail
+// @Failure      403   {object}  dto.ApiResponseFail
+// @Failure      500   {object}  dto.ApiResponseFail
 func (h *UserHandler) Refresh(c *gin.Context) {
 	defer pkg.PanicHandler(c)
 	var rq dto.RefreshRequest
@@ -166,11 +183,14 @@ func (h *UserHandler) Refresh(c *gin.Context) {
 // User godoc
 // @Summary      Password-reset
 // @Description  reset password
-// @Tags         users
+// @Tags         Users
 // @Accept       json
 // @Produce      json
 // @Param        Password-reset   body    dto.UserRequestResetPassword   true  "Data"
 // @Router       /api/user/password-reset [PATCH]
+// @Success      200   {object}  dto.ApiResponseSuccessNoData
+// @Failure      401   {object}  dto.ApiResponseFail
+// @Failure      500   {object}  dto.ApiResponseFail
 func (h *UserHandler) ResetPassword(c *gin.Context) {
 	defer pkg.PanicHandler(c)
 	var request dto.UserRequestResetPassword
@@ -218,10 +238,17 @@ func (h *UserHandler) ResetPassword(c *gin.Context) {
 // User godoc
 // @Summary      Get session
 // @Description  Get session
-// @Tags         users
+// @Tags         Users
 // @Accept       json
 // @Produce      json
+// @param Authorization header string true "Authorization"
 // @Router       /api/user/session [GET]
+// @Success      200   {object}  dto.ApiResponseSuccessStruct
+// @Failure      401   {object}  dto.ApiResponseFail
+// @securityDefinitions.apiKey token
+// @in header
+// @name Authorization
+// @Security JWT
 func (h *UserHandler) Session(c *gin.Context) {
 	defer pkg.PanicHandler(c)
 	userId := utils.GetUserIdFromContext(c)
@@ -230,17 +257,20 @@ func (h *UserHandler) Session(c *gin.Context) {
 		log.Error("Happened error when reset password. Error", err)
 		pkg.PanicExeption(constant.Unauthorized, err.Error())
 	}
-	c.JSON(http.StatusOK, pkg.BuildReponseSuccess(http.StatusOK, constant.Success, user))
+	userResponse := utils.ConvertUserToUserResponse(user)
+	c.JSON(http.StatusOK, pkg.BuildReponseSuccess(http.StatusOK, constant.Success, userResponse))
 }
 
 // User godoc
 // @Summary      Email reset password
 // @Description   Email reset password
-// @Tags         users
+// @Tags         Users
 // @Accept       json
 // @Produce      json
 // @Param        Email_Reset_Password   body    dto.CheckPasswordReset   true  "Data"
 // @Router       /api/user/forget-password [POST]
+// @Success      200   {object}  dto.ApiResponseSuccessNoData
+// @Failure      500   {object}  dto.ApiResponseFail
 func (h *UserHandler) CheckPasswordReset(c *gin.Context) {
 	defer pkg.PanicHandler(c)
 	var request dto.CheckPasswordReset
@@ -259,11 +289,18 @@ func (h *UserHandler) CheckPasswordReset(c *gin.Context) {
 // User godoc
 // @Summary      Delete user
 // @Description   Delete user via email
-// @Tags         users
+// @Tags         Users
 // @Accept       json
 // @Produce      json
+// @param Authorization header string true "Authorization"
 // @Param		email	path		string				true	"email"
 // @Router       /api/user/{email} [DELETE]
+// @Success      200   {object}  dto.ApiResponseSuccessNoData
+// @Failure      500   {object}  dto.ApiResponseFail
+// @securityDefinitions.apiKey token
+// @in header
+// @name Authorization
+// @Security JWT
 func (h *UserHandler) DeleteUser(c *gin.Context) {
 	defer pkg.PanicHandler(c)
 	email := c.Param("email")
@@ -278,10 +315,17 @@ func (h *UserHandler) DeleteUser(c *gin.Context) {
 // User godoc
 // @Summary      Logout
 // @Description   Logout
-// @Tags         auth
+// @Tags         Auth
 // @Accept       json
 // @Produce      json
+// @param Authorization header string true "Authorization"
 // @Router       /api/auth/logout [POST]
+// @Success      200   {object}  dto.ApiResponseSuccessNoData
+// @Failure      500   {object}  dto.ApiResponseFail
+// @securityDefinitions.apiKey token
+// @in header
+// @name Authorization
+// @Security JWT
 func (h *UserHandler) Logout(c *gin.Context) {
 	defer pkg.PanicHandler(c)
 	userId := utils.GetUserIdFromContext(c)
@@ -294,6 +338,238 @@ func (h *UserHandler) Logout(c *gin.Context) {
 	if err != nil {
 		log.Error("Happened error when logout user. Error", err)
 		pkg.PanicExeption(constant.UnknownError, err.Error())
+	}
+	c.JSON(http.StatusOK, pkg.BuildReponseSuccessNoData(http.StatusOK, constant.Success))
+}
+
+// User godoc
+// @Summary      Get all user
+// @Description   Get all user
+// @Tags         Users
+// @Accept       json
+// @Produce      json
+// @param Authorization header string true "Authorization"
+// @Router       /api/users [GET]
+// @Success      200   {object}  dto.ApiResponseSuccessStruct
+// @securityDefinitions.apiKey token
+// @in header
+// @name Authorization
+// @Security JWT
+func (h *UserHandler) GetAllUser(c *gin.Context) {
+	defer pkg.PanicHandler(c)
+	// userId := utils.GetUserIdFromContext(c)
+	users := h.service.GetAllUser()
+	usersResponses := utils.ConvertUsersToUserResponses(users)
+	c.JSON(http.StatusOK, pkg.BuildReponseSuccess(http.StatusOK, constant.Success, usersResponses))
+}
+
+// User godoc
+// @Summary      Update Information
+// @Description   Update Information
+// @Tags         Users
+// @Accept       json
+// @Produce      json
+// @Param        Information   body    dto.UpdateInformationUserRequest   true  "Data"
+// @param Authorization header string true "Authorization"
+// @Router       /api/user/information [PATCH]
+// @Success      200   {object}  dto.ApiResponseSuccessStruct
+// @Failure      500   {object}  dto.ApiResponseFail
+// @securityDefinitions.apiKey token
+// @in header
+// @name Authorization
+// @Security JWT
+func (h *UserHandler) UpdateInformationUser(c *gin.Context) {
+	defer pkg.PanicHandler(c)
+	userId := utils.GetUserIdFromContext(c)
+	var request dto.UpdateInformationUserRequest
+	if err := c.ShouldBindJSON(&request); err != nil {
+		log.Error("Happened error when mapping request from FE. Error", err)
+		pkg.PanicExeption(constant.InvalidRequest)
+	}
+	userUpdated, err := h.service.UpdateInformation(userId, request.FirstName, request.LastName)
+	if err != nil {
+		log.Error("Happened error when update information user. Error", err)
+		pkg.PanicExeption(constant.UnknownError, err.Error())
+	}
+	usersResponse := utils.ConvertUserToUserResponse(userUpdated)
+	c.JSON(http.StatusOK, pkg.BuildReponseSuccess(http.StatusOK, constant.Success, usersResponse))
+}
+
+// Role godoc
+// @Summary      Update role by id
+// @Description   Update role by id
+// @Tags         Roles
+// @Accept       json
+// @Produce      json
+// @Param        Role   body    dto.UpdateRoleUserRequest   true  "Data"
+// @param Authorization header string true "Authorization"
+// @Router       /api/users/role [PATCH]
+// @Success      200   {object}  dto.ApiResponseSuccessStruct
+// @Failure      500   {object}  dto.ApiResponseFail
+// @securityDefinitions.apiKey token
+// @in header
+// @name Authorization
+// @Security JWT
+func (h *UserHandler) UpdateRoleUser(c *gin.Context) {
+	defer pkg.PanicHandler(c)
+	userId := utils.GetUserIdFromContext(c)
+	var request dto.UpdateRoleUserRequest
+	if err := c.ShouldBindJSON(&request); err != nil {
+		log.Error("Happened error when mapping request from FE. Error", err)
+		pkg.PanicExeption(constant.InvalidRequest)
+	}
+	userUpdated, err := h.service.UpdateRole(userId, request.Id, request.Slug)
+	if err != nil {
+		log.Error("Happened error when update role user. Error", err)
+		pkg.PanicExeption(constant.UnknownError, err.Error())
+	}
+	usersResponse := utils.ConvertUserToUserResponse(userUpdated)
+	c.JSON(http.StatusOK, pkg.BuildReponseSuccess(http.StatusOK, constant.Success, usersResponse))
+}
+
+// Role godoc
+// @Summary      Get all user by department_id
+// @Description  Get all user by department_id
+// @Tags         Users
+// @Accept       json
+// @Produce      json
+// @Param		department_id	path		string				true	"department_id"
+// @param Authorization header string true "Authorization"
+// @Router       /api/user/department/{department_id} [GET]
+// @securityDefinitions.apiKey token
+// @in header
+// @name Authorization
+// @Security JWT
+func (h *UserHandler) GetAllUserOfDepartment(c *gin.Context) {
+	defer pkg.PanicHandler(c)
+	idStr := c.Param("department_id")
+	departmentId, err := strconv.ParseInt(idStr, 10, 64)
+	if err != nil {
+		log.Error("Happened error when convert assetId to int64. Error", err)
+		pkg.PanicExeption(constant.InvalidRequest, "Happened error when convert assetId to int64")
+	}
+	users, err := h.service.GetAllUserOfDepartment(departmentId)
+	if err != nil {
+		log.Error("Happened error when get all user of department. Error", err)
+		pkg.PanicExeption(constant.UnknownError, "Happened error when get all user of department")
+	}
+	userResponses := utils.ConvertUsersToUserResponses(users)
+	c.JSON(http.StatusOK, pkg.BuildReponseSuccess(http.StatusOK, constant.Success, userResponses))
+}
+
+// Role godoc
+// @Summary      Update department by id
+// @Description   Update department by id
+// @Tags         Users
+// @Accept       json
+// @Produce      json
+// @Param        department   body    dto.UserUpdateDepartmentRequest   true  "Data"
+// @param Authorization header string true "Authorization"
+// @Router       /api/user/department [PATCH]
+// @Success      200   {object}  dto.ApiResponseSuccessStruct
+// @Failure      500   {object}  dto.ApiResponseFail
+// @securityDefinitions.apiKey token
+// @in header
+// @name Authorization
+// @Security JWT
+func (h *UserHandler) UpdateDepartment(c *gin.Context) {
+	defer pkg.PanicHandler(c)
+	var request dto.UserUpdateDepartmentRequest
+	if err := c.ShouldBindJSON(&request); err != nil {
+		log.Error("Happened error when mapping request from FE. Error", err)
+		pkg.PanicExeption(constant.InvalidRequest)
+	}
+	err := h.service.UpdateDepartment(request.UserId, request.DepartmentId)
+	if err != nil {
+		log.Error("Happened error when get all user of department. Error", err)
+		pkg.PanicExeption(constant.UnknownError, "Happened error when get all user of department")
+	}
+	c.JSON(http.StatusOK, pkg.BuildReponseSuccessNoData(http.StatusOK, constant.Success))
+}
+
+// User godoc
+// @Summary      Update head department by userId
+// @Description  Update head department by userId
+// @Tags         Users
+// @Accept       json
+// @Produce      json
+// @Param		user_id	path		string				true	"user_id"
+// @param Authorization header string true "Authorization"
+// @Router       /api/user/head-department/{user_id} [PATCH]
+// @securityDefinitions.apiKey token
+// @in header
+// @name Authorization
+// @Security JWT
+func (h *UserHandler) UpdateHeadDep(c *gin.Context) {
+	defer pkg.PanicHandler(c)
+	idStr := c.Param("user_id")
+	userId, err := strconv.ParseInt(idStr, 10, 64)
+	if err != nil {
+		log.Error("Happened error when convert userId to int64. Error", err)
+		pkg.PanicExeption(constant.InvalidRequest, "Happened error when convert userId to int64")
+	}
+	err = h.service.UpdateHeadDep(userId)
+	if err != nil {
+		log.Error("Happened error when update user is head department. Error", err)
+		pkg.PanicExeption(constant.UnknownError, "Happened error when update user is head department")
+	}
+	c.JSON(http.StatusOK, pkg.BuildReponseSuccessNoData(http.StatusOK, constant.Success))
+}
+
+// User godoc
+// @Summary      Update head department by userId
+// @Description  Update head department by userId
+// @Tags         Users
+// @Accept       json
+// @Produce      json
+// @Param		user_id	path		string				true	"user_id"
+// @param Authorization header string true "Authorization"
+// @Router       /api/user/manager-department/{user_id} [PATCH]
+// @securityDefinitions.apiKey token
+// @in header
+// @name Authorization
+// @Security JWT
+func (h *UserHandler) UpdateManagerDep(c *gin.Context) {
+	defer pkg.PanicHandler(c)
+	idStr := c.Param("user_id")
+	userId, err := strconv.ParseInt(idStr, 10, 64)
+	if err != nil {
+		log.Error("Happened error when convert userId to int64. Error", err)
+		pkg.PanicExeption(constant.InvalidRequest, "Happened error when convert userId to int64")
+	}
+	err = h.service.UpdateManagerDep(userId)
+	if err != nil {
+		log.Error("Happened error when update user is manager department. Error", err)
+		pkg.PanicExeption(constant.UnknownError, "Happened error when update user is manager department")
+	}
+	c.JSON(http.StatusOK, pkg.BuildReponseSuccessNoData(http.StatusOK, constant.Success))
+}
+
+// User godoc
+// @Summary      Update can-export by userId
+// @Description  Update can-export by userId
+// @Tags         Users
+// @Accept       json
+// @Produce      json
+// @Param		user_id	path		string				true	"user_id"
+// @param Authorization header string true "Authorization"
+// @Router       /api/user/can-export/{user_id} [PATCH]
+// @securityDefinitions.apiKey token
+// @in header
+// @name Authorization
+// @Security JWT
+func (h *UserHandler) UpdateCanExport(c *gin.Context) {
+	defer pkg.PanicHandler(c)
+	idStr := c.Param("user_id")
+	userId, err := strconv.ParseInt(idStr, 10, 64)
+	if err != nil {
+		log.Error("Happened error when convert userId to int64. Error", err)
+		pkg.PanicExeption(constant.InvalidRequest, "Happened error when convert userId to int64")
+	}
+	err = h.service.UpdateCanExport(userId)
+	if err != nil {
+		log.Error("Happened error when update user can export. Error", err)
+		pkg.PanicExeption(constant.UnknownError, "Happened error when update user can export")
 	}
 	c.JSON(http.StatusOK, pkg.BuildReponseSuccessNoData(http.StatusOK, constant.Success))
 }
