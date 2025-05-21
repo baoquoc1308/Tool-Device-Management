@@ -1,5 +1,7 @@
+import { ViewAllAssets } from '@/features/assets'
+
 const AllAssets = () => {
-  return <div>All assets</div>
+  return <ViewAllAssets />
 }
 
 export default AllAssets

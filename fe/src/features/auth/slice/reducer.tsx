@@ -41,12 +41,12 @@ const userSlice = createSlice({
       .addCase(getSession.fulfilled, (state, action) => {
         if (action.payload.success) {
           state.user.email = action.payload.data.email
-          state.user.firstName = action.payload.data.first_name
-          state.user.lastName = action.payload.data.last_name
+          state.user.firstName = action.payload.data.firstName
+          state.user.lastName = action.payload.data.lastName
           state.user.id = action.payload.data.id
           Cookies.set('email', action.payload.data.email)
-          Cookies.set('firstName', action.payload.data.first_name)
-          Cookies.set('lastName', action.payload.data.last_name)
+          Cookies.set('firstName', action.payload.data.firstName)
+          Cookies.set('lastName', action.payload.data.lastName)
           Cookies.set('id', action.payload.data.id)
           state.loading = false
         } else {

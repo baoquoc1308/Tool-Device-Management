@@ -1,6 +1,4 @@
-'use client'
-
-import { ChevronsUpDown, LogOut } from 'lucide-react'
+import { ChevronsUpDown } from 'lucide-react'
 import {
   DropdownMenu,
   DropdownMenuContent,

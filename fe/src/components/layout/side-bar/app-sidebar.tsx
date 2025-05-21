@@ -1,4 +1,3 @@
-'use client'
 import { SidebarMainContent } from './_components/sidebar-main-content'
 import { NavUser } from './_components/sidebar-footer'
 import { data } from './_components/sidebar-item'
