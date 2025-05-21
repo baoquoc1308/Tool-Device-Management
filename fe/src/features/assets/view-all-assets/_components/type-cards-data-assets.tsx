@@ -13,17 +13,27 @@ import {
   PaginationLink,
   PaginationNext,
   PaginationPrevious,
-  PaginationEllipsis,
 } from '@/components/ui'
 import type { AssetsType } from '../model'
 import { Info } from 'lucide-react'
 import { Link } from 'react-router-dom'
+import { useState } from 'react'
 
 export const ViewCardsDataAssets = ({ assets }: { assets: AssetsType[] }) => {
+  const [currentPage, setCurrentPage] = useState<number>(1)
+
+  const totalPages = Math.ceil(assets.length / 3)
+  const currentAssets = assets.slice((currentPage - 1) * 3, currentPage * 3)
+
+  const handleChangePage = (page: number) => {
+    if (page >= 1 && page <= totalPages) {
+      setCurrentPage(page)
+    }
+  }
   return (
     <div className='flex flex-col gap-4'>
       <div className='grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3'>
-        {assets.map((asset) => (
+        {currentAssets.map((asset) => (
           <Card
             key={asset.id}
             className='flex h-full flex-row overflow-hidden p-0 transition-all hover:shadow-md'
@@ -103,16 +113,20 @@ export const ViewCardsDataAssets = ({ assets }: { assets: AssetsType[] }) => {
       <Pagination>
         <PaginationContent>
           <PaginationItem>
-            <PaginationPrevious href='#' />
+            <PaginationPrevious onClick={() => handleChangePage(currentPage - 1)} />
           </PaginationItem>
+          {Array.from({ length: totalPages }, (_, i) => (
+            <PaginationItem key={i}>
+              <PaginationLink
+                isActive={currentPage === i + 1}
+                onClick={() => handleChangePage(i + 1)}
+              >
+                {i + 1}
+              </PaginationLink>
+            </PaginationItem>
+          ))}
           <PaginationItem>
-            <PaginationLink href='#'>1</PaginationLink>
-          </PaginationItem>
-          <PaginationItem>
-            <PaginationEllipsis />
-          </PaginationItem>
-          <PaginationItem>
-            <PaginationNext href='#' />
+            <PaginationNext onClick={() => handleChangePage(currentPage + 1)} />
           </PaginationItem>
         </PaginationContent>
       </Pagination>
