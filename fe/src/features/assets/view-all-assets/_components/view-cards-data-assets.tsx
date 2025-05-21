@@ -38,7 +38,7 @@ export const ViewCardsDataAssets = ({ assets }: { assets: AssetsType[] }) => {
             key={asset.id}
             className='flex h-full flex-row overflow-hidden p-0 transition-all hover:shadow-md'
           >
-            <div className='bg-muted relative h-auto w-full overflow-hidden'>
+            <div className='bg-muted relative aspect-auto w-1/2 overflow-hidden'>
               {asset.imageUpload && (
                 <img
                   src={asset.imageUpload}

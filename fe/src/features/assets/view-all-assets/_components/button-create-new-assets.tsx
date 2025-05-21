@@ -6,7 +6,7 @@ export const ButtonCreateNewAssets = () => {
   return (
     <Button
       size='sm'
-      onClick={() => navigate('/assets/create')}
+      onClick={() => navigate('/assets/create-asset')}
     >
       <Plus className='mr-2 h-4 w-4' />
       Create New Asset
