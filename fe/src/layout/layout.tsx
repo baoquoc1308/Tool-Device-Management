@@ -7,7 +7,7 @@ const Layout = () => {
   return (
     <SidebarProvider defaultOpen={sidebarState}>
       <AppSidebar />
-      <main className='flex flex-1 flex-col gap-4 p-4 pt-0'>
+      <main className='flex flex-1 flex-col gap-4 overflow-x-hidden overflow-y-auto p-4 pt-0'>
         <Header />
         <Outlet />
       </main>
