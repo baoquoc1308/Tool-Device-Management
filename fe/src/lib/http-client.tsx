@@ -15,7 +15,7 @@ let requestFailed: RequestFailed[] = []
 export const httpClient = axios.create({
   baseURL: import.meta.env.VITE_API_URL,
   headers: {
-    'Content-Type': 'application/json',
+    'Content-Type': 'multipart/form-data',
   },
 })
 
@@ -42,14 +42,15 @@ httpClient.interceptors.response.use(
     const refreshToken = Cookies.get('refreshToken')
     const status = error.response?.data.status
     const message = error.response?.data.msg
-    if ((status === 401 && message === 'Access Token expired') || message === 'Access Token Invoked') {
+    if ((status === 401 && message === 'Access Token expired') || message === 'Access Token was revoked') {
       if (!isRefreshing) {
         isRefreshing = true
-        const { data, error } = await tryCatch(httpRequest.post('/auth/refresh', { refresh_token: refreshToken }))
+        const { data, error } = await tryCatch(httpRequest.post('/auth/refresh', { refreshToken: refreshToken }))
         if (error) {
           if (
             (error as any).response?.data.msg === 'Refresh token was expired' ||
-            (error as any).response?.data.msg === 'Refresh token was invoked'
+            (error as any).response?.data.msg === 'Refresh token was invoked' ||
+            (error as any).response?.data.msg === 'Refresh token was revoked'
           ) {
             Object.keys(Cookies.get()).forEach(function (cookieName) {
               Cookies.remove(cookieName)
