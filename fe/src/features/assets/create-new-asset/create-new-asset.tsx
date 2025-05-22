@@ -85,16 +85,20 @@ const CreateNewAsset = () => {
       categoryId: '',
       departmentId: '',
       owner: '',
-      file: undefined,
-      image: undefined,
+      file: null,
+      image: null,
     },
+    mode: 'onChange',
   })
-
   const onSubmit = (data: CreateAssetFormType) => {
     startTransition(async () => {
-      console.log(data)
       const response = await createNewAsset(data)
-      console.log('response', response)
+      if (!response.success) {
+        toast.error(response.error?.message || 'Failed to create asset')
+        return
+      }
+      toast.success('Asset created successfully')
+      navigate('/assets')
     })
   }
 
@@ -113,7 +117,16 @@ const CreateNewAsset = () => {
       setFileName(file.name)
     }
   }
+  const handlePurchaseDateChange = (field: any, value: any) => {
+    field.onChange(value)
+    const endDate = form.getValues('warrantExpiry')
 
+    if (endDate) {
+      form.trigger('warrantExpiry')
+    } else {
+      form.clearErrors('warrantExpiry')
+    }
+  }
   return (
     <div className='container mx-auto max-w-3xl py-6'>
       <Card>
@@ -262,9 +275,8 @@ const CreateNewAsset = () => {
                           <Calendar
                             mode='single'
                             selected={field.value}
-                            onSelect={field.onChange}
-                            disabled={(date) => date > new Date() || date < new Date('1900-01-01')}
-                            initialFocus
+                            onSelect={(value) => handlePurchaseDateChange(field, value)}
+                            autoFocus
                           />
                         </PopoverContent>
                       </Popover>
@@ -300,8 +312,7 @@ const CreateNewAsset = () => {
                             mode='single'
                             selected={field.value}
                             onSelect={field.onChange}
-                            disabled={(date) => date < new Date('1900-01-01')}
-                            initialFocus
+                            autoFocus
                           />
                         </PopoverContent>
                       </Popover>
@@ -456,7 +467,7 @@ const CreateNewAsset = () => {
           </Button>
           <Button
             onClick={form.handleSubmit(onSubmit)}
-            disabled={isPending}
+            disabled={isPending || !form.formState.isValid || !form.formState.isDirty}
           >
             {isPending ? (
               <LoadingSpinner className='mr-2 h-4 w-4 animate-spin' />
