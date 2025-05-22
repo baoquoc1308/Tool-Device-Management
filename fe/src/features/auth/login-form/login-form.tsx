@@ -18,6 +18,7 @@ import { toast } from 'sonner'
 import { useAppDispatch } from '@/hooks'
 import { logIn } from '../slice'
 import { useTransition } from 'react'
+import Cookies from 'js-cookie'
 
 const LoginForm = () => {
   const [isPending, startTransition] = useTransition()
@@ -43,6 +44,8 @@ const LoginForm = () => {
         toast.error('User is inactive, please go to email and verify your account')
         return
       }
+      Cookies.set('accessToken', result.data.access_token)
+      Cookies.set('refreshToken', result.data.refresh_token)
       toast.success('Login successfully')
       navigate('/')
     })

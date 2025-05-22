@@ -5,7 +5,10 @@ class HttpRequest {
     return await httpClient.get(endpoint)
   }
 
-  async post(endpoint: string, data?: unknown) {
+  async post(endpoint: string, data?: unknown, headers?: unknown) {
+    if (headers) {
+      return await httpClient.post(endpoint, data, { headers })
+    }
     return await httpClient.post(endpoint, data)
   }
 

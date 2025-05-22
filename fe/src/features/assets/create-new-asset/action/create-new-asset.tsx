@@ -3,7 +3,7 @@ import { tryCatch } from '@/utils'
 import type { CreateAssetFormType } from '../model/schema'
 
 const createNewAsset = async (value: CreateAssetFormType) => {
-  const { data, error } = await tryCatch(httpRequest.post('/assets', value))
+  const { data, error } = await tryCatch(httpRequest.post('/assets', value, { 'Content-Type': 'multipart/form-data' }))
   if (error) return { success: false, error }
   return { success: true, data: data }
 }

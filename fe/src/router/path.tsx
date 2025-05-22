@@ -7,6 +7,7 @@ import {
   ResetPasswordPage,
   AssetsPage,
   CreateAssetPage,
+  AssetDetailPage,
 } from '@/pages'
 import { ProtectedRoute, AuthRoute } from './auth-guard'
 import Layout from '@/layout/layout'
@@ -34,6 +35,10 @@ export const router = createBrowserRouter([
               {
                 path: 'create-asset',
                 element: <CreateAssetPage />,
+              },
+              {
+                path: ':id',
+                element: <AssetDetailPage />,
               },
             ],
           },

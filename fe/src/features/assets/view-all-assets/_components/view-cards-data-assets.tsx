@@ -18,6 +18,7 @@ import type { AssetsType } from '../model'
 import { Info } from 'lucide-react'
 import { Link } from 'react-router-dom'
 import { useState } from 'react'
+import { cn } from '@/lib'
 
 export const ViewCardsDataAssets = ({ assets }: { assets: AssetsType[] }) => {
   const [currentPage, setCurrentPage] = useState<number>(1)
@@ -61,17 +62,14 @@ export const ViewCardsDataAssets = ({ assets }: { assets: AssetsType[] }) => {
                     <span className='font-mono text-xs'>{asset.serialNumber}</span>
                     <Badge
                       variant='outline'
-                      className={`${
-                        asset.status === 'New'
-                          ? 'border-green-200 bg-green-100 text-green-800'
-                          : asset.status === 'In Use'
-                            ? 'border-blue-200 bg-blue-100 text-blue-800'
-                            : asset.status === 'Under Maintenance'
-                              ? 'border-amber-200 bg-amber-100 text-amber-800'
-                              : asset.status === 'Retired'
-                                ? 'border-slate-200 bg-slate-100 text-slate-800'
-                                : 'border-red-200 bg-red-100 text-red-800'
-                      } flex items-center gap-1`}
+                      className={cn(
+                        'ml-4 flex items-center gap-1',
+                        asset.status === 'New' && 'border-green-200 bg-green-100 text-green-800',
+                        asset.status === 'In Use' && 'border-blue-200 bg-blue-100 text-blue-800',
+                        asset.status === 'Under Maintenance' && 'border-amber-200 bg-amber-100 text-amber-800',
+                        asset.status === 'Retired' && 'border-slate-200 bg-slate-100 text-slate-800',
+                        asset.status === 'Disposed' && 'border-gray-200 bg-gray-100 text-gray-800'
+                      )}
                     >
                       {asset.status}
                     </Badge>

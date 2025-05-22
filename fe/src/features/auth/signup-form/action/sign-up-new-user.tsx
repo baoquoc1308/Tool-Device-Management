@@ -6,8 +6,8 @@ export const signUpNewUser = async (dataSignUp: DataSignupType) => {
   const { data, error } = await tryCatch(
     httpRequest.post('/auth/register', {
       email: dataSignUp.email,
-      first_name: dataSignUp.firstName,
-      last_name: dataSignUp.lastName,
+      firstName: dataSignUp.firstName,
+      lastName: dataSignUp.lastName,
       password: dataSignUp.password,
       redirectUrl: 'http://localhost:5173/login',
     })
