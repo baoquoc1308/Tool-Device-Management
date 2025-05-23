@@ -35,7 +35,7 @@ httpClient.interceptors.request.use(
 httpClient.interceptors.response.use(
   (response) => {
     //do sth here for post-response
-    return response
+    return response.data
   },
   async (error) => {
     const config = error.config

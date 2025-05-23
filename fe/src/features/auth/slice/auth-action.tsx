@@ -25,7 +25,7 @@ export const logIn = createAsyncThunk('user/logIn', async (value: DataLogInType,
     }
     return {
       success: true,
-      data: data.data.data,
+      data: data.data,
     }
   } catch (error) {
     return thunkAPI.rejectWithValue(error)
@@ -44,7 +44,7 @@ export const getSession = createAsyncThunk('user/getSession', async (_, thunkAPI
 
     return {
       success: true,
-      data: data.data.data,
+      data: data.data,
     }
   } catch (error) {
     return thunkAPI.rejectWithValue(error)

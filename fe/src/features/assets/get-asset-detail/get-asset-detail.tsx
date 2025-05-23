@@ -2,7 +2,7 @@ import { useParams, Link } from 'react-router-dom'
 import type { AssetsType } from '../view-all-assets/model'
 import { tryCatch } from '@/utils'
 import { useEffect, useTransition } from 'react'
-import { getAssetInformation } from './action'
+import { getAssetInformation } from '../api'
 import { useState } from 'react'
 import { toast } from 'sonner'
 import { format } from 'date-fns'
@@ -47,11 +47,9 @@ const GetAssetDetail = () => {
       const { data, error } = await tryCatch(getAssetInformation(id))
       if (error) {
         toast.error('Error fetching asset data')
-        console.error(error)
         return
       }
-      console.log(data)
-      setAsset(data.data.data)
+      setAsset(data.data)
     })
   }
 

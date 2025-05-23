@@ -21,8 +21,10 @@ import { Input } from '@/components/ui/input'
 import { ArrowLeft } from 'lucide-react'
 import { Link } from 'react-router-dom'
 import { type ForgetPasswordFormType, forgetPasswordFormSchema } from './model'
-import { sendResetPasswordEmail } from './action'
+import { sendResetPasswordEmail } from '../api'
 import { toast } from 'sonner'
+import { tryCatch } from '@/utils'
+import { SignUpSuccess } from './_component'
 
 const ForgetPasswordForm = () => {
   const [isPending, startTransition] = useTransition()
@@ -37,8 +39,8 @@ const ForgetPasswordForm = () => {
 
   const onSubmit = async (data: ForgetPasswordFormType) => {
     startTransition(async () => {
-      const response = await sendResetPasswordEmail(data.email)
-      if (!response.success) {
+      const response = await tryCatch(sendResetPasswordEmail(data.email))
+      if (response.error) {
         toast.error((response.error as any)?.data.msg)
         return
       }
@@ -49,29 +51,7 @@ const ForgetPasswordForm = () => {
   }
 
   if (isSuccess) {
-    return (
-      <Card className='mx-auto w-full max-w-md'>
-        <CardHeader>
-          <CardTitle>Check your email</CardTitle>
-          <CardDescription>We've sent password reset instructions to your email.</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <p className='text-muted-foreground mb-4 text-sm'>
-            If you don't see the email, check other places it might be, like your junk, spam, or other folders.
-          </p>
-          <Button
-            variant='outline'
-            asChild
-            className='w-full'
-          >
-            <Link to='/login'>
-              <ArrowLeft className='mr-2 h-4 w-4' />
-              Back to login
-            </Link>
-          </Button>
-        </CardContent>
-      </Card>
-    )
+    return <SignUpSuccess />
   }
 
   return (

@@ -31,11 +31,10 @@ import {
   LoadingSpinner,
 } from '@/components/ui'
 import { CalendarIcon, Laptop, Upload, PaperclipIcon, ImageIcon } from 'lucide-react'
-import getAllDepartment from './action/get-all-department'
-import getAllCategories from './action/get-all-categories'
-import getAllUsers from './action/get-all-user'
+import { getAllDepartment, getAllCategories, createNewAsset } from '../api'
+import { getAllUsers } from '@/features/user'
 import { type CreateAssetFormType, createAssetFormSchema } from './model/schema'
-import createNewAsset from './action/create-new-asset'
+import { tryCatch } from '@/utils'
 
 const CreateNewAsset = () => {
   const navigate = useNavigate()
@@ -50,24 +49,24 @@ const CreateNewAsset = () => {
 
   const getAllInformation = () => {
     startTransitionGetData(async () => {
-      const departmentsResponse = await getAllDepartment()
-      if (!departmentsResponse.success) {
+      const departmentsResponse = await tryCatch(getAllDepartment())
+      if (departmentsResponse.error) {
         toast.error(departmentsResponse.error?.message || 'Failed to load departments')
         return
       }
-      setDepartments(departmentsResponse.data)
-      const categoriesResponse = await getAllCategories()
-      if (!categoriesResponse.success) {
+      setDepartments(departmentsResponse.data.data)
+      const categoriesResponse = await tryCatch(getAllCategories())
+      if (categoriesResponse.error) {
         toast.error(categoriesResponse.error?.message || 'Failed to load categories')
         return
       }
-      setCategories(categoriesResponse.data)
-      const usersResponse = await getAllUsers()
-      if (!usersResponse.success) {
+      setCategories(categoriesResponse.data.data)
+      const usersResponse = await tryCatch(getAllUsers())
+      if (usersResponse.error) {
         toast.error(usersResponse.error?.message || 'Failed to load users')
         return
       }
-      setUsers(usersResponse.data)
+      setUsers(usersResponse.data.data)
     })
   }
 
@@ -92,8 +91,8 @@ const CreateNewAsset = () => {
   })
   const onSubmit = (data: CreateAssetFormType) => {
     startTransition(async () => {
-      const response = await createNewAsset(data)
-      if (!response.success) {
+      const response = await tryCatch(createNewAsset(data))
+      if (response.error) {
         toast.error(response.error?.message || 'Failed to create asset')
         return
       }

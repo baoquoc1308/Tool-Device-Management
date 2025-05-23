@@ -1,11 +1,7 @@
 import { AllAssets } from '@/components'
 
 const AssetsPage = () => {
-  return (
-    <div>
-      <AllAssets />
-    </div>
-  )
+  return <AllAssets />
 }
 
 export default AssetsPage
