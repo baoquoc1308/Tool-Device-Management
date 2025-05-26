@@ -1,2 +1,6 @@
 export * from './link-to-forgot-password'
 export * from './link-to-sign-up'
+export * from './email-field'
+export * from './button-submit-form'
+export * from './password-field'
+export * from './remember-me-field'

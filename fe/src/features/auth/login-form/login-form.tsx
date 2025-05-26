@@ -1,27 +1,14 @@
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { type DataLoginType, loginSchema } from './model/schema'
-import {
-  FormField,
-  FormItem,
-  Label,
-  FormControl,
-  FormMessage,
-  Input,
-  Button,
-  Form,
-  Checkbox,
-  LoadingSpinner,
-} from '@/components/ui'
+import { Form } from '@/components/ui'
 import { useNavigate } from 'react-router-dom'
 import { toast } from 'sonner'
 import { useAppDispatch } from '@/hooks'
 import { logIn } from '../slice'
 import { useTransition } from 'react'
 import Cookies from 'js-cookie'
-import { Lock, LogIn, Mail } from 'lucide-react'
-import { LinkToForgetPassword, LinkToSignUp } from './_components'
-import ButtonSubmitForm from './_components/button-submit-form'
+import { EmailField, ButtonSubmitForm, LinkToSignUp, PasswordField, RememberMeField } from './_components'
 
 const LoginForm = () => {
   const [isPending, startTransition] = useTransition()
@@ -65,70 +52,9 @@ const LoginForm = () => {
           onSubmit={form.handleSubmit(onSubmit)}
           className='space-y-4 sm:space-y-5'
         >
-          <FormField
-            name='email'
-            control={form.control}
-            render={({ field }) => (
-              <FormItem>
-                <Label className='text-sm font-medium'>Email Address</Label>
-                <FormControl>
-                  <div className='relative'>
-                    <div className='pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3'>
-                      <Mail className='h-4 w-4 text-gray-400 sm:h-5 sm:w-5' />
-                    </div>
-                    <Input
-                      type='email'
-                      placeholder='email@company.com'
-                      className='h-9 pl-9 text-sm sm:h-10 sm:pl-10'
-                      {...field}
-                    />
-                  </div>
-                </FormControl>
-                <FormMessage className='text-xs sm:text-sm' />
-              </FormItem>
-            )}
-          />
-          <FormField
-            name='password'
-            control={form.control}
-            render={({ field }) => (
-              <FormItem>
-                <LinkToForgetPassword />
-                <FormControl>
-                  <div className='relative'>
-                    <div className='pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3'>
-                      <Lock className='h-4 w-4 text-gray-400 sm:h-5 sm:w-5' />
-                    </div>
-                    <Input
-                      type='password'
-                      placeholder='••••••••'
-                      className='h-9 pl-9 text-sm sm:h-10 sm:pl-10'
-                      {...field}
-                    />
-                  </div>
-                </FormControl>
-                <FormMessage className='text-xs sm:text-sm' />
-              </FormItem>
-            )}
-          />
-          <FormField
-            name='rememberMe'
-            control={form.control}
-            render={({ field }) => (
-              <FormItem>
-                <FormControl>
-                  <div className='mt-2 flex items-center'>
-                    <Checkbox
-                      checked={field.value}
-                      onCheckedChange={field.onChange}
-                    />
-                    <Label className='ml-2 block text-xs text-gray-700 sm:text-sm'>Remember me</Label>
-                  </div>
-                </FormControl>
-                <FormMessage className='text-xs sm:text-sm' />
-              </FormItem>
-            )}
-          />
+          <EmailField form={form} />
+          <PasswordField form={form} />
+          <RememberMeField form={form} />
           <ButtonSubmitForm
             isPending={isPending}
             form={form}

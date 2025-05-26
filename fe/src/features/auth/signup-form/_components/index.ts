@@ -1,0 +1,6 @@
+export * from './first-name-field.tsx'
+export * from './last-name-field.tsx'
+export * from './email-filed.tsx'
+export * from './password-field.tsx'
+export * from './confirm-password-field.tsx'
+export * from './button-submit.tsx'

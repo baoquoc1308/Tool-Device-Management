@@ -3,7 +3,7 @@ import { LogIn } from 'lucide-react'
 import type { UseFormReturn } from 'react-hook-form'
 import type { DataLoginType } from '../model'
 
-const ButtonSubmitForm = ({ isPending, form }: { isPending: boolean; form: UseFormReturn<DataLoginType> }) => {
+export const ButtonSubmitForm = ({ isPending, form }: { isPending: boolean; form: UseFormReturn<DataLoginType> }) => {
   return (
     <Button
       disabled={!form.formState.isDirty}
@@ -21,5 +21,3 @@ const ButtonSubmitForm = ({ isPending, form }: { isPending: boolean; form: UseFo
     </Button>
   )
 }
-
-export default ButtonSubmitForm

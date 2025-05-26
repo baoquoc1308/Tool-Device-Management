@@ -30,11 +30,21 @@ import {
   Calendar,
   LoadingSpinner,
 } from '@/components/ui'
-import { CalendarIcon, Laptop, Upload, PaperclipIcon, ImageIcon } from 'lucide-react'
+import { Laptop, Upload, PaperclipIcon, ImageIcon } from 'lucide-react'
 import { getAllDepartment, getAllCategories, createNewAsset } from '../api'
 import { getAllUsers } from '@/features/user'
 import { type CreateAssetFormType, createAssetFormSchema } from './model/schema'
 import { tryCatch } from '@/utils'
+import {
+  AssetNameField,
+  CategoryIdField,
+  SerialNumberField,
+  DepartmentIdField,
+  PurchaseDateField,
+  WarrantExpiryField,
+  OwnerField,
+  CostField,
+} from './_components'
 
 const CreateNewAsset = () => {
   const navigate = useNavigate()
@@ -144,278 +154,29 @@ const CreateNewAsset = () => {
               aria-disabled={isPendingGetData}
             >
               <div className='grid grid-cols-1 gap-6 md:grid-cols-2'>
-                <FormField
-                  control={form.control}
-                  name='assetName'
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>
-                        Asset Name <span className='text-red-500'>*</span>
-                      </FormLabel>
-                      <FormControl>
-                        <Input
-                          placeholder='Enter asset name'
-                          {...field}
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
+                <AssetNameField form={form} />
+                <SerialNumberField form={form} />
+                <CategoryIdField
+                  form={form}
+                  categories={categories}
                 />
-
-                <FormField
-                  control={form.control}
-                  name='serialNumber'
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>
-                        Serial Number <span className='text-red-500'>*</span>
-                      </FormLabel>
-                      <FormControl>
-                        <Input
-                          placeholder='Enter serial number'
-                          {...field}
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
+                <DepartmentIdField
+                  form={form}
+                  departments={departments}
                 />
-
-                <FormField
-                  control={form.control}
-                  name='categoryId'
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>
-                        Category <span className='text-red-500'>*</span>
-                      </FormLabel>
-                      <Select
-                        onValueChange={field.onChange}
-                        defaultValue={field.value}
-                      >
-                        <FormControl>
-                          <SelectTrigger>
-                            <SelectValue placeholder='Select a category' />
-                          </SelectTrigger>
-                        </FormControl>
-                        <SelectContent>
-                          {categories.map((category) => (
-                            <SelectItem
-                              key={category.id}
-                              value={category.id.toString()}
-                            >
-                              {category.categoryName}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                      <FormMessage />
-                    </FormItem>
-                  )}
+                <PurchaseDateField
+                  form={form}
+                  handlePurchaseDateChange={handlePurchaseDateChange}
                 />
-
-                <FormField
-                  control={form.control}
-                  name='departmentId'
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>
-                        Department <span className='text-red-500'>*</span>
-                      </FormLabel>
-                      <Select
-                        onValueChange={field.onChange}
-                        defaultValue={field.value}
-                      >
-                        <FormControl>
-                          <SelectTrigger>
-                            <SelectValue placeholder='Select a department' />
-                          </SelectTrigger>
-                        </FormControl>
-                        <SelectContent>
-                          {departments.map((department) => (
-                            <SelectItem
-                              key={department.id}
-                              value={department.id.toString()}
-                            >
-                              {department.departmentName}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name='purchaseDate'
-                  render={({ field }) => (
-                    <FormItem className='flex flex-col'>
-                      <FormLabel>
-                        Purchase Date <span className='text-red-500'>*</span>
-                      </FormLabel>
-                      <Popover>
-                        <PopoverTrigger asChild>
-                          <FormControl>
-                            <Button
-                              variant={'outline'}
-                              className={`w-full pl-3 text-left font-normal ${!field.value && 'text-muted-foreground'}`}
-                            >
-                              {field.value ? format(field.value, 'PPP') : <span>Select date</span>}
-                              <CalendarIcon className='ml-auto h-4 w-4 opacity-50' />
-                            </Button>
-                          </FormControl>
-                        </PopoverTrigger>
-                        <PopoverContent
-                          className='w-auto p-0'
-                          align='start'
-                        >
-                          <Calendar
-                            mode='single'
-                            selected={field.value}
-                            onSelect={(value) => handlePurchaseDateChange(field, value)}
-                            autoFocus
-                          />
-                        </PopoverContent>
-                      </Popover>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name='warrantExpiry'
-                  render={({ field }) => (
-                    <FormItem className='flex flex-col'>
-                      <FormLabel>
-                        Warranty Expiry <span className='text-red-500'>*</span>
-                      </FormLabel>
-                      <Popover>
-                        <PopoverTrigger asChild>
-                          <FormControl>
-                            <Button
-                              variant={'outline'}
-                              className={`w-full pl-3 text-left font-normal ${!field.value && 'text-muted-foreground'}`}
-                            >
-                              {field.value ? format(field.value, 'PPP') : <span>Select date</span>}
-                              <CalendarIcon className='ml-auto h-4 w-4 opacity-50' />
-                            </Button>
-                          </FormControl>
-                        </PopoverTrigger>
-                        <PopoverContent
-                          className='w-auto p-0'
-                          align='start'
-                        >
-                          <Calendar
-                            mode='single'
-                            selected={field.value}
-                            onSelect={field.onChange}
-                            autoFocus
-                          />
-                        </PopoverContent>
-                      </Popover>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                <FormField
-                  control={form.control}
-                  name='cost'
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>
-                        Cost <span className='text-red-500'>*</span>
-                      </FormLabel>
-                      <FormControl>
-                        <div className='relative'>
-                          <span className='absolute top-1/2 left-3 -translate-y-1/2'>$</span>
-                          <Input
-                            type='number'
-                            className='pl-7'
-                            placeholder='0.00'
-                            {...field}
-                            onChange={(e) => field.onChange(e.target.valueAsNumber)}
-                          />
-                        </div>
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                <FormField
-                  control={form.control}
-                  name='owner'
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>
-                        Owner <span className='text-red-500'>*</span>
-                      </FormLabel>
-                      <Select
-                        onValueChange={field.onChange}
-                        defaultValue={field.value}
-                      >
-                        <FormControl>
-                          <SelectTrigger>
-                            <SelectValue placeholder='Select a department' />
-                          </SelectTrigger>
-                        </FormControl>
-                        <SelectContent>
-                          {users.map((user) => (
-                            <SelectItem
-                              key={user.id}
-                              value={user.id.toString()}
-                            >
-                              {user.lastName + ' ' + user.firstName}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                      <FormMessage />
-                    </FormItem>
-                  )}
+                <WarrantExpiryField form={form} />
+                <CostField form={form} />
+                <OwnerField
+                  form={form}
+                  users={users}
                 />
               </div>
 
               <div className='grid grid-cols-1 gap-6 md:grid-cols-2'>
-                <FormField
-                  control={form.control}
-                  name='file'
-                  render={({ field: { value, onChange, ...field } }) => (
-                    <FormItem>
-                      <FormLabel>
-                        Attachment <span className='text-red-500'>*</span>
-                      </FormLabel>
-                      <FormControl>
-                        <div className='flex w-full flex-col items-center justify-center'>
-                          <label
-                            htmlFor='file-upload'
-                            className='flex h-28 w-full cursor-pointer flex-col items-center justify-center rounded-lg border-2 border-dashed bg-gray-50 hover:bg-gray-100 dark:border-gray-600 dark:bg-slate-900 dark:hover:border-gray-500'
-                          >
-                            <div className='flex flex-col items-center justify-center pt-5 pb-6'>
-                              <PaperclipIcon className='mb-2 h-8 w-8 text-gray-500 dark:text-gray-400' />
-                              <p className='mb-1 text-sm text-gray-500 dark:text-gray-400'>
-                                {fileName ? fileName : <span>Click to attach file</span>}
-                              </p>
-                              <p className='text-xs text-gray-500 dark:text-gray-400'>PDF, DOC, XLS, etc.</p>
-                            </div>
-                            <Input
-                              id='file-upload'
-                              type='file'
-                              className='hidden'
-                              {...field}
-                              onChange={(e) => handleFileChange(e, { onChange })}
-                            />
-                          </label>
-                        </div>
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
                 <FormField
                   control={form.control}
                   name='image'
