@@ -1,52 +1,54 @@
 import { FormControl, FormField, FormItem, FormMessage, FormLabel, Input } from '@/components/ui'
-import { PaperclipIcon } from 'lucide-react'
+import { ImageIcon } from 'lucide-react'
 import type { CreateAssetFormType } from '../model'
 import type { UseFormReturn } from 'react-hook-form'
 
-export const FileField = ({
+export const ImageField = ({
   form,
-  fileName,
-  setFileName,
+  imageName,
+  setImageName,
 }: {
   form: UseFormReturn<CreateAssetFormType>
-  fileName: string
-  setFileName: React.Dispatch<React.SetStateAction<string>>
+  imageName: string
+  setImageName: React.Dispatch<React.SetStateAction<string>>
 }) => {
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>, field: any) => {
+  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>, field: any) => {
     const file = e.target.files?.[0]
     if (file) {
       field.onChange(file)
-      setFileName(file.name)
+      setImageName(file.name)
     }
   }
+
   return (
     <FormField
       control={form.control}
-      name='file'
+      name='image'
       render={({ field: { value, onChange, ...field } }) => (
         <FormItem>
           <FormLabel>
-            Attachment <span className='text-red-500'>*</span>
+            Asset Image <span className='text-red-500'>*</span>
           </FormLabel>
           <FormControl>
             <div className='flex w-full flex-col items-center justify-center'>
               <label
-                htmlFor='file-upload'
-                className='flex h-28 w-full cursor-pointer flex-col items-center justify-center rounded-lg border-2 border-dashed bg-gray-50 hover:bg-gray-100 dark:border-gray-600 dark:bg-slate-900 dark:hover:border-gray-500'
+                htmlFor='image-upload'
+                className='flex h-28 w-full cursor-pointer flex-col items-center justify-center overflow-hidden rounded-lg border-2 border-dashed bg-gray-50 hover:bg-gray-100 dark:border-gray-600 dark:bg-slate-900 dark:hover:border-gray-500'
               >
                 <div className='flex flex-col items-center justify-center pt-5 pb-6'>
-                  <PaperclipIcon className='mb-2 h-8 w-8 text-gray-500 dark:text-gray-400' />
+                  <ImageIcon className='mb-2 h-8 w-8 text-gray-500 dark:text-gray-400' />
                   <p className='mb-1 text-sm text-gray-500 dark:text-gray-400'>
-                    {fileName ? fileName : <span>Click to attach file</span>}
+                    {imageName ? imageName : 'Click to upload image'}
                   </p>
-                  <p className='text-xs text-gray-500 dark:text-gray-400'>PDF, DOC, XLS, etc.</p>
+                  <p className='text-xs text-gray-500 dark:text-gray-400'>PNG, JPG, GIF up to 10MB</p>
                 </div>
                 <Input
-                  id='file-upload'
+                  id='image-upload'
                   type='file'
+                  accept='image/*'
                   className='hidden'
                   {...field}
-                  onChange={(e) => handleFileChange(e, { onChange })}
+                  onChange={(e) => handleImageChange(e, { onChange })}
                 />
               </label>
             </div>

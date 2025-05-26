@@ -15,13 +15,17 @@ import { format } from 'date-fns'
 import type { CreateAssetFormType } from '../model'
 import type { UseFormReturn } from 'react-hook-form'
 
-export const PurchaseDateField = ({
-  form,
-  handlePurchaseDateChange,
-}: {
-  form: UseFormReturn<CreateAssetFormType>
-  handlePurchaseDateChange: (field: any, value: Date | undefined) => void
-}) => {
+export const PurchaseDateField = ({ form }: { form: UseFormReturn<CreateAssetFormType> }) => {
+  const handlePurchaseDateChange = (field: any, value: any) => {
+    field.onChange(value)
+    const endDate = form.getValues('warrantExpiry')
+
+    if (endDate) {
+      form.trigger('warrantExpiry')
+    } else {
+      form.clearErrors('warrantExpiry')
+    }
+  }
   return (
     <FormField
       control={form.control}

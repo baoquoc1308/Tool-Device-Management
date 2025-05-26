@@ -8,7 +8,7 @@ import { type ForgetPasswordFormType, forgetPasswordFormSchema } from './model'
 import { sendResetPasswordEmail } from '../api'
 import { toast } from 'sonner'
 import { tryCatch } from '@/utils'
-import { ButtonSubmit, EmailField, SignUpSuccess } from './_component'
+import { ButtonSubmit, EmailField, SignUpSuccess } from './_components'
 
 const ForgetPasswordForm = () => {
   const [isPending, startTransition] = useTransition()
