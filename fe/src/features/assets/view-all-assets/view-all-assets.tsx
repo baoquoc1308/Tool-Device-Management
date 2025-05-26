@@ -1,18 +1,32 @@
-import { useEffect, useState, useTransition } from 'react'
-import { getAllAssets } from '../api'
+import { useEffect, useState, useTransition, useMemo, use } from 'react'
+import { getAllAssets, getDataAssetsFilter } from '../api'
 import { toast } from 'sonner'
-import type { AssetsType } from './model'
+import type { AssetsType, FilterType } from './model'
 import { columnsAssetsTable } from './column-table'
 import { DataTable, Card, CardHeader, CardTitle, CardDescription, CardContent, Skeleton } from '@/components/ui'
 import { Laptop } from 'lucide-react'
-import { ButtonCreateNewAssets, ButtonViewType, CardStatusStatistic, ViewCardsDataAssets } from './_components'
+import {
+  ButtonCreateNewAssets,
+  ButtonViewType,
+  CardStatusStatistic,
+  FilterAssets,
+  ViewCardsDataAssets,
+} from './_components'
 import { tryCatch } from '@/utils'
+import { useDebounce } from '@/hooks'
+import { useSearchParams } from 'react-router-dom'
 
 const ViewAllAssets = () => {
+  const [searchParam, setSearchParam] = useSearchParams()
   const [isPending, startTransition] = useTransition()
   const [assets, setAssets] = useState<AssetsType[]>([])
   const [viewMode, setViewMode] = useState<string>('table')
-
+  const [filteredAssets, setFilteredAssets] = useState<FilterType>({
+    assetName: searchParam.get('assetName') || '',
+    categoryId: searchParam.get('categoryId') || null,
+    departmentId: searchParam.get('departmentId') || null,
+    status: searchParam.get('status') || null,
+  })
   const getAssetsData = () => {
     startTransition(async () => {
       const response = await tryCatch(getAllAssets())
@@ -23,10 +37,46 @@ const ViewAllAssets = () => {
       setAssets(response.data.data)
     })
   }
+  const filterData = useDebounce(filteredAssets, 1000)
+
   useEffect(() => {
     getAssetsData()
   }, [])
+  const getAssetsFilterData = () => {
+    startTransition(async () => {
+      const { data, error } = await tryCatch(getDataAssetsFilter({ ...filterData }))
+      if (error) {
+        toast.error(error?.message || 'Failed to load assets')
+        return
+      }
+      setAssets(data.data.data)
+    })
+  }
 
+  useEffect(() => {
+    if (filteredAssets.assetName) {
+      searchParam.set('assetName', filteredAssets.assetName)
+    } else {
+      searchParam.delete('assetName')
+    }
+    if (filteredAssets.categoryId) {
+      searchParam.set('categoryId', filteredAssets.categoryId)
+    } else {
+      searchParam.delete('categoryId')
+    }
+    if (filteredAssets.departmentId) {
+      searchParam.set('departmentId', filteredAssets.departmentId)
+    } else {
+      searchParam.delete('departmentId')
+    }
+    if (filteredAssets.status) {
+      searchParam.set('status', filteredAssets.status)
+    } else {
+      searchParam.delete('status')
+    }
+    setSearchParam(searchParam)
+    getAssetsFilterData()
+  }, [filterData])
   return (
     <div className='space-y-6'>
       <ButtonViewType
@@ -44,12 +94,16 @@ const ViewAllAssets = () => {
           </div>
           <ButtonCreateNewAssets />
         </CardHeader>
-        <CardContent>
+        <CardContent className='space-y-6'>
           <CardStatusStatistic
             isPending={isPending}
             assets={assets}
           />
 
+          <FilterAssets
+            filteredAssets={filteredAssets}
+            setFilteredAssets={setFilteredAssets}
+          />
           {isPending ? (
             <div className='space-y-4'>
               <Skeleton className='h-12 w-full' />

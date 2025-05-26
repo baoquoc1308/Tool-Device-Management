@@ -3,10 +3,18 @@ import { Upload } from 'lucide-react'
 import type { CreateAssetFormType } from '../model'
 import type { UseFormReturn } from 'react-hook-form'
 
-export const ButtonUpload = ({ isPending, form }: { isPending: boolean; form: UseFormReturn<CreateAssetFormType> }) => {
+export const ButtonUpload = ({
+  isPending,
+  form,
+  onSubmit,
+}: {
+  isPending: boolean
+  form: UseFormReturn<CreateAssetFormType>
+  onSubmit: (data: CreateAssetFormType) => void
+}) => {
   return (
     <Button
-      type='submit'
+      onClick={form.handleSubmit(onSubmit)}
       disabled={isPending || !form.formState.isValid || !form.formState.isDirty}
     >
       {isPending ? (

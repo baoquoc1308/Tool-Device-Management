@@ -146,6 +146,7 @@ const CreateNewAsset = () => {
           <ButtonUpload
             isPending={isPending}
             form={form}
+            onSubmit={onSubmit}
           />
         </CardFooter>
       </Card>
