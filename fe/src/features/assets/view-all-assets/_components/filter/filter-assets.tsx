@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react'
+import React from 'react'
 import { Button } from '@/components/ui'
 import { FilterX } from 'lucide-react'
 import type { FilterType } from '../../model'
