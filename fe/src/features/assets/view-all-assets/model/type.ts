@@ -12,6 +12,7 @@ export type AssetsType = {
   assetName: string
   purchaseDate: Date
   cost: number
+  qrUrl?: string
   owner: {
     id: number
     firstName: string

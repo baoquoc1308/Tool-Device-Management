@@ -12,7 +12,10 @@ class HttpRequest {
     return await httpClient.post(endpoint, data)
   }
 
-  async put(endpoint: string, data: unknown) {
+  async put(endpoint: string, data: unknown, headers?: unknown) {
+    if (headers) {
+      return await httpClient.put(endpoint, data, { headers })
+    }
     return await httpClient.put(endpoint, data)
   }
 

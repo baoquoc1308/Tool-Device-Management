@@ -1,4 +1,5 @@
 import { z } from 'zod'
+
 export const createAssetFormSchema = z
   .object({
     assetName: z.string().min(2, { message: 'Asset name must be at least 2 characters' }),
@@ -10,7 +11,7 @@ export const createAssetFormSchema = z
     serialNumber: z.string({ required_error: 'Serial number is required' }),
     categoryId: z.string({ required_error: 'Category is required' }),
     departmentId: z.string({ required_error: 'Department is required' }),
-    owner: z.string().min(1, { message: 'Owner ID is required' }),
+    status: z.string({ required_error: 'Status is required' }).optional(),
     file: z
       .instanceof(File, {
         message: 'File is required',

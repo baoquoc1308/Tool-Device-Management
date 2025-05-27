@@ -45,6 +45,12 @@ export const FilterAssets = ({
         />
 
         <Button
+          disabled={
+            !filteredAssets.assetName &&
+            !filteredAssets.categoryId &&
+            !filteredAssets.departmentId &&
+            !filteredAssets.status
+          }
           variant='outline'
           onClick={resetFilters}
           className='gap-2'

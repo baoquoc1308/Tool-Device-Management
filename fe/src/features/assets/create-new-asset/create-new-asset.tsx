@@ -16,7 +16,6 @@ import {
   DepartmentIdField,
   PurchaseDateField,
   WarrantExpiryField,
-  OwnerField,
   CostField,
   FileField,
   ImageField,
@@ -27,11 +26,9 @@ import {
 const CreateNewAsset = () => {
   const navigate = useNavigate()
   const [isPending, startTransition] = useTransition()
-
   const [fileName, setFileName] = useState<string>('')
   const [departments, setDepartments] = useState<any[]>([])
   const [categories, setCategories] = useState<any[]>([])
-  const [users, setUsers] = useState<any[]>([])
   const [isPendingGetData, startTransitionGetData] = useTransition()
   const [imageName, setImageName] = useState<string>('')
 
@@ -49,12 +46,6 @@ const CreateNewAsset = () => {
         return
       }
       setCategories(categoriesResponse.data.data)
-      const usersResponse = await tryCatch(getAllUsers())
-      if (usersResponse.error) {
-        toast.error(usersResponse.error?.message || 'Failed to load users')
-        return
-      }
-      setUsers(usersResponse.data.data)
     })
   }
 
@@ -71,7 +62,6 @@ const CreateNewAsset = () => {
       serialNumber: '',
       categoryId: '',
       departmentId: '',
-      owner: '',
       file: null,
       image: null,
     },
@@ -120,10 +110,6 @@ const CreateNewAsset = () => {
                 <PurchaseDateField form={form} />
                 <WarrantExpiryField form={form} />
                 <CostField form={form} />
-                <OwnerField
-                  form={form}
-                  users={users}
-                />
               </div>
 
               <div className='grid grid-cols-1 gap-6 md:grid-cols-2'>

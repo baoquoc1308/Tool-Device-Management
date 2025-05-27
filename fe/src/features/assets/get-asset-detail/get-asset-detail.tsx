@@ -20,7 +20,7 @@ import {
 
 import { ArrowLeft, Pencil, Loader2 } from 'lucide-react'
 
-import { AssetBadge, AssetFile, AssetImage, AssetInformation, NoAsset } from './_components'
+import { AssetBadge, AssetFile, AssetImage, AssetInformation, AssetQR, NoAsset } from './_components'
 
 const GetAssetDetail = () => {
   const { id } = useParams()
@@ -31,6 +31,7 @@ const GetAssetDetail = () => {
     startTransition(async () => {
       if (!id) return
       const { data, error } = await tryCatch(getAssetInformation(id))
+
       if (error) {
         toast.error('Error fetching asset data')
         return
@@ -70,17 +71,22 @@ const GetAssetDetail = () => {
           <h1 className='text-3xl font-semibold'>{asset.assetName}</h1>
           <AssetBadge asset={asset} />
         </div>
-        <Link to={`/assets/edit/${id}`}>
+        <Link to={`/assets/update/${id}`}>
           <Button variant='outline'>
             <Pencil className='mr-2 h-4 w-4' />
-            Edit Asset
+            Update Asset
           </Button>
         </Link>
       </div>
 
-      <div className='grid grid-cols-1 gap-6 lg:grid-cols-3'>
-        <div className='lg:col-span-2'>
-          <Card className='h-full'>
+      {/* Using grid layout with equal height rows */}
+      <div
+        className='grid grid-cols-1 gap-6 lg:grid-cols-3'
+        style={{ gridAutoRows: '1fr' }}
+      >
+        {/* First column - Asset Information */}
+        <div className='flex lg:col-span-2'>
+          <Card className='w-full'>
             <CardHeader>
               <CardTitle>Asset Information</CardTitle>
               <CardDescription>Details about the hardware asset</CardDescription>
@@ -91,8 +97,12 @@ const GetAssetDetail = () => {
           </Card>
         </div>
 
-        <div>
-          <Tabs defaultValue='image'>
+        {/* Second column - Tabs Container */}
+        <div className='flex'>
+          <Tabs
+            defaultValue='image'
+            className='flex w-full flex-col'
+          >
             <TabsList className='w-full'>
               <TabsTrigger
                 value='image'
@@ -106,14 +116,21 @@ const GetAssetDetail = () => {
               >
                 Documents
               </TabsTrigger>
+              <TabsTrigger
+                value='qr'
+                className='flex-1'
+              >
+                QR
+              </TabsTrigger>
             </TabsList>
 
+            {/* Tab content with flex-grow to fill available space */}
             <TabsContent
               value='image'
-              className='mt-4'
+              className='mt-4 flex flex-grow'
             >
-              <Card>
-                <CardContent className='flex items-center justify-center p-4'>
+              <Card className='w-full'>
+                <CardContent className='flex h-full items-center justify-center py-4'>
                   <AssetImage asset={asset} />
                 </CardContent>
               </Card>
@@ -121,11 +138,22 @@ const GetAssetDetail = () => {
 
             <TabsContent
               value='documents'
-              className='mt-4'
+              className='mt-4 flex flex-grow'
             >
-              <Card>
-                <CardContent className='p-4'>
+              <Card className='w-full'>
+                <CardContent className='flex h-full items-center justify-center py-4'>
                   <AssetFile asset={asset} />
+                </CardContent>
+              </Card>
+            </TabsContent>
+
+            <TabsContent
+              value='qr'
+              className='mt-4 flex flex-grow'
+            >
+              <Card className='w-full'>
+                <CardContent className='flex h-full items-center justify-center py-4'>
+                  <AssetQR asset={asset} />
                 </CardContent>
               </Card>
             </TabsContent>

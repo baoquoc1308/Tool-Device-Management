@@ -41,7 +41,7 @@ httpClient.interceptors.response.use(
     const config = error.config
     const refreshToken = Cookies.get('refreshToken')
     const status = error.response?.data.status
-    const message = error.response?.data.msg
+    const message = error.response?.data.message
     if ((status === 401 && message === 'Access Token expired') || message === 'Access Token was revoked') {
       if (!isRefreshing) {
         isRefreshing = true
@@ -59,8 +59,8 @@ httpClient.interceptors.response.use(
             return Promise.reject(error)
           } else return Promise.reject(error)
         }
-        Cookies.set('accessToken', data?.data?.data.access_token)
-        config.headers.Authorization = `Bearer ${data?.data?.data.access_token}`
+        Cookies.set('accessToken', data?.data.access_token)
+        config.headers.Authorization = `Bearer ${data?.data.access_token}`
         for (const { config, resolve, reject } of requestFailed) {
           try {
             const data = await httpClient(config)
@@ -77,6 +77,6 @@ httpClient.interceptors.response.use(
         requestFailed.push({ config, resolve, reject })
       })
     }
-    return Promise.reject(error)
+    return Promise.reject(error.response?.data)
   }
 )

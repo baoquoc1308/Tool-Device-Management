@@ -40,13 +40,11 @@ export const ViewCardsDataAssets = ({ assets }: { assets: AssetsType[] }) => {
             className='flex h-full flex-row overflow-hidden p-0 transition-all hover:shadow-md'
           >
             <div className='bg-muted relative aspect-auto w-1/2 overflow-hidden'>
-              {asset.imageUpload && (
-                <img
-                  src={asset.imageUpload}
-                  alt={asset.assetName}
-                  className='h-full w-full object-cover'
-                />
-              )}
+              <img
+                src={asset.imageUpload}
+                alt={asset.assetName}
+                className='h-full w-full object-cover'
+              />
             </div>
 
             <div className='flex flex-col items-center justify-between py-6'>
