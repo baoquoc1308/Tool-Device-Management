@@ -1,1 +1,1 @@
-export * from './assets-type'
+export * from './type'

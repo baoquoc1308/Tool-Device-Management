@@ -1,5 +1,12 @@
 export type AssetStatus = 'New' | 'In Use' | 'Under Maintenance' | 'Retired' | 'Disposed'
 
+export type FilterType = {
+  assetName: string | ''
+  categoryId: string | null
+  departmentId: string | null
+  status: string | null
+}
+
 export type AssetsType = {
   id: number
   assetName: string
