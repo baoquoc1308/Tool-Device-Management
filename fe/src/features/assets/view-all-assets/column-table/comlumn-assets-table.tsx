@@ -1,9 +1,14 @@
 import type { ColumnDef } from '@tanstack/react-table'
 import type { AssetsType, AssetStatus } from '../model'
-import { Badge } from '@/components/ui'
+import { Badge, Button } from '@/components/ui'
 import { CircleIcon, UserIcon, WrenchIcon, ArchiveIcon, TrashIcon } from 'lucide-react'
+import { Link } from 'react-router-dom'
 
 export const columnsAssetsTable: ColumnDef<AssetsType>[] = [
+  {
+    accessorKey: 'id',
+    header: 'ID',
+  },
   {
     accessorKey: 'assetName',
     header: 'Asset Name',
@@ -71,6 +76,24 @@ export const columnsAssetsTable: ColumnDef<AssetsType>[] = [
           {config.icon}
           {status}
         </Badge>
+      )
+    },
+  },
+  {
+    id: 'actions',
+    header: 'Actions',
+    cell: ({ row }) => {
+      const assetId = row.getValue('id') as number
+
+      return (
+        <Button
+          variant='outline'
+          className='w-fit'
+        >
+          <Link to={`/assets/${assetId}`}>
+            <span className='text-sm font-medium'>View</span>
+          </Link>
+        </Button>
       )
     },
   },

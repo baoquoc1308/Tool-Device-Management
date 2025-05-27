@@ -1,11 +1,12 @@
 import { useEffect, useState, useTransition } from 'react'
-import { getAllAssets } from './action'
+import { getAllAssets } from '../api'
 import { toast } from 'sonner'
 import type { AssetsType } from './model'
 import { columnsAssetsTable } from './column-table'
 import { DataTable, Card, CardHeader, CardTitle, CardDescription, CardContent, Skeleton } from '@/components/ui'
 import { Laptop } from 'lucide-react'
 import { ButtonCreateNewAssets, ButtonViewType, CardStatusStatistic, ViewCardsDataAssets } from './_components'
+import { tryCatch } from '@/utils'
 
 const ViewAllAssets = () => {
   const [isPending, startTransition] = useTransition()
@@ -14,15 +15,14 @@ const ViewAllAssets = () => {
 
   const getAssetsData = () => {
     startTransition(async () => {
-      const response = await getAllAssets()
-      if (!response.success) {
+      const response = await tryCatch(getAllAssets())
+      if (response.error) {
         toast.error(response.error?.message || 'Failed to load assets')
         return
       }
-      setAssets(response.data)
+      setAssets(response.data.data)
     })
   }
-
   useEffect(() => {
     getAssetsData()
   }, [])

@@ -15,7 +15,7 @@ let requestFailed: RequestFailed[] = []
 export const httpClient = axios.create({
   baseURL: import.meta.env.VITE_API_URL,
   headers: {
-    'Content-Type': 'multipart/form-data',
+    'Content-Type': 'application/json',
   },
 })
 
@@ -35,7 +35,7 @@ httpClient.interceptors.request.use(
 httpClient.interceptors.response.use(
   (response) => {
     //do sth here for post-response
-    return response
+    return response.data
   },
   async (error) => {
     const config = error.config
