@@ -10,7 +10,15 @@ type RequestFailed = {
   reject: (reason?: any) => void
 }
 
+type Requesting = {
+  checked: boolean
+  config: InternalAxiosRequestConfig
+  resolve: (value: any) => void
+  reject: (reason?: any) => void
+}
+
 let requestFailed: RequestFailed[] = []
+let requestings: Requesting[] = []
 
 export const httpClient = axios.create({
   baseURL: import.meta.env.VITE_API_URL,
@@ -25,6 +33,7 @@ httpClient.interceptors.request.use(
     if (token) {
       config.headers.Authorization = `Bearer ${token}`
     }
+
     return config
   },
   (error) => {
@@ -34,7 +43,6 @@ httpClient.interceptors.request.use(
 
 httpClient.interceptors.response.use(
   (response) => {
-    //do sth here for post-response
     return response.data
   },
   async (error) => {

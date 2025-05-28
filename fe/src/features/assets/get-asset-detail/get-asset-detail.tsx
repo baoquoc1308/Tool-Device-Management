@@ -1,10 +1,9 @@
 import { useParams, Link } from 'react-router-dom'
 import type { AssetsType } from '../view-all-assets/model'
-import { tryCatch } from '@/utils'
+import { getData } from '@/utils'
 import { useEffect, useTransition } from 'react'
 import { getAssetInformation } from '../api'
 import { useState } from 'react'
-import { toast } from 'sonner'
 import {
   Card,
   CardContent,
@@ -30,13 +29,7 @@ const GetAssetDetail = () => {
   const getAssetData = () => {
     startTransition(async () => {
       if (!id) return
-      const { data, error } = await tryCatch(getAssetInformation(id))
-
-      if (error) {
-        toast.error('Error fetching asset data')
-        return
-      }
-      setAsset(data.data)
+      await getData(() => getAssetInformation(id), setAsset)
     })
   }
 

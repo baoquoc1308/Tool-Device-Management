@@ -19,7 +19,7 @@ import {
 import { DollarSign, Laptop } from 'lucide-react'
 import { getAllDepartment, getAllCategories, createNewAsset } from '../api'
 import { type CreateAssetFormType, createAssetFormSchema } from './model/schema'
-import { tryCatch } from '@/utils'
+import { getData, tryCatch } from '@/utils'
 import { FileField, ImageField, ButtonCancel } from './_components'
 
 const CreateNewAsset = () => {
@@ -33,18 +33,8 @@ const CreateNewAsset = () => {
 
   const getAllInformation = () => {
     startTransitionGetData(async () => {
-      const departmentsResponse = await tryCatch(getAllDepartment())
-      if (departmentsResponse.error) {
-        toast.error(departmentsResponse.error?.message || 'Failed to load departments')
-        return
-      }
-      setDepartments(departmentsResponse.data.data)
-      const categoriesResponse = await tryCatch(getAllCategories())
-      if (categoriesResponse.error) {
-        toast.error(categoriesResponse.error?.message || 'Failed to load categories')
-        return
-      }
-      setCategories(categoriesResponse.data.data)
+      await getData(getAllDepartment, setDepartments)
+      await getData(getAllCategories, setCategories)
     })
   }
 

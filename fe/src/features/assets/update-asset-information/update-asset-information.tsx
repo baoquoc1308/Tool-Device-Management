@@ -22,7 +22,7 @@ import { ArrowLeft, Save, DollarSign } from 'lucide-react'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { FormProvider, useForm } from 'react-hook-form'
 import { toast } from 'sonner'
-import { tryCatch, urlToFile } from '@/utils'
+import { getData, tryCatch, urlToFile } from '@/utils'
 import { getAssetInformation, getAllCategories, getAllDepartment, updateAssetInformation } from '../api'
 import type { AssetsType } from '../view-all-assets/model/type'
 import { type CreateAssetFormType, createAssetFormSchema } from '../create-new-asset'
@@ -60,30 +60,16 @@ const UpdateAssetInformation = () => {
   const getAssetData = () => {
     startGetDataTransition(async () => {
       if (!id) return
-      const { data, error } = await tryCatch(getAssetInformation(id))
-
-      if (error) {
-        toast.error('Error fetching asset data')
-        return
-      }
-      setAsset(data.data)
-      if (data.data.imageUpload) {
-        setImagePreview(data.data.imageUpload)
+      await getData(getAllCategories, setCategories)
+      await getData(getAllDepartment, setDepartments)
+      const data = await getData(() => getAssetInformation(id), setAsset)
+      if (data.imageUpload) {
+        setImagePreview(data.imageUpload)
       }
 
-      if (data.data.fileAttachment) {
-        setFileAttachmentName(data.data.fileAttachment)
+      if (data.fileAttachment) {
+        setFileAttachmentName(data.fileAttachment)
       }
-      const categoriesResponse = await tryCatch(getAllCategories())
-      if (categoriesResponse.error) {
-        toast.error('Error fetching categories')
-      }
-      setCategories(categoriesResponse.data?.data)
-      const departmentsResponse = await tryCatch(getAllDepartment())
-      if (departmentsResponse.error) {
-        toast.error('Error fetching departments')
-      }
-      setDepartments(departmentsResponse.data?.data)
     })
   }
 
