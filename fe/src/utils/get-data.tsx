@@ -8,6 +8,7 @@ export const getData = async (apiCall: () => Promise<any>, setState: React.Dispa
     toast.error(response.error?.message)
     return null
   }
+
   setState(response.data.data)
   return response.data.data
 }

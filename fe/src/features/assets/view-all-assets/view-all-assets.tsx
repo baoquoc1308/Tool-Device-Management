@@ -39,7 +39,12 @@ const ViewAllAssets = () => {
   }, [])
   const getAssetsFilterData = () => {
     startTransition(async () => {
-      await getData(() => getDataAssetsFilter(filterData), setFilteredAssets)
+      const { data, error } = await tryCatch(getDataAssetsFilter({ ...filterData }))
+      if (error) {
+        toast.error(error?.message || 'Failed to load assets')
+        return
+      }
+      setAssets(data.data.data)
     })
   }
 
