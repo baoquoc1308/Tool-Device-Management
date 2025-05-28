@@ -1,27 +1,26 @@
 import { useEffect, useState, useTransition } from 'react'
-import { useForm } from 'react-hook-form'
+import { FormProvider, useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useNavigate } from 'react-router-dom'
 import { toast } from 'sonner'
-import { Form, Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from '@/components/ui'
-import { Laptop } from 'lucide-react'
+import {
+  Form,
+  Card,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+  CardContent,
+  CardFooter,
+  FormInput,
+  FormSelect,
+  FormDatePicker,
+  FormButtonSubmit,
+} from '@/components/ui'
+import { DollarSign, Laptop } from 'lucide-react'
 import { getAllDepartment, getAllCategories, createNewAsset } from '../api'
-import { getAllUsers } from '@/features/user'
 import { type CreateAssetFormType, createAssetFormSchema } from './model/schema'
 import { tryCatch } from '@/utils'
-import {
-  AssetNameField,
-  CategoryIdField,
-  SerialNumberField,
-  DepartmentIdField,
-  PurchaseDateField,
-  WarrantExpiryField,
-  CostField,
-  FileField,
-  ImageField,
-  ButtonCancel,
-  ButtonUpload,
-} from './_components'
+import { FileField, ImageField, ButtonCancel } from './_components'
 
 const CreateNewAsset = () => {
   const navigate = useNavigate()
@@ -62,8 +61,8 @@ const CreateNewAsset = () => {
       serialNumber: '',
       categoryId: '',
       departmentId: '',
-      file: null,
-      image: null,
+      file: '',
+      image: '',
     },
     mode: 'onChange',
   })
@@ -78,63 +77,105 @@ const CreateNewAsset = () => {
       navigate('/assets')
     })
   }
+  const handlePurchaseDateChange = (field: any, value: any) => {
+    field.onChange(value)
+    const endDate = form.getValues('warrantExpiry')
 
+    if (endDate) {
+      form.trigger('warrantExpiry')
+    } else {
+      form.clearErrors('warrantExpiry')
+    }
+  }
   return (
     <div className='container mx-auto max-w-3xl py-6'>
       <Card>
-        <CardHeader>
-          <CardTitle className='flex items-center text-2xl'>
-            <Laptop className='mr-2 h-6 w-6' />
-            Create New Asset
-          </CardTitle>
-          <CardDescription>Add a new asset to the inventory system</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <Form {...form}>
-            <form
-              onSubmit={form.handleSubmit(onSubmit)}
-              className='space-y-6'
-              aria-disabled={isPendingGetData}
-            >
-              <div className='grid grid-cols-1 gap-6 md:grid-cols-2'>
-                <AssetNameField form={form} />
-                <SerialNumberField form={form} />
-                <CategoryIdField
-                  form={form}
-                  categories={categories}
-                />
-                <DepartmentIdField
-                  form={form}
-                  departments={departments}
-                />
-                <PurchaseDateField form={form} />
-                <WarrantExpiryField form={form} />
-                <CostField form={form} />
-              </div>
+        <FormProvider {...form}>
+          <CardHeader>
+            <CardTitle className='flex items-center text-2xl'>
+              <Laptop className='mr-2 h-6 w-6' />
+              Create New Asset
+            </CardTitle>
+            <CardDescription>Add a new asset to the inventory system</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <Form {...form}>
+              <form
+                onSubmit={form.handleSubmit(onSubmit)}
+                className='space-y-6'
+                aria-disabled={isPendingGetData}
+              >
+                <div className='grid grid-cols-1 gap-6 md:grid-cols-2'>
+                  <FormInput
+                    name='assetName'
+                    type='text'
+                    label='Asset Name'
+                    placeholder='Enter asset name'
+                  />
+                  <FormInput
+                    name='serialNumber'
+                    type='text'
+                    label='Serial Number'
+                    placeholder='Enter serial number'
+                  />
+                  <FormSelect
+                    name='categoryId'
+                    label='Category'
+                    placeholder='Select a category'
+                    data={categories}
+                  />
 
-              <div className='grid grid-cols-1 gap-6 md:grid-cols-2'>
-                <FileField
-                  form={form}
-                  fileName={fileName}
-                  setFileName={setFileName}
-                />
-                <ImageField
-                  form={form}
-                  imageName={imageName}
-                  setImageName={setImageName}
-                />
-              </div>
-            </form>
-          </Form>
-        </CardContent>
-        <CardFooter className='flex justify-between'>
-          <ButtonCancel isPending={isPending} />
-          <ButtonUpload
-            isPending={isPending}
-            form={form}
-            onSubmit={onSubmit}
-          />
-        </CardFooter>
+                  <FormSelect
+                    name='departmentId'
+                    label='Department'
+                    placeholder='Select a department'
+                    data={departments}
+                  />
+                  <FormDatePicker
+                    name='purchaseDate'
+                    label='Purchase Date'
+                    fn={handlePurchaseDateChange}
+                  />
+
+                  <FormDatePicker
+                    name='warrantExpiry'
+                    label='Warranty Expiry'
+                  />
+                  <FormInput
+                    name='cost'
+                    type='number'
+                    label='Cost'
+                    placeholder='Enter asset cost'
+                    Icon={DollarSign}
+                  />
+                </div>
+
+                <div className='grid grid-cols-1 gap-6 md:grid-cols-2'>
+                  <FileField
+                    form={form}
+                    fileName={fileName}
+                    setFileName={setFileName}
+                  />
+                  <ImageField
+                    form={form}
+                    imageName={imageName}
+                    setImageName={setImageName}
+                  />
+                </div>
+              </form>
+            </Form>
+          </CardContent>
+          <CardFooter className='flex justify-between'>
+            <ButtonCancel isPending={isPending} />
+            <FormButtonSubmit
+              className='w-fit sm:w-auto'
+              isPending={isPending}
+              Icon={Laptop}
+              type='Create Asset'
+              onSubmit={onSubmit}
+            />
+          </CardFooter>
+        </FormProvider>
       </Card>
     </div>
   )

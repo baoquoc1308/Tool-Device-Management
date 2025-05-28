@@ -2,7 +2,7 @@ import { z } from 'zod'
 
 export const createAssetFormSchema = z
   .object({
-    assetName: z.string().min(2, { message: 'Asset name must be at least 2 characters' }),
+    assetName: z.string({ required_error: 'Asset name is required' }),
     purchaseDate: z.date({ required_error: 'Purchase date is required' }),
     cost: z.coerce.number({
       required_error: 'Cost is required',
@@ -13,15 +13,31 @@ export const createAssetFormSchema = z
     departmentId: z.string({ required_error: 'Department is required' }),
     status: z.string({ required_error: 'Status is required' }).optional(),
     file: z
-      .instanceof(File, {
+      .union([
+        z
+          .instanceof(File, { message: 'Image is required' })
+          .refine((file) => !file || file.size !== 0 || file.size <= 5000000, `Max image size is ${5000000}MB`),
+        z.string(), // Allow the existing image URL for editing mode
+      ])
+
+      .refine((value) => value instanceof File || typeof value === 'string', {
         message: 'File is required',
-      })
-      .nullable(),
+      }),
     image: z
-      .instanceof(File, {
+      .union([
+        z
+          .instanceof(File, { message: 'Image is required' })
+          .refine((file) => !file || file.size !== 0 || file.size <= 5000000, `Max image size is ${5000000}MB`)
+          .refine(
+            (file) => !file || file.type === '' || ['image/jpeg', 'image/png', 'image/jpg'].includes(file.type),
+            'Only .jpg, .jpeg, and .png formats are supported'
+          ),
+        z.string(), // Allow the existing image URL for editing mode
+      ])
+
+      .refine((value) => value instanceof File || typeof value === 'string', {
         message: 'Image is required',
-      })
-      .nullable(),
+      }),
   })
   .superRefine(
     (

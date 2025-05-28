@@ -1,40 +1,28 @@
 import {
-  FormControl,
   FormField,
   FormItem,
+  FormControl,
   FormMessage,
-  FormLabel,
+  Label,
   Popover,
   PopoverTrigger,
   Button,
   PopoverContent,
   Calendar,
-} from '@/components'
+} from '@/components/ui'
 import { CalendarIcon } from 'lucide-react'
 import { format } from 'date-fns'
-import type { CreateAssetFormType } from '../model'
-import type { UseFormReturn } from 'react-hook-form'
+import { useFormContext } from 'react-hook-form'
 
-export const PurchaseDateField = ({ form }: { form: UseFormReturn<CreateAssetFormType> }) => {
-  const handlePurchaseDateChange = (field: any, value: any) => {
-    field.onChange(value)
-    const endDate = form.getValues('warrantExpiry')
-
-    if (endDate) {
-      form.trigger('warrantExpiry')
-    } else {
-      form.clearErrors('warrantExpiry')
-    }
-  }
+export const FormDatePicker = ({ name, label, fn }: { name: string; label: string; fn?: Function }) => {
+  const { control } = useFormContext()
   return (
     <FormField
-      control={form.control}
-      name='purchaseDate'
+      control={control}
+      name={name}
       render={({ field }) => (
         <FormItem className='flex flex-col'>
-          <FormLabel>
-            Purchase Date <span className='text-red-500'>*</span>
-          </FormLabel>
+          <Label>{label}</Label>
           <Popover>
             <PopoverTrigger asChild>
               <FormControl>
@@ -54,7 +42,13 @@ export const PurchaseDateField = ({ form }: { form: UseFormReturn<CreateAssetFor
               <Calendar
                 mode='single'
                 selected={field.value}
-                onSelect={(value) => handlePurchaseDateChange(field, value)}
+                onSelect={(value) => {
+                  if (fn) {
+                    fn(field, value)
+                  } else {
+                    field.onChange(value)
+                  }
+                }}
                 autoFocus
               />
             </PopoverContent>

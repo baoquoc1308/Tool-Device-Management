@@ -43,7 +43,7 @@ export const ViewCardsDataAssets = ({ assets }: { assets: AssetsType[] }) => {
               <img
                 src={asset.imageUpload}
                 alt={asset.assetName}
-                className='h-full w-full object-cover'
+                className='h-full w-full object-contain'
               />
             </div>
 

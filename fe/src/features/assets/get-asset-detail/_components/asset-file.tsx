@@ -9,7 +9,7 @@ export const AssetFile = ({ asset }: { asset: AssetsType }) => {
     <div className='flex flex-col items-center justify-between gap-5 rounded-md border p-3'>
       <div className='flex items-center'>
         <FileText className='text-primary mr-2 h-5 w-5' />
-        <span>{getFileName(asset.fileAttachment)}</span>
+        <span className='block max-w-[200px] truncate'>{getFileName(asset.fileAttachment)}</span>
       </div>
       <Link
         to={asset.fileAttachment}
