@@ -1,50 +1,52 @@
 import {
-  FormControl,
   FormField,
   FormItem,
+  FormControl,
   FormMessage,
-  FormLabel,
+  Label,
   Select,
   SelectTrigger,
   SelectValue,
   SelectContent,
   SelectItem,
 } from '@/components/ui'
-import type { CreateAssetFormType } from '../model'
-import type { UseFormReturn } from 'react-hook-form'
+import { useFormContext } from 'react-hook-form'
 
-export const DepartmentIdField = ({
-  form,
-  departments,
+export const FormSelect = ({
+  name,
+  label,
+  placeholder,
+  data,
 }: {
-  form: UseFormReturn<CreateAssetFormType>
-  departments: any[]
+  name: string
+  label: string
+  placeholder: string
+  data: any[]
 }) => {
+  const { control } = useFormContext()
   return (
     <FormField
-      control={form.control}
-      name='departmentId'
+      control={control}
+      name={name}
       render={({ field }) => (
         <FormItem>
-          <FormLabel>
-            Department <span className='text-red-500'>*</span>
-          </FormLabel>
+          <Label>{label}</Label>
           <Select
             onValueChange={field.onChange}
             defaultValue={field.value}
           >
             <FormControl>
               <SelectTrigger>
-                <SelectValue placeholder='Select a department' />
+                <SelectValue placeholder={placeholder} />
               </SelectTrigger>
             </FormControl>
             <SelectContent>
-              {departments.map((department) => (
+              {data.map((d) => (
                 <SelectItem
-                  key={department.id}
-                  value={department.id.toString()}
+                  key={d.id}
+                  value={d.id.toString()}
                 >
-                  {department.departmentName}
+                  {d.categoryName || d.departmentName || d.name}
                 </SelectItem>
               ))}
             </SelectContent>

@@ -2,7 +2,7 @@ import { Link } from 'react-router-dom'
 
 export const LinkToSignUp = () => {
   return (
-    <div className='text-muted-foreground mt-4 text-center text-xs sm:text-sm'>
+    <div className='text-muted-foreground text-center text-xs sm:text-sm'>
       Don't have an account?{' '}
       <Link
         to='/signup'

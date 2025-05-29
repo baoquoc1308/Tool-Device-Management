@@ -12,7 +12,7 @@ import {
   FilterAssets,
   ViewCardsDataAssets,
 } from './_components'
-import { tryCatch } from '@/utils'
+import { getData, tryCatch } from '@/utils'
 import { useDebounce } from '@/hooks'
 import { useSearchParams } from 'react-router-dom'
 
@@ -29,12 +29,7 @@ const ViewAllAssets = () => {
   })
   const getAssetsData = () => {
     startTransition(async () => {
-      const response = await tryCatch(getAllAssets())
-      if (response.error) {
-        toast.error(response.error?.message || 'Failed to load assets')
-        return
-      }
-      setAssets(response.data.data)
+      await getData(getAllAssets, setAssets)
     })
   }
   const filterData = useDebounce(filteredAssets, 1000)
@@ -77,6 +72,7 @@ const ViewAllAssets = () => {
     setSearchParam(searchParam)
     getAssetsFilterData()
   }, [filterData])
+
   return (
     <div className='space-y-6'>
       <ButtonViewType

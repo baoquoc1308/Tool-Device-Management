@@ -12,10 +12,10 @@ export const ImageField = ({
   imageName: string
   setImageName: React.Dispatch<React.SetStateAction<string>>
 }) => {
-  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>, field: any) => {
+  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
     if (file) {
-      field.onChange(file)
+      form.setValue('image', file)
       setImageName(file.name)
     }
   }
@@ -24,11 +24,9 @@ export const ImageField = ({
     <FormField
       control={form.control}
       name='image'
-      render={({ field: { value, onChange, ...field } }) => (
+      render={() => (
         <FormItem>
-          <FormLabel>
-            Asset Image <span className='text-red-500'>*</span>
-          </FormLabel>
+          <FormLabel>Asset Image</FormLabel>
           <FormControl>
             <div className='flex w-full flex-col items-center justify-center'>
               <label
@@ -47,8 +45,7 @@ export const ImageField = ({
                   type='file'
                   accept='image/*'
                   className='hidden'
-                  {...field}
-                  onChange={(e) => handleImageChange(e, { onChange })}
+                  onChange={handleImageChange}
                 />
               </label>
             </div>

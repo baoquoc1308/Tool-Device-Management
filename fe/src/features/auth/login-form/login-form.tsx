@@ -1,14 +1,15 @@
-import { useForm } from 'react-hook-form'
+import { FormProvider, useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { type DataLoginType, loginSchema } from './model/schema'
-import { Form } from '@/components/ui'
+import { Form, FormButtonSubmit, FormInput } from '@/components/ui'
 import { useNavigate } from 'react-router-dom'
 import { toast } from 'sonner'
 import { useAppDispatch } from '@/hooks'
 import { logIn } from '../slice'
 import { useTransition } from 'react'
 import Cookies from 'js-cookie'
-import { EmailField, ButtonSubmitForm, LinkToSignUp, PasswordField, RememberMeField } from './_components'
+import { LinkToSignUp, RememberMeField, LinkToForgetPassword } from './_components'
+import { Lock, Mail, Plus } from 'lucide-react'
 
 const LoginForm = () => {
   const [isPending, startTransition] = useTransition()
@@ -27,7 +28,7 @@ const LoginForm = () => {
     startTransition(async () => {
       const result = await dispatch(logIn(data)).unwrap()
       if (!result.success) {
-        toast.error((result.error as any)?.msg)
+        toast.error((result.error as any)?.message || 'Login failed, please try again')
         return
       }
       if (result.data.is_active === false) {
@@ -47,21 +48,42 @@ const LoginForm = () => {
         <p className='text-muted-foreground px-2 text-center text-sm'>Manage your devices and assets securely</p>
       </div>
 
-      <Form {...form}>
-        <form
-          onSubmit={form.handleSubmit(onSubmit)}
-          className='space-y-4 sm:space-y-5'
-        >
-          <EmailField form={form} />
-          <PasswordField form={form} />
-          <RememberMeField form={form} />
-          <ButtonSubmitForm
-            isPending={isPending}
-            form={form}
-          />
-          <LinkToSignUp />
-        </form>
-      </Form>
+      <FormProvider {...form}>
+        <Form {...form}>
+          <form
+            onSubmit={form.handleSubmit(onSubmit)}
+            className='space-y-4 sm:space-y-5'
+          >
+            <FormInput
+              name='email'
+              type='email'
+              label='Email Address'
+              Icon={Mail}
+              placeholder='Enter your email address'
+            />
+
+            <FormInput
+              name='password'
+              type='password'
+              label='Password'
+              Icon={Lock}
+              placeholder='••••••••'
+            />
+            <RememberMeField form={form} />
+            <FormButtonSubmit
+              className='bg-primary hover:bg-primary/90 mt-5 flex h-9 w-full items-center justify-center gap-1.5 text-sm font-medium sm:mt-6 sm:h-10 sm:gap-2 sm:text-base'
+              isPending={isPending}
+              Icon={Plus}
+              type='Create Account'
+              onSubmit={onSubmit}
+            />
+            <div className='flex flex-col items-center gap-2 sm:flex-row sm:justify-between'>
+              <LinkToSignUp />
+              <LinkToForgetPassword />
+            </div>
+          </form>
+        </Form>
+      </FormProvider>
     </div>
   )
 }

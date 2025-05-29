@@ -12,10 +12,11 @@ export const FileField = ({
   fileName: string
   setFileName: React.Dispatch<React.SetStateAction<string>>
 }) => {
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>, field: any) => {
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
     if (file) {
-      field.onChange(file)
+      form.setValue('file', file)
+
       setFileName(file.name)
     }
   }
@@ -23,11 +24,9 @@ export const FileField = ({
     <FormField
       control={form.control}
       name='file'
-      render={({ field: { value, onChange, ...field } }) => (
+      render={({}) => (
         <FormItem>
-          <FormLabel>
-            Attachment <span className='text-red-500'>*</span>
-          </FormLabel>
+          <FormLabel>Attachment</FormLabel>
           <FormControl>
             <div className='flex w-full flex-col items-center justify-center'>
               <label
@@ -45,8 +44,7 @@ export const FileField = ({
                   id='file-upload'
                   type='file'
                   className='hidden'
-                  {...field}
-                  onChange={(e) => handleFileChange(e, { onChange })}
+                  onChange={handleFileChange}
                 />
               </label>
             </div>

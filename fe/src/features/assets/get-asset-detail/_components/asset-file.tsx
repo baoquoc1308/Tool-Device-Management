@@ -2,21 +2,24 @@ import { Button } from '@/components'
 import { FileText } from 'lucide-react'
 import { Link } from 'react-router-dom'
 import type { AssetsType } from '../../view-all-assets/model'
+import { getFileName } from '@/utils'
 
 export const AssetFile = ({ asset }: { asset: AssetsType }) => {
   return asset.fileAttachment ? (
-    <div className='flex items-center justify-between rounded-md border p-3'>
+    <div className='flex flex-col items-center justify-between gap-5 rounded-md border p-3'>
       <div className='flex items-center'>
         <FileText className='text-primary mr-2 h-5 w-5' />
-        <span>Asset Document</span>
+        <span className='block max-w-[200px] truncate'>{getFileName(asset.fileAttachment)}</span>
       </div>
       <Link
         to={asset.fileAttachment}
         download={true}
+        className='w-full'
       >
         <Button
           variant='outline'
           size='sm'
+          className='w-full'
         >
           View
         </Button>
