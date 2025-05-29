@@ -3,6 +3,7 @@ import type { FilterType } from '../../../model'
 import { useEffect, useState, useTransition } from 'react'
 import { tryCatch } from '@/utils'
 import { getAllDepartment } from '@/features/assets/api'
+import type { DepartmentType } from '@/features/assets/create-new-asset'
 
 export const DepartmentsFilter = ({
   filteredAssets,
@@ -12,7 +13,7 @@ export const DepartmentsFilter = ({
   setFilteredAssets: React.Dispatch<React.SetStateAction<FilterType>>
 }) => {
   const [isPending, startTransition] = useTransition()
-  const [departments, setDepartments] = useState<any[]>([])
+  const [departments, setDepartments] = useState<DepartmentType[]>([])
   const getDepartments = () => {
     startTransition(async () => {
       const response = await tryCatch(getAllDepartment())
@@ -42,7 +43,7 @@ export const DepartmentsFilter = ({
           {departments.map((department) => (
             <SelectItem
               key={department.id}
-              value={department.id}
+              value={department.id.toString()}
             >
               {department.departmentName}
             </SelectItem>

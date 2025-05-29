@@ -44,7 +44,7 @@ export const FormDatePicker = ({ name, label, fn }: { name: string; label: strin
                 selected={field.value}
                 onSelect={(value) => {
                   if (fn) {
-                    fn(field, value)
+                    fn(value)
                   } else {
                     field.onChange(value)
                   }

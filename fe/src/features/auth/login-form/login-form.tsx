@@ -28,7 +28,7 @@ const LoginForm = () => {
     startTransition(async () => {
       const result = await dispatch(logIn(data)).unwrap()
       if (!result.success) {
-        toast.error((result.error as any)?.message || 'Login failed, please try again')
+        toast.error(result.error?.message || 'Login failed, please try again')
         return
       }
       if (result.data.is_active === false) {

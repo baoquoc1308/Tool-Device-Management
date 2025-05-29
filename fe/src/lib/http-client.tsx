@@ -1,13 +1,13 @@
 import { httpRequest, tryCatch } from '@/utils'
-import axios, { type InternalAxiosRequestConfig } from 'axios'
+import axios, { type AxiosResponse, type InternalAxiosRequestConfig } from 'axios'
 import Cookies from 'js-cookie'
 
 let isRefreshing = false
 
 type RequestFailed = {
   config: InternalAxiosRequestConfig
-  resolve: (value: any) => void
-  reject: (reason?: any) => void
+  resolve: (value: AxiosResponse) => void
+  reject: (reason?: Error) => void
 }
 
 let requestFailed: RequestFailed[] = []
@@ -25,7 +25,7 @@ httpClient.interceptors.request.use(
     if (token) {
       config.headers.Authorization = `Bearer ${token}`
     }
-
+    Promise.resolve
     return config
   },
   (error) => {
@@ -47,10 +47,11 @@ httpClient.interceptors.response.use(
         isRefreshing = true
         const { data, error } = await tryCatch(httpRequest.post('/auth/refresh', { refreshToken: refreshToken }))
         if (error) {
+          const errorMessage = (axios.isAxiosError(error) && error.response?.data?.message) || 'Failed to refresh token'
           if (
-            (error as any).response?.data.message === 'Refresh token was expired' ||
-            (error as any).response?.data.message === 'Refresh token was invoked' ||
-            (error as any).response?.data.message === 'Refresh token was revoked'
+            errorMessage === 'Refresh token was expired' ||
+            errorMessage === 'Refresh token was invoked' ||
+            errorMessage === 'Refresh token was revoked'
           ) {
             Object.keys(Cookies.get()).forEach(function (cookieName) {
               Cookies.remove(cookieName)
@@ -66,7 +67,7 @@ httpClient.interceptors.response.use(
             const data = await httpClient(config)
             resolve(data)
           } catch (error) {
-            reject(error)
+            reject(error as Error)
           }
         }
         requestFailed = []

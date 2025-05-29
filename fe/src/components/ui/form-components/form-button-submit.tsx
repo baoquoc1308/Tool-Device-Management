@@ -1,7 +1,9 @@
 import { Button, LoadingSpinner } from '@/components/ui'
 import { useFormContext } from 'react-hook-form'
 
-export const FormButtonSubmit = ({
+import type { FieldValues } from 'react-hook-form'
+
+export const FormButtonSubmit = <FormType extends FieldValues>({
   isPending,
   type,
   Icon,
@@ -12,9 +14,9 @@ export const FormButtonSubmit = ({
   Icon?: React.ElementType
   type: string
   className?: string
-  onSubmit: (value: any) => void
+  onSubmit: (value: FormType) => void
 }) => {
-  const { formState, handleSubmit } = useFormContext()
+  const { formState, handleSubmit } = useFormContext<FormType>()
   return (
     <Button
       disabled={!formState.isDirty || !formState.isValid || isPending}

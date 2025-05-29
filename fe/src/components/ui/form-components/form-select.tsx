@@ -12,6 +12,14 @@ import {
 } from '@/components/ui'
 import { useFormContext } from 'react-hook-form'
 
+type DataType = {
+  id: number | string
+  categoryName?: string
+  departmentName?: string
+  name?: string
+  value?: string
+}
+
 export const FormSelect = ({
   name,
   label,
@@ -21,7 +29,7 @@ export const FormSelect = ({
   name: string
   label: string
   placeholder: string
-  data: any[]
+  data: DataType[]
 }) => {
   const { control } = useFormContext()
   return (

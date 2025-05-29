@@ -37,7 +37,7 @@ const ForgetPasswordForm = () => {
     startTransition(async () => {
       const response = await tryCatch(sendResetPasswordEmail(data.email))
       if (response.error) {
-        toast.error((response.error as any)?.message || 'Failed to send reset password email')
+        toast.error(response.error?.message || 'Failed to send reset password email')
         return
       }
       toast.success('Check your email for reset password link')
