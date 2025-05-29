@@ -65,7 +65,7 @@ const UpdateAssetInformation = () => {
   const getAssetData = () => {
     startGetDataTransition(async () => {
       if (!id) return
-      const d = await getData(getAllCategories, setCategories)
+      await getData(getAllCategories, setCategories)
       await getData(getAllDepartment, setDepartments)
       const data = await getData(() => getAssetInformation(id), setAsset)
       if (data?.imageUpload) {
