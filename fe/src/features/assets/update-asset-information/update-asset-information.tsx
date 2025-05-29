@@ -65,7 +65,7 @@ const UpdateAssetInformation = () => {
   const getAssetData = () => {
     startGetDataTransition(async () => {
       if (!id) return
-      await getData(getAllCategories, setCategories)
+      const d = await getData(getAllCategories, setCategories)
       await getData(getAllDepartment, setDepartments)
       const data = await getData(() => getAssetInformation(id), setAsset)
       if (data?.imageUpload) {
@@ -116,6 +116,7 @@ const UpdateAssetInformation = () => {
       navigate(`/assets/${id}`)
     })
   }
+
   const handlePurchaseDateChange = (value: Date) => {
     form.setValue('purchaseDate', value)
     const endDate = form.getValues('warrantExpiry')

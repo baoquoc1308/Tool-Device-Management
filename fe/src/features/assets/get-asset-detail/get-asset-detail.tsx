@@ -1,8 +1,8 @@
-import { useParams, Link } from 'react-router-dom'
+import { useParams, Link, useNavigate } from 'react-router-dom'
 import type { AssetsType } from '../view-all-assets/model'
-import { getData } from '@/utils'
+import { getData, tryCatch } from '@/utils'
 import { useEffect, useTransition } from 'react'
-import { getAssetInformation } from '../api'
+import { deleteAsset, getAssetInformation } from '../api'
 import { useState } from 'react'
 import {
   Card,
@@ -15,21 +15,38 @@ import {
   TabsContent,
   TabsList,
   TabsTrigger,
+  LoadingSpinner,
 } from '@/components/ui'
 
-import { ArrowLeft, Pencil, Loader2 } from 'lucide-react'
+import { ArrowLeft, Pencil, Loader2, Trash2 } from 'lucide-react'
 
 import { AssetBadge, AssetFile, AssetImage, AssetInformation, AssetQR, NoAsset } from './_components'
+import { ViewAssetLog } from '../view-asset-log'
+import { toast } from 'sonner'
 
 const GetAssetDetail = () => {
   const { id } = useParams()
   const [isPending, startTransition] = useTransition()
+  const [isDeleting, startDeletingTransition] = useTransition()
   const [asset, setAsset] = useState<AssetsType>()
+  const navigate = useNavigate()
 
   const getAssetData = () => {
     startTransition(async () => {
       if (!id) return
       await getData(() => getAssetInformation(id), setAsset)
+    })
+  }
+  const deletingAsset = () => {
+    if (!id) return
+    startDeletingTransition(async () => {
+      const response = await tryCatch(deleteAsset(id))
+      if (response.error) {
+        toast.error(response.error.message || 'Failed to delete asset')
+        return
+      }
+      toast.success('Asset deleted successfully')
+      navigate('/assets')
     })
   }
 
@@ -64,12 +81,31 @@ const GetAssetDetail = () => {
           <h1 className='text-3xl font-semibold'>{asset.assetName}</h1>
           <AssetBadge asset={asset} />
         </div>
-        <Link to={`/assets/update/${id}`}>
-          <Button variant='outline'>
-            <Pencil className='mr-2 h-4 w-4' />
-            Update Asset
-          </Button>
-        </Link>
+        {asset.status !== 'Disposed' && (
+          <div className='flex items-center space-x-2'>
+            <Link to={`/assets/update/${id}`}>
+              <Button variant='outline'>
+                <Pencil className='mr-2 h-4 w-4' />
+                Update Asset
+              </Button>
+            </Link>
+
+            <Button
+              variant='destructive'
+              onClick={deletingAsset}
+              disabled={isDeleting}
+            >
+              {isDeleting ? (
+                <LoadingSpinner className='mr-2 h-4 w-4 animate-spin' />
+              ) : (
+                <>
+                  <Trash2 className='mr-2 h-4 w-4' />
+                  Delete Asset
+                </>
+              )}
+            </Button>
+          </div>
+        )}
       </div>
 
       {/* Using grid layout with equal height rows */}
@@ -78,7 +114,7 @@ const GetAssetDetail = () => {
         style={{ gridAutoRows: '1fr' }}
       >
         {/* First column - Asset Information */}
-        <div className='flex lg:col-span-2'>
+        <div className='flex flex-col gap-6 lg:col-span-2'>
           <Card className='w-full'>
             <CardHeader>
               <CardTitle>Asset Information</CardTitle>
@@ -88,6 +124,9 @@ const GetAssetDetail = () => {
               <AssetInformation asset={asset} />
             </CardContent>
           </Card>
+
+          {/* Asset History Log */}
+          <ViewAssetLog id={id || ''} />
         </div>
 
         {/* Second column - Tabs Container */}
