@@ -33,12 +33,12 @@ const ViewAssetLog = ({ id }: { id: string }) => {
             <p>No history available for this asset</p>
           </div>
         ) : (
-          <ScrollArea className='h-[180px] rounded-2xl border px-4 py-2'>
+          <ScrollArea className='h-[180px] rounded-xl border px-4 pt-3'>
             <div className='space-y-4'>
               {assetLog?.data?.map((item, index) => (
                 <div
                   key={index}
-                  className='flex gap-4 border-b pb-4 last:border-b-0 last:pb-0'
+                  className='mt-1 mb-2 flex gap-4 border-b pb-4 last:border-b-0 last:pb-0'
                 >
                   <LogIcon item={item} />
                   <LogInformation item={item} />
