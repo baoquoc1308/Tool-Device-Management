@@ -28,14 +28,9 @@ const SignupForm = () => {
   const onSubmit = (data: DataSignupType) => {
     startTransition(async () => {
       const response = await tryCatch(signUpNewUser(data))
-      const errorData = (response.error as AxiosError)?.response?.data
-      const errorMsg =
-        errorData && typeof errorData === 'object' && 'msg' in errorData
-          ? (errorData as { msg: string }).msg
-          : undefined
 
-      if (errorData) {
-        toast.error(errorMsg)
+      if (response.error) {
+        toast.error(response.error.message || 'Failed to create account, please try again')
         return
       }
       toast.success('Account created successfully')

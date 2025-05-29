@@ -16,7 +16,6 @@ import { toast } from 'sonner'
 import { type ResetPasswordFormType, resetPasswordFormSchema } from './model'
 import { resetPassword } from '../api'
 import { tryCatch } from '@/utils'
-import type { AxiosError } from 'axios'
 import { ErrorComponent, SuccessComponent } from './_components'
 import { Lock } from 'lucide-react'
 
@@ -37,19 +36,14 @@ const ResetPasswordForm = () => {
   const onSubmit = (data: ResetPasswordFormType) => {
     startTransition(async () => {
       const response = await tryCatch(resetPassword(data.password, token))
-      const errorData = (response.error as AxiosError)?.response?.data
-      const errorMsg =
-        errorData && typeof errorData === 'object' && 'msg' in errorData
-          ? (errorData as { msg: string }).msg
-          : undefined
-
-      if (response.error && errorMsg === 'Token was expired') {
-        toast.error(errorMsg)
+      if (response.error && response.error.message === 'Token was expired') {
+        toast.error(response.error.message)
         setError(true)
         return
       }
       if (response.error) {
-        toast.error(errorMsg)
+        toast.error(response.error.message || 'Failed to reset password, please try again')
+        setError(true)
         return
       }
       setIsSuccess(true)

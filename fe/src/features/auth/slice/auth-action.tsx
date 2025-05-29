@@ -20,7 +20,7 @@ export const logIn = createAsyncThunk('user/logIn', async (value: DataLogInType,
     if (error) {
       return {
         success: false,
-        error: (error as AxiosError).response?.data,
+        error: error as AxiosError,
       }
     }
     return {

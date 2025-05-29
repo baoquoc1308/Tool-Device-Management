@@ -10,15 +10,7 @@ type RequestFailed = {
   reject: (reason?: any) => void
 }
 
-type Requesting = {
-  checked: boolean
-  config: InternalAxiosRequestConfig
-  resolve: (value: any) => void
-  reject: (reason?: any) => void
-}
-
 let requestFailed: RequestFailed[] = []
-let requestings: Requesting[] = []
 
 export const httpClient = axios.create({
   baseURL: import.meta.env.VITE_API_URL,
@@ -56,9 +48,9 @@ httpClient.interceptors.response.use(
         const { data, error } = await tryCatch(httpRequest.post('/auth/refresh', { refreshToken: refreshToken }))
         if (error) {
           if (
-            (error as any).response?.data.msg === 'Refresh token was expired' ||
-            (error as any).response?.data.msg === 'Refresh token was invoked' ||
-            (error as any).response?.data.msg === 'Refresh token was revoked'
+            (error as any).response?.data.message === 'Refresh token was expired' ||
+            (error as any).response?.data.message === 'Refresh token was invoked' ||
+            (error as any).response?.data.message === 'Refresh token was revoked'
           ) {
             Object.keys(Cookies.get()).forEach(function (cookieName) {
               Cookies.remove(cookieName)
@@ -85,6 +77,7 @@ httpClient.interceptors.response.use(
         requestFailed.push({ config, resolve, reject })
       })
     }
-    return Promise.reject(error.response?.data)
+
+    return Promise.reject(error.response.data)
   }
 )
