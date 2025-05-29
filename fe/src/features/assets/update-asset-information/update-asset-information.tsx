@@ -116,6 +116,7 @@ const UpdateAssetInformation = () => {
       navigate(`/assets/${id}`)
     })
   }
+
   const handlePurchaseDateChange = (value: Date) => {
     form.setValue('purchaseDate', value)
     const endDate = form.getValues('warrantExpiry')

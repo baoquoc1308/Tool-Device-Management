@@ -8,7 +8,6 @@ import { signUpNewUser } from '../api'
 import { toast } from 'sonner'
 import { useTransition } from 'react'
 import { tryCatch } from '@/utils'
-import type { AxiosError } from 'axios'
 import { Lock, Mail, Plus, User } from 'lucide-react'
 
 const SignupForm = () => {

@@ -60,7 +60,6 @@ const CreateNewAsset = () => {
   const onSubmit = (data: CreateAssetFormType) => {
     startTransition(async () => {
       const response = await tryCatch(createNewAsset(data))
-
       if (response.error) {
         toast.error(response.error?.message || 'Failed to create asset')
         return

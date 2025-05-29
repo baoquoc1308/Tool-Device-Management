@@ -27,6 +27,7 @@ const LoginForm = () => {
   const onSubmit = async (data: DataLoginType) => {
     startTransition(async () => {
       const result = await dispatch(logIn(data)).unwrap()
+
       if (!result.success) {
         toast.error(result.error?.message || 'Login failed, please try again')
         return
