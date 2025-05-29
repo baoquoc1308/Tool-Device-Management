@@ -46,8 +46,10 @@ httpClient.interceptors.response.use(
       if (!isRefreshing) {
         isRefreshing = true
         const { data, error } = await tryCatch(httpRequest.post('/auth/refresh', { refreshToken: refreshToken }))
+
         if (error) {
-          const errorMessage = (axios.isAxiosError(error) && error.response?.data?.message) || 'Failed to refresh token'
+          const errorMessage = error.message || 'Failed to refresh token'
+
           if (
             errorMessage === 'Refresh token was expired' ||
             errorMessage === 'Refresh token was invoked' ||
