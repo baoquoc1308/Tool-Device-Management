@@ -3,6 +3,7 @@ import type { FilterType } from '../../../model'
 import { useEffect, useState, useTransition } from 'react'
 import { tryCatch } from '@/utils'
 import { getAllCategories } from '@/features/assets/api'
+import type { CategoryType } from '@/features/assets/create-new-asset'
 export const CategoriesFilter = ({
   filteredAssets,
   setFilteredAssets,
@@ -11,7 +12,7 @@ export const CategoriesFilter = ({
   setFilteredAssets: React.Dispatch<React.SetStateAction<FilterType>>
 }) => {
   const [isPending, startTransition] = useTransition()
-  const [categories, setCategories] = useState<any[]>([])
+  const [categories, setCategories] = useState<CategoryType[]>([])
   const getCategories = () => {
     startTransition(async () => {
       const response = await tryCatch(getAllCategories())
@@ -41,7 +42,7 @@ export const CategoriesFilter = ({
           {categories.map((category) => (
             <SelectItem
               key={category.id}
-              value={category.id}
+              value={category.id.toString()}
             >
               {category.categoryName}
             </SelectItem>

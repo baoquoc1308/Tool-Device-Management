@@ -72,7 +72,6 @@ const ViewAllAssets = () => {
     setSearchParam(searchParam)
     getAssetsFilterData()
   }, [filterData])
-
   return (
     <div className='space-y-6'>
       <ButtonViewType

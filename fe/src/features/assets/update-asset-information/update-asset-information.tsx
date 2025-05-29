@@ -25,7 +25,12 @@ import { toast } from 'sonner'
 import { getData, tryCatch, urlToFile } from '@/utils'
 import { getAssetInformation, getAllCategories, getAllDepartment, updateAssetInformation } from '../api'
 import type { AssetsType } from '../view-all-assets/model/type'
-import { type CreateAssetFormType, createAssetFormSchema } from '../create-new-asset'
+import {
+  type CategoryType,
+  type CreateAssetFormType,
+  type DepartmentType,
+  createAssetFormSchema,
+} from '../create-new-asset'
 import { STATUS } from './data/status'
 import { FieldFile, FieldImage, IsError, IsGettingData } from './_components'
 
@@ -35,8 +40,8 @@ const UpdateAssetInformation = () => {
   const [isPending, startTransition] = useTransition()
   const [isGetDataPending, startGetDataTransition] = useTransition()
   const [asset, setAsset] = useState<AssetsType>()
-  const [categories, setCategories] = useState<any[]>([])
-  const [departments, setDepartments] = useState<any[]>([])
+  const [categories, setCategories] = useState<CategoryType[]>([])
+  const [departments, setDepartments] = useState<DepartmentType[]>([])
   const [imagePreview, setImagePreview] = useState<string | null>(null)
   const [fileAttachmentName, setFileAttachmentName] = useState<string | null>(null)
 
@@ -63,11 +68,11 @@ const UpdateAssetInformation = () => {
       await getData(getAllCategories, setCategories)
       await getData(getAllDepartment, setDepartments)
       const data = await getData(() => getAssetInformation(id), setAsset)
-      if (data.imageUpload) {
+      if (data?.imageUpload) {
         setImagePreview(data.imageUpload)
       }
 
-      if (data.fileAttachment) {
+      if (data?.fileAttachment) {
         setFileAttachmentName(data.fileAttachment)
       }
     })
@@ -111,8 +116,8 @@ const UpdateAssetInformation = () => {
       navigate(`/assets/${id}`)
     })
   }
-  const handlePurchaseDateChange = (field: any, value: any) => {
-    field.onChange(value)
+  const handlePurchaseDateChange = (value: Date) => {
+    form.setValue('purchaseDate', value)
     const endDate = form.getValues('warrantExpiry')
 
     if (endDate) {

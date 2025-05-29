@@ -21,13 +21,14 @@ import { getAllDepartment, getAllCategories, createNewAsset } from '../api'
 import { type CreateAssetFormType, createAssetFormSchema } from './model/schema'
 import { getData, tryCatch } from '@/utils'
 import { FileField, ImageField, ButtonCancel } from './_components'
+import type { CategoryType, DepartmentType } from './model'
 
 const CreateNewAsset = () => {
   const navigate = useNavigate()
   const [isPending, startTransition] = useTransition()
   const [fileName, setFileName] = useState<string>('')
-  const [departments, setDepartments] = useState<any[]>([])
-  const [categories, setCategories] = useState<any[]>([])
+  const [departments, setDepartments] = useState<DepartmentType[]>([])
+  const [categories, setCategories] = useState<CategoryType[]>([])
   const [isPendingGetData, startTransitionGetData] = useTransition()
   const [imageName, setImageName] = useState<string>('')
 
@@ -59,6 +60,7 @@ const CreateNewAsset = () => {
   const onSubmit = (data: CreateAssetFormType) => {
     startTransition(async () => {
       const response = await tryCatch(createNewAsset(data))
+
       if (response.error) {
         toast.error(response.error?.message || 'Failed to create asset')
         return
@@ -67,8 +69,8 @@ const CreateNewAsset = () => {
       navigate('/assets')
     })
   }
-  const handlePurchaseDateChange = (field: any, value: any) => {
-    field.onChange(value)
+  const handlePurchaseDateChange = (value: Date) => {
+    form.setValue('purchaseDate', value)
     const endDate = form.getValues('warrantExpiry')
 
     if (endDate) {
