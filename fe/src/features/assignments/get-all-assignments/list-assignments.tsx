@@ -49,7 +49,7 @@ const ListAssignments = () => {
     if (filters.emailAssigned) {
       searchParam.set('emailAssigned', filters.emailAssigned)
     } else {
-      searchParam.delete('departmentId')
+      searchParam.delete('emailAssigned')
     }
     setSearchParam(searchParam)
     getAssetsFilterData()
