@@ -9,10 +9,11 @@ import {
   CreateAssetPage,
   AssetDetailPage,
   AssignmentsPage,
+  UpdateAssetPage,
+  AssignmentDetailPage,
 } from '@/pages'
 import { ProtectedRoute, AuthRoute } from './auth-guard'
 import Layout from '@/layout/layout'
-import UpdateAssetPage from '@/pages/update-asset-page'
 
 export const router = createBrowserRouter([
   {
@@ -54,6 +55,10 @@ export const router = createBrowserRouter([
               {
                 path: '',
                 element: <AssignmentsPage />,
+              },
+              {
+                path: ':id',
+                element: <AssignmentDetailPage />,
               },
             ],
           },

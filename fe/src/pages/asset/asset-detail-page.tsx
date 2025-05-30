@@ -1,4 +1,4 @@
-import { AssetDetail } from '../components'
+import { AssetDetail } from '@/components'
 const AssetDetailPage = () => {
   return <AssetDetail />
 }
