@@ -1,9 +1,14 @@
 import type { ColumnDef } from '@tanstack/react-table'
 import type { AssignmentData } from '../model/type'
-import { Badge } from '@/components/ui'
+import { Badge, Button } from '@/components/ui'
 import { CircleIcon, UserIcon, WrenchIcon, ArchiveIcon, TrashIcon } from 'lucide-react'
+import { Link } from 'react-router-dom'
 
 export const columnsAssignmentsTable: ColumnDef<AssignmentData>[] = [
+  {
+    accessorKey: 'id',
+    header: 'ID',
+  },
   {
     accessorKey: 'asset.assetName',
     header: 'Asset Name',
@@ -81,6 +86,25 @@ export const columnsAssignmentsTable: ColumnDef<AssignmentData>[] = [
           {config.icon}
           {status}
         </Badge>
+      )
+    },
+  },
+
+  {
+    id: 'actions',
+    header: 'Actions',
+    cell: ({ row }) => {
+      const assetId = row.getValue('id') as number
+
+      return (
+        <Button
+          variant='outline'
+          className='w-fit'
+        >
+          <Link to={`/assignments/${assetId}`}>
+            <span className='text-sm font-medium'>View</span>
+          </Link>
+        </Button>
       )
     },
   },

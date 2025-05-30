@@ -1,0 +1,7 @@
+export * from './assignment-asset-name'
+export * from './assignment-asset-status'
+export * from './assignment-asset-image'
+export * from './assignment-asset-file'
+export * from './assignment-user-assign'
+export * from './assignment-department'
+export * from './assignment-error'
