@@ -1,4 +1,4 @@
-import { LayoutDashboard, Computer } from 'lucide-react'
+import { LayoutDashboard, NotebookPen, Computer } from 'lucide-react'
 export const data = {
   navMain: [
     {
@@ -21,6 +21,19 @@ export const data = {
         {
           title: 'Create assets',
           url: '/assets/create-asset',
+        },
+      ],
+    },
+    {
+      title: 'Assignments',
+      url: '/assignments',
+      icon: NotebookPen,
+      active: true,
+      haveChildren: true,
+      items: [
+        {
+          title: 'All assignments',
+          url: '/assignments',
         },
       ],
     },

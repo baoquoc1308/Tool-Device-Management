@@ -10,6 +10,7 @@ export const getData = async <T,>(
   setState: React.Dispatch<React.SetStateAction<T>>
 ) => {
   const { data, error } = await tryCatch(apiCall())
+
   if (error) {
     toast.error(error?.message)
     return null

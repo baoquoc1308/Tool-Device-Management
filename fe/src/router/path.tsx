@@ -8,6 +8,7 @@ import {
   AssetsPage,
   CreateAssetPage,
   AssetDetailPage,
+  AssignmentsPage,
 } from '@/pages'
 import { ProtectedRoute, AuthRoute } from './auth-guard'
 import Layout from '@/layout/layout'
@@ -44,6 +45,15 @@ export const router = createBrowserRouter([
               {
                 path: 'update/:id',
                 element: <UpdateAssetPage />,
+              },
+            ],
+          },
+          {
+            path: 'assignments',
+            children: [
+              {
+                path: '',
+                element: <AssignmentsPage />,
               },
             ],
           },
