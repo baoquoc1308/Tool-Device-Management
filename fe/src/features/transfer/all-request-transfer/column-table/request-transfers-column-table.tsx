@@ -1,7 +1,7 @@
 import type { ColumnDef } from '@tanstack/react-table'
 import type { RequestTransferStatusType, RequestTransferType } from '../model'
 import { Badge, Button } from '@/components/ui'
-import { Check, X, ChartBarStacked } from 'lucide-react'
+import { Check, X } from 'lucide-react'
 import { Link } from 'react-router-dom'
 
 export const columns: ColumnDef<RequestTransferType>[] = [
