@@ -101,7 +101,6 @@ export const columns: ColumnDef<RequestTransferType>[] = [
             size='sm'
             className='border-green-500 text-green-500 hover:bg-green-100 hover:text-green-600'
             disabled={disabled}
-            onClick={() => console.log(`Approve request ${id}`)}
           >
             <Check className='mr-1 h-4 w-4' />
             Approve
@@ -111,7 +110,6 @@ export const columns: ColumnDef<RequestTransferType>[] = [
             size='sm'
             className='border-red-500 text-red-500 hover:bg-red-100 hover:text-red-600'
             disabled={disabled}
-            onClick={() => console.log(`Reject request ${id}`)}
           >
             <X className='mr-1 h-4 w-4' />
             Reject

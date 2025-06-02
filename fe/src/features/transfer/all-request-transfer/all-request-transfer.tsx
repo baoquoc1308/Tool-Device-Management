@@ -31,7 +31,7 @@ const AllRequestTransfer = () => {
     await getData(() => getAllRequestTransferWithFilter(filteredStatus), setTransfers)
     setIsLoading(false)
   }
-  console.log(transfers)
+
   useEffect(() => {
     getTransfersDataWithFilter()
   }, [])
