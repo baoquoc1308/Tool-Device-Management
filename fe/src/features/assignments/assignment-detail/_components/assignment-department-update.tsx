@@ -1,7 +1,6 @@
 import { FormSelect } from '@/components'
 import type { DepartmentType } from '@/features/assets'
 import type { AssignmentData } from '../../get-all-assignments/model'
-import type React from 'react'
 
 export const AssignmentDepartmentUpdate = ({
   departments,

@@ -5,7 +5,6 @@ import { ArrowLeft, MapPin, User, Package, Loader2 } from 'lucide-react'
 import type { AssignmentData } from '../get-all-assignments/model/type'
 import { getData, tryCatch } from '@/utils'
 import { getAssignmentData, UpdateAssignment } from '../api'
-
 import {
   AssignmentAssetFile,
   AssignmentAssetImage,
@@ -197,7 +196,7 @@ const ViewAssignmentDetail = () => {
               </Button>
               <Button
                 onClick={form.handleSubmit(onSubmit)}
-                disabled={isSubmitting}
+                disabled={isSubmitting || !form.formState.isDirty}
               >
                 {isSubmitting ? (
                   <>

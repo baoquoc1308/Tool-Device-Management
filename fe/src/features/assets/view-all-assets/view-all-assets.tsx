@@ -3,7 +3,7 @@ import { getAllAssets, getDataAssetsFilter } from '../api'
 import { toast } from 'sonner'
 import type { AssetsType, FilterType } from './model'
 import { columnsAssetsTable } from './column-table'
-import { DataTable, Card, CardHeader, CardTitle, CardDescription, CardContent, Skeleton } from '@/components/ui'
+import { DataTable, Card, CardHeader, CardTitle, CardDescription, CardContent, SkeletonForTable } from '@/components/ui'
 import { Laptop } from 'lucide-react'
 import {
   ButtonCreateNewAssets,
@@ -100,13 +100,7 @@ const ViewAllAssets = () => {
             setFilteredAssets={setFilteredAssets}
           />
           {isPending ? (
-            <div className='space-y-4'>
-              <Skeleton className='h-12 w-full' />
-              <Skeleton className='h-12 w-full' />
-              <Skeleton className='h-12 w-full' />
-              <Skeleton className='h-12 w-full' />
-              <Skeleton className='h-12 w-full' />
-            </div>
+            <SkeletonForTable />
           ) : (
             <>
               {viewMode === 'table' ? (

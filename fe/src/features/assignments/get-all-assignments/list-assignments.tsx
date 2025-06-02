@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { Card, CardHeader, CardTitle, CardContent, CardDescription, Skeleton, DataTable } from '@/components/ui'
+import { Card, CardHeader, CardTitle, CardContent, CardDescription, DataTable, SkeletonForTable } from '@/components/ui'
 import { ClipboardList } from 'lucide-react'
 import type { AssignmentsResponse } from './model'
 import { getData } from '@/utils'
@@ -90,13 +90,7 @@ const ListAssignments = () => {
           </div>
 
           {isLoading ? (
-            <div className='space-y-4'>
-              <Skeleton className='h-12 w-full' />
-              <Skeleton className='h-12 w-full' />
-              <Skeleton className='h-12 w-full' />
-              <Skeleton className='h-12 w-full' />
-              <Skeleton className='h-12 w-full' />
-            </div>
+            <SkeletonForTable />
           ) : (
             <DataTable
               columns={columnsAssignmentsTable}
