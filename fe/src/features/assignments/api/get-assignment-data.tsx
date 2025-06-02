@@ -1,5 +1,5 @@
-import { httpClient } from '@/lib'
+import { httpRequest } from '@/utils'
 
 export const getAssignmentData = async (id: string) => {
-  return await httpClient.get(`/assignments/${id}`)
+  return await httpRequest.get(`/assignments/${id}`)
 }

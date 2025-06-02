@@ -1,7 +1,13 @@
 import { httpClient } from '../lib'
 
 class HttpRequest {
-  async get(endpoint: string) {
+  async get(endpoint: string, params?: Record<string, unknown>, headers?: Record<string, string>) {
+    if (params) {
+      return await httpClient.get(endpoint, params)
+    }
+    if (headers) {
+      return await httpClient.get(endpoint, { headers })
+    }
     return await httpClient.get(endpoint)
   }
 

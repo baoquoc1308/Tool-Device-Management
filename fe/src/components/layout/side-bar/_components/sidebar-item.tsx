@@ -1,4 +1,4 @@
-import { LayoutDashboard, NotebookPen, Computer } from 'lucide-react'
+import { LayoutDashboard, NotebookPen, Computer, SendToBack } from 'lucide-react'
 export const data = {
   navMain: [
     {
@@ -34,6 +34,19 @@ export const data = {
         {
           title: 'All assignments',
           url: '/assignments',
+        },
+      ],
+    },
+    {
+      title: 'Transfers',
+      url: '/transfers',
+      icon: SendToBack,
+      active: true,
+      haveChildren: true,
+      items: [
+        {
+          title: 'All transfers',
+          url: '/transfers',
         },
       ],
     },
