@@ -13,6 +13,7 @@ import {
   AssignmentDetailPage,
   AllRequestTransferPage,
   RequestTransferDetailPage,
+  CreateNewRequestTransferPage,
 } from '@/pages'
 import { ProtectedRoute, AuthRoute } from './auth-guard'
 import Layout from '@/layout/layout'
@@ -74,6 +75,10 @@ export const router = createBrowserRouter([
               {
                 path: ':id',
                 element: <RequestTransferDetailPage />,
+              },
+              {
+                path: 'create-request-transfer',
+                element: <CreateNewRequestTransferPage />,
               },
             ],
           },
