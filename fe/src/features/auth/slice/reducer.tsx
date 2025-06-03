@@ -8,6 +8,10 @@ const initialState = {
     email: '',
     firstName: '',
     lastName: '',
+    role: {
+      id: '',
+      slug: '',
+    },
   },
   accessToken: '',
   refreshToken: '',
@@ -44,10 +48,14 @@ const userSlice = createSlice({
           state.user.firstName = action.payload.data.firstName
           state.user.lastName = action.payload.data.lastName
           state.user.id = action.payload.data.id
+          state.user.role.id = action.payload.data.role.id
+          state.user.role.slug = action.payload.data.role.slug
           Cookies.set('email', action.payload.data.email)
           Cookies.set('firstName', action.payload.data.firstName)
           Cookies.set('lastName', action.payload.data.lastName)
           Cookies.set('id', action.payload.data.id)
+          Cookies.set('roleId', action.payload.data.role.id)
+          Cookies.set('roleSlug', action.payload.data.role.slug)
           state.loading = false
         } else {
           state.loading = false

@@ -1,2 +1,5 @@
 export * from './get-all-request-transfer'
 export * from './get-all-request-transfer-with-filter'
+export * from './get-request-transfer-information'
+export * from './approve-transfer-request'
+export * from './deny-request-transfer'

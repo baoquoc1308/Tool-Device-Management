@@ -95,7 +95,6 @@ const UpdateAssetInformation = () => {
       file: asset?.fileAttachment ? asset?.fileAttachment : '',
     })
   }, [asset])
-
   const onSubmit = (values: CreateAssetFormType) => {
     startTransition(async () => {
       if (typeof values.image === 'string') {

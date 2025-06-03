@@ -12,6 +12,7 @@ export type RequestTransferType = {
     firstName: string
     lastName: string
     email: string
+    departmentId: number
   }
 }
 export type RequestTransferResponseType = {

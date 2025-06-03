@@ -1,5 +1,7 @@
+import { RequestTransferInformation } from '@/features/transfer'
+
 const RequestTransferDetail = () => {
-  return <div></div>
+  return <RequestTransferInformation />
 }
 
 export default RequestTransferDetail

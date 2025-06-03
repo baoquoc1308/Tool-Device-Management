@@ -20,7 +20,6 @@ export function DataTable<TData, TValue>({ columns, data }: DataTableProps<TData
     getCoreRowModel: getCoreRowModel(),
     getPaginationRowModel: getPaginationRowModel(),
   })
-
   return (
     <div className='flex flex-col gap-4 rounded-md border p-2'>
       <Table>
