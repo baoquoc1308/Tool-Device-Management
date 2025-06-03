@@ -9,7 +9,9 @@ import {
   SelectValue,
   SelectContent,
   SelectItem,
+  FormDescription,
 } from '@/components/ui'
+import { formatCamelCase } from '@/utils/format-camel-case'
 import { useFormContext } from 'react-hook-form'
 
 type DataType = {
@@ -21,6 +23,7 @@ type DataType = {
   lastName?: string
   value?: string
   assetName?: string
+  slug?: string
 }
 
 export const FormSelect = ({
@@ -63,9 +66,14 @@ export const FormSelect = ({
                 return (
                   <SelectItem
                     key={d.id}
-                    value={d.id.toString()}
+                    value={d.slug || d.id.toString() || ''}
                   >
-                    {d.assetName || d.categoryName || d.departmentName || d.name || d.firstName + ' ' + d.lastName}
+                    {(d.slug && formatCamelCase(d.slug)) ||
+                      d.assetName ||
+                      d.categoryName ||
+                      d.departmentName ||
+                      d.name ||
+                      d.firstName + ' ' + d.lastName}
                   </SelectItem>
                 )
               })}

@@ -17,6 +17,7 @@ import {
 } from '@/pages'
 import { ProtectedRoute, AuthRoute } from './auth-guard'
 import Layout from '@/layout/layout'
+import { AssignRoleForUserPage } from '@/pages/user'
 
 export const router = createBrowserRouter([
   {
@@ -79,6 +80,15 @@ export const router = createBrowserRouter([
               {
                 path: 'create-request-transfer',
                 element: <CreateNewRequestTransferPage />,
+              },
+            ],
+          },
+          {
+            path: 'user',
+            children: [
+              {
+                path: 'assign-role',
+                element: <AssignRoleForUserPage />,
               },
             ],
           },

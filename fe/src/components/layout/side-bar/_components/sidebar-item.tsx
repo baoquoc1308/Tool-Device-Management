@@ -1,4 +1,4 @@
-import { LayoutDashboard, NotebookPen, Computer, SendToBack } from 'lucide-react'
+import { LayoutDashboard, NotebookPen, Computer, SendToBack, PersonStanding } from 'lucide-react'
 export const data = {
   navMain: [
     {
@@ -51,6 +51,19 @@ export const data = {
         {
           title: 'Create new request transfer',
           url: '/transfers/create-request-transfer',
+        },
+      ],
+    },
+    {
+      title: 'User',
+      url: '/user',
+      icon: PersonStanding,
+      active: true,
+      haveChildren: true,
+      items: [
+        {
+          title: 'Assign role',
+          url: '/user/assign-role',
         },
       ],
     },
