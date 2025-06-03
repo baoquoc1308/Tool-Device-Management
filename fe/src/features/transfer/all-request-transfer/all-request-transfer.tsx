@@ -80,7 +80,7 @@ const AllRequestTransfer = () => {
             <SkeletonForTable />
           ) : transfers && transfers.data ? (
             <DataTable
-              columns={columns}
+              columns={columns(getTransfersDataWithFilter)}
               data={transfers.data}
             />
           ) : (

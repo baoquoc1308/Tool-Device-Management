@@ -14,11 +14,13 @@ import { useFormContext } from 'react-hook-form'
 
 type DataType = {
   id: number | string
+  name?: string
   categoryName?: string
   departmentName?: string
   firstName?: string
   lastName?: string
   value?: string
+  assetName?: string
 }
 
 export const FormSelect = ({
@@ -57,14 +59,16 @@ export const FormSelect = ({
               </SelectTrigger>
             </FormControl>
             <SelectContent>
-              {data.map((d) => (
-                <SelectItem
-                  key={d.id}
-                  value={d.id.toString()}
-                >
-                  {d.categoryName || d.departmentName || d.firstName + ' ' + d.lastName}
-                </SelectItem>
-              ))}
+              {data.map((d) => {
+                return (
+                  <SelectItem
+                    key={d.id}
+                    value={d.id.toString()}
+                  >
+                    {d.assetName || d.categoryName || d.departmentName || d.name || d.firstName + ' ' + d.lastName}
+                  </SelectItem>
+                )
+              })}
             </SelectContent>
           </Select>
           <FormMessage />
