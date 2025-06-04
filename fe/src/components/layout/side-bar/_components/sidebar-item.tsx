@@ -48,6 +48,10 @@ export const data = {
           title: 'All transfers',
           url: '/transfers',
         },
+        {
+          title: 'Create new request transfer',
+          url: '/transfers/create-request-transfer',
+        },
       ],
     },
   ],
