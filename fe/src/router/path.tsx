@@ -14,6 +14,7 @@ import {
   AllRequestTransferPage,
   RequestTransferDetailPage,
   CreateNewRequestTransferPage,
+  ViewAllMaintenanceSchedulePage,
 } from '@/pages'
 import { ProtectedRoute, AuthRoute } from './auth-guard'
 import Layout from '@/layout/layout'
@@ -50,6 +51,10 @@ export const router = createBrowserRouter([
               {
                 path: 'update/:id',
                 element: <UpdateAssetPage />,
+              },
+              {
+                path: 'maintenance-schedule',
+                element: <ViewAllMaintenanceSchedulePage />,
               },
             ],
           },

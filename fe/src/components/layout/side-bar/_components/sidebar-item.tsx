@@ -22,6 +22,10 @@ export const data = {
           title: 'Create assets',
           url: '/assets/create-asset',
         },
+        {
+          title: 'Maintenance schedule',
+          url: '/assets/maintenance-schedule',
+        },
       ],
     },
     {
