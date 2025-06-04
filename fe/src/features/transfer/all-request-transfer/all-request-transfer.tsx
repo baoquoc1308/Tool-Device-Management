@@ -10,7 +10,7 @@ import {
   SkeletonForTable,
 } from '@/components/ui'
 import { RepeatIcon } from 'lucide-react'
-import type { RequestTransferResponseType } from './model'
+import type { RequestTransferType } from './model'
 import { getData } from '@/utils'
 import { getAllRequestTransferWithFilter } from '../api'
 import { columns } from './column-table'
@@ -19,7 +19,7 @@ import { useSearchParams } from 'react-router-dom'
 import { useDebounce } from '@/hooks'
 
 const AllRequestTransfer = () => {
-  const [transfers, setTransfers] = useState<RequestTransferResponseType>()
+  const [transfers, setTransfers] = useState<RequestTransferType[]>()
   const [isLoading, setIsLoading] = useState(true)
   const [statusFilter, setStatusFilter] = useState<string>('')
   const [searchParam, setSearchParam] = useSearchParams()
@@ -78,10 +78,10 @@ const AllRequestTransfer = () => {
           </div>
           {isLoading ? (
             <SkeletonForTable />
-          ) : transfers && transfers.data ? (
+          ) : transfers ? (
             <DataTable
               columns={columns(getTransfersDataWithFilter)}
-              data={transfers.data}
+              data={transfers}
             />
           ) : (
             <div className='flex flex-col items-center justify-center py-12 text-center'>

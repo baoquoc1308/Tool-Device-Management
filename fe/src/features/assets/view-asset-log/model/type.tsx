@@ -10,11 +10,3 @@ export type AssetLog = {
     email: string
   }
 }
-
-export type AssetLogArray = {
-  data: AssetLog[]
-  limit: number
-  page: number
-  total: number
-  total_page: number
-}

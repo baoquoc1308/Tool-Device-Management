@@ -15,10 +15,3 @@ export type RequestTransferType = {
     departmentId: number
   }
 }
-export type RequestTransferResponseType = {
-  data: RequestTransferType[]
-  total: number
-  page: number
-  limit: number
-  total_page: number
-}

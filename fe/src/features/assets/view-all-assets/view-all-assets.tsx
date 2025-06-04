@@ -18,7 +18,7 @@ import { useSearchParams } from 'react-router-dom'
 
 const ViewAllAssets = () => {
   const [searchParam, setSearchParam] = useSearchParams()
-  const [isPending, startTransition] = useTransition()
+  const [isPending, setIspending] = useState(false)
   const [assets, setAssets] = useState<AssetsType[]>([])
   const [viewMode, setViewMode] = useState<string>('table')
   const [filteredAssets, setFilteredAssets] = useState<FilterType>({
@@ -27,26 +27,16 @@ const ViewAllAssets = () => {
     departmentId: searchParam.get('departmentId') || null,
     status: searchParam.get('status') || null,
   })
-  const getAssetsData = () => {
-    startTransition(async () => {
-      await getData(getAllAssets, setAssets)
-    })
+  const getAssetsData = async () => {
+    setIspending(true)
+    await getData(() => getDataAssetsFilter({ ...filterData }), setAssets)
+    setIspending(false)
   }
   const filterData = useDebounce(filteredAssets, 1000)
 
   useEffect(() => {
     getAssetsData()
   }, [])
-  const getAssetsFilterData = () => {
-    startTransition(async () => {
-      const { data, error } = await tryCatch(getDataAssetsFilter({ ...filterData }))
-      if (error) {
-        toast.error(error?.message || 'Failed to load assets')
-        return
-      }
-      setAssets(data.data.data)
-    })
-  }
 
   useEffect(() => {
     if (filteredAssets.assetName) {
@@ -70,8 +60,9 @@ const ViewAllAssets = () => {
       searchParam.delete('status')
     }
     setSearchParam(searchParam)
-    getAssetsFilterData()
+    getAssetsData()
   }, [filterData])
+
   return (
     <div className='space-y-6'>
       <ButtonViewType
