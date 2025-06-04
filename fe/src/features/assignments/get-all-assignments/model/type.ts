@@ -29,13 +29,6 @@ export type AssignmentData = {
   }
 }
 
-export type AssignmentsResponse = {
-  data: AssignmentData[]
-  limit: number
-  page: number
-  total: number
-  total_page: number
-}
 export type FilterData = {
   assetName: string
   emailAssigned: string

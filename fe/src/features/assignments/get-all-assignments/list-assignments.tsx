@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { Card, CardHeader, CardTitle, CardContent, CardDescription, DataTable, SkeletonForTable } from '@/components/ui'
 import { ClipboardList } from 'lucide-react'
-import type { AssignmentsResponse } from './model'
+import type { AssignmentData } from './model'
 import { getData } from '@/utils'
 import { getAssignments, getAssignmentsWithFilter } from '../api'
 import { columnsAssignmentsTable } from './column-table'
@@ -11,7 +11,7 @@ import { ButtonClearFilter, AssetNameFilter, AssignedToFilter, AssignedByFilter 
 
 const ListAssignments = () => {
   const [searchParam, setSearchParam] = useSearchParams()
-  const [assignments, setAssignments] = useState<AssignmentsResponse>()
+  const [assignments, setAssignments] = useState<AssignmentData[]>()
   const [isLoading, setIsLoading] = useState(true)
   const [filters, setFilters] = useState({
     assetName: '',
@@ -94,7 +94,7 @@ const ListAssignments = () => {
           ) : (
             <DataTable
               columns={columnsAssignmentsTable}
-              data={assignments?.data || []}
+              data={assignments || []}
             />
           )}
         </div>
