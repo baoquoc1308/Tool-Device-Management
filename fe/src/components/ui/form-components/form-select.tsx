@@ -9,7 +9,6 @@ import {
   SelectValue,
   SelectContent,
   SelectItem,
-  FormDescription,
 } from '@/components/ui'
 import { formatCamelCase } from '@/utils/format-camel-case'
 import { useFormContext } from 'react-hook-form'
