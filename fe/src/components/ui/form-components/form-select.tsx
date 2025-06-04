@@ -54,7 +54,7 @@ export const FormSelect = ({
                 onChange(value)
               }
             }}
-            defaultValue={field.value}
+            value={field.value}
           >
             <FormControl>
               <SelectTrigger>

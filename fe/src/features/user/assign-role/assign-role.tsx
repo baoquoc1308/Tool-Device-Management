@@ -13,7 +13,6 @@ import {
 import { Shield, Loader2 } from 'lucide-react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { z } from 'zod'
 import { getData, tryCatch } from '@/utils'
 import { assignRoleForUser, getAllRoles, getAllUsers } from '../api'
 import type { UserType } from '../model'
@@ -27,6 +26,7 @@ export const AssignRole = () => {
   const [isLoadingRoles, setIsLoadingRoles] = useState(false)
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [roles, setRoles] = useState<Roles[]>()
+  const [selectedUser, setSelectedUser] = useState<UserType | null>(null)
 
   const form = useForm<AssignRoleType>({
     resolver: zodResolver(assignRoleSchema),
@@ -55,18 +55,26 @@ export const AssignRole = () => {
   const onSubmit = async (values: AssignRoleType) => {
     setIsSubmitting(true)
     const data = await tryCatch(assignRoleForUser(values.role, values.userId))
-    console.log('Role assigned successfully:', data)
     if (data.error) {
+      form.reset()
       toast.error(data.error.message || 'Failed to assign role to user')
       setIsSubmitting(false)
       return
     }
-
-    toast.success(`Role ${values.role} assigned to user ${values.userId} successfully`)
-    form.reset()
+    const user = users.find((u) => u.id.toString() === values.userId)
+    form.reset({ userId: undefined, role: undefined })
+    toast.success(`Role ${values.role} assigned to user ${user?.firstName} ${user?.lastName} successfully`)
     setIsSubmitting(false)
   }
-
+  useEffect(() => {
+    const userId = form.watch('userId')
+    if (userId) {
+      const user = users.find((u) => u.id.toString() === userId) || null
+      setSelectedUser(user)
+    } else {
+      setSelectedUser(null)
+    }
+  }, [form.watch('userId'), users])
   return (
     <div className='container mx-auto px-4 py-6'>
       <Card className='mx-auto w-full max-w-2xl'>
@@ -83,7 +91,7 @@ export const AssignRole = () => {
             onSubmit={form.handleSubmit(onSubmit)}
             className='space-y-6'
           >
-            <CardContent className='flex items-center justify-evenly space-y-4'>
+            <CardContent className='space-y-4'>
               {isLoadingUsers ? (
                 <div className='flex items-center gap-2 py-2'>
                   <Loader2 className='h-4 w-4 animate-spin' />
@@ -97,7 +105,17 @@ export const AssignRole = () => {
                   data={users}
                 />
               )}
-
+              {selectedUser && (
+                <div className='bg-muted rounded-md p-4'>
+                  <h3 className='mb-2 text-sm font-medium'>Selected User</h3>
+                  <div className='flex flex-col items-start gap-3'>
+                    <p className='font-medium'>
+                      {selectedUser.firstName} {selectedUser.lastName}
+                    </p>
+                    <p className='text-muted-foreground text-sm'>{selectedUser.email}</p>
+                  </div>
+                </div>
+              )}
               {isLoadingRoles ? (
                 <div className='flex items-center gap-2 py-2'>
                   <Loader2 className='h-4 w-4 animate-spin' />
