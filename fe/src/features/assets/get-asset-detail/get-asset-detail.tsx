@@ -20,14 +20,24 @@ import {
 
 import { ArrowLeft, Pencil, Loader2, Trash2 } from 'lucide-react'
 
-import { AssetBadge, AssetFile, AssetImage, AssetInformation, AssetQR, NoAsset } from './_components'
+import {
+  AssetBadge,
+  AssetFile,
+  AssetImage,
+  AssetInformation,
+  AssetMaintenanceSchedule,
+  AssetQR,
+  NoAsset,
+} from './_components'
 import { ViewAssetLog } from '../view-asset-log'
 import { toast } from 'sonner'
+import { UpdateMaintenanceSchedule } from '../update-maintenance-schedule'
 
 const GetAssetDetail = () => {
   const { id } = useParams()
   const [isPending, startTransition] = useTransition()
   const [isDeleting, startDeletingTransition] = useTransition()
+  const [isDialogOpen, setIsDialogOpen] = useState(false)
   const [asset, setAsset] = useState<AssetsType>()
   const navigate = useNavigate()
 
@@ -68,6 +78,11 @@ const GetAssetDetail = () => {
 
   return (
     <div className='container mx-auto px-4 py-8'>
+      <UpdateMaintenanceSchedule
+        id={id || ''}
+        isDialogOpen={isDialogOpen}
+        setIsDialogOpen={setIsDialogOpen}
+      />
       <div className='mb-6 flex items-center justify-between'>
         <div className='flex items-center'>
           <Link to='/assets'>
@@ -127,6 +142,26 @@ const GetAssetDetail = () => {
 
           {/* Asset History Log */}
           <ViewAssetLog id={id || ''} />
+          <Card className='w-full'>
+            <div className='flex items-center justify-between'>
+              <CardHeader className='flex-1'>
+                <CardTitle>Maintenance Schedule</CardTitle>
+                <CardDescription>Upcoming and past maintenance schedules</CardDescription>
+              </CardHeader>
+              <div className='flex items-center space-x-2 p-4'>
+                <Button
+                  variant={'outline'}
+                  onClick={() => setIsDialogOpen(true)}
+                >
+                  Update schedules
+                </Button>
+              </div>
+            </div>
+
+            <CardContent>
+              <AssetMaintenanceSchedule id={id || ''} />
+            </CardContent>
+          </Card>
         </div>
 
         {/* Second column - Tabs Container */}

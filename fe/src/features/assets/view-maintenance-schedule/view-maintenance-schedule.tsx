@@ -39,7 +39,6 @@ const ViewMaintenanceSchedule = () => {
   useEffect(() => {
     fetchMaintenanceSchedules()
   }, [])
-
   useEffect(() => {
     if (schedules.length > 0) {
       getSchedulesData(schedules)

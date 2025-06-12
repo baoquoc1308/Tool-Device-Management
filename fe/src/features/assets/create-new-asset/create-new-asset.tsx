@@ -78,6 +78,7 @@ const CreateNewAsset = () => {
       form.clearErrors('warrantExpiry')
     }
   }
+
   return (
     <div className='container mx-auto max-w-3xl py-6'>
       <Card>

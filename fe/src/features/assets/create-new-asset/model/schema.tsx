@@ -29,7 +29,8 @@ export const createAssetFormSchema = z
           .instanceof(File, { message: 'Image is required' })
           .refine((file) => !file || file.size !== 0 || file.size <= 5000000, `Max image size is ${5000000}MB`)
           .refine(
-            (file) => !file || file.type === '' || ['image/jpeg', 'image/png', 'image/jpg'].includes(file.type),
+            (file) =>
+              !file || file.type === '' || ['image/jpeg', 'image/png', 'image/jpg', 'image/webp'].includes(file.type),
             'Only .jpg, .jpeg, and .png formats are supported'
           ),
         z.string(), // Allow the existing image URL for editing mode

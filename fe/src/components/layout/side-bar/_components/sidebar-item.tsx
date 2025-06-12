@@ -26,6 +26,10 @@ export const data = {
           title: 'Maintenance schedule',
           url: '/assets/maintenance-schedule',
         },
+        {
+          title: 'Create maintenance schedule',
+          url: '/assets/maintenance-schedule/create',
+        },
       ],
     },
     {

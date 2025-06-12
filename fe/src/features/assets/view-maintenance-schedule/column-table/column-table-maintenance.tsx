@@ -3,6 +3,9 @@ import { format } from 'date-fns'
 import { Badge, Button } from '@/components/ui'
 import { Link } from 'react-router-dom'
 import type { MaintenanceSchedule } from '../model'
+import { Calendar } from 'lucide-react'
+import { UpdateMaintenanceSchedule } from '../../update-maintenance-schedule'
+import { useState } from 'react'
 export const columnTableMaintenance: ColumnDef<MaintenanceSchedule>[] = [
   {
     accessorKey: 'asset.assetName',
@@ -45,26 +48,37 @@ export const columnTableMaintenance: ColumnDef<MaintenanceSchedule>[] = [
     ),
   },
   {
-    id: 'duration',
-    header: 'Duration',
-    cell: ({ row }) => {
-      const startDate = new Date(row.original.startDate)
-      const endDate = new Date(row.original.endDate)
-      const daysDiff = Math.ceil(endDate.getTime() - startDate.getTime()) / 86400000
-      return `${daysDiff} days`
-    },
-  },
-  {
     id: 'actions',
     header: '',
-    cell: ({ row }) => (
-      <Button
-        variant='outline'
-        size='sm'
-        asChild
-      >
-        <Link to={`/assets/${row.original.asset.id}`}>View Asset</Link>
-      </Button>
-    ),
+    cell: ({ row }) => {
+      const id = row.original.id
+      const [isDialogOpen, setIsDialogOpen] = useState(false)
+      return (
+        <div className='flex items-center gap-2'>
+          <UpdateMaintenanceSchedule
+            id={id.toString()}
+            isDialogOpen={isDialogOpen}
+            setIsDialogOpen={setIsDialogOpen}
+          />
+          <Button
+            variant='outline'
+            size='sm'
+            asChild
+          >
+            <Link to={`/assets/${row.original.asset.id}`}>View Asset</Link>
+          </Button>
+          <Button
+            variant='outline'
+            size='sm'
+            onClick={() => {
+              setIsDialogOpen(true)
+            }}
+          >
+            <Calendar className='mr-2 h-4 w-4' />
+            Update Schedule
+          </Button>
+        </div>
+      )
+    },
   },
 ]
