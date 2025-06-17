@@ -100,7 +100,7 @@ const ViewAllAssets = () => {
                   data={assets}
                 />
               ) : (
-                <ViewCardsDataAssets assets={assets} />
+                <ViewCardsDataAssets assets={assets || []} />
               )}
             </>
           )}

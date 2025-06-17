@@ -1,7 +1,7 @@
 import { Card, CardContent, Skeleton } from '@/components/ui'
 import type { AssetsType } from '../model'
 export const CardStatusStatistic = ({ isPending, assets }: { isPending: boolean; assets: AssetsType[] }) => {
-  if (!assets) {
+  if (assets.length === 0) {
     return (
       <div className='mb-6 grid grid-cols-2 gap-4 md:grid-cols-5'>
         <Card>

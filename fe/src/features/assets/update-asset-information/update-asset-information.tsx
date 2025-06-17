@@ -77,7 +77,6 @@ const UpdateAssetInformation = () => {
       }
     })
   }
-
   useEffect(() => {
     getAssetData()
   }, [id])
