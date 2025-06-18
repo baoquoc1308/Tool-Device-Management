@@ -11,6 +11,7 @@ import (
 	"log"
 	"time"
 
+	"github.com/gin-contrib/pprof"
 	"github.com/robfig/cron/v3"
 
 	"github.com/gin-gonic/gin"
@@ -68,10 +69,8 @@ func main() {
 	//Maintenance
 	MaintenanceService := service.NewMaintenanceSchedulesService(maintenanceRepository, assetsRepository, userRepository, notificationsService)
 	maintenanceHandler := handler.NewMaintenanceSchedulesHandler(MaintenanceService)
-
 	// Notification
 	notificationsHandler := handler.NewNotificationHandler(notificationsService)
-
 	docs.SwaggerInfo.Title = "API Tool device manage"
 	docs.SwaggerInfo.Description = "App Tool device manage"
 	docs.SwaggerInfo.Version = "1.0"
@@ -80,6 +79,7 @@ func main() {
 	docs.SwaggerInfo.Schemes = []string{"http", "https"}
 
 	r := gin.Default()
+	pprof.Register(r)
 	api.SetupRoutes(r, userHandler, locationHandler, categoriesHandler, departmentHandler, assetsHandler, roleHandler, assignmentHandler, assetLogHandler, requestTransferHandler, maintenanceHandler, SSeHandler, notificationsHandler, userSessionRepository, db)
 	r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 
@@ -92,7 +92,7 @@ func main() {
 	if err != nil {
 		log.Fatalf("❌ Failed to schedule cron job: %v", err)
 	}
-	_, err = c.AddFunc("0 8 * * *", func() {
+	_, err = c.AddFunc("1 8 * * *", func() {
 		log.Println("🔔 Running warranty notification check at 8:00 AM")
 		utils.SendEmailsForWarrantyExpiry(db, emailService, notificationsService, assetsRepository, userRepository)
 	})
@@ -103,6 +103,14 @@ func main() {
 	_, err = c.AddFunc("0 9 * * *", func() {
 		log.Println("🔔 Running update status when finish maintenance check at 8:00 AM")
 		utils.UpdateStatusWhenFinishMaintenance(db, assetsRepository, userRepository, notificationsService, assetsLogRepository)
+	})
+	if err != nil {
+		log.Fatalf("❌ Failed to schedule cron job: %v", err)
+	}
+
+	_, err = c.AddFunc("*/10 * * * *", func() {
+		log.Println("🔔 Running kill session")
+		utils.KillIdleSessions(db, "pg_killed_sessions_log.csv")
 	})
 	if err != nil {
 		log.Fatalf("❌ Failed to schedule cron job: %v", err)

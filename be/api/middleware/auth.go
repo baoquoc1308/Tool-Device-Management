@@ -5,6 +5,7 @@ import (
 	"BE_Manage_device/internal/domain/repository"
 	"BE_Manage_device/pkg"
 	"BE_Manage_device/pkg/utils"
+	"context"
 	"fmt"
 	"net/http"
 	"strconv"
@@ -126,6 +127,16 @@ func RequirePermission(permSlug []string, accessLevel []string, db *gorm.DB) gin
 			c.Abort()
 			return
 		}
+		c.Next()
+	}
+}
+
+func TimeoutMiddleware(d time.Duration) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		ctx, cancel := context.WithTimeout(c.Request.Context(), d)
+		defer cancel()
+
+		c.Request = c.Request.WithContext(ctx)
 		c.Next()
 	}
 }

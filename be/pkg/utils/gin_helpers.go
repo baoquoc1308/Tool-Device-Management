@@ -2,90 +2,24 @@ package utils
 
 import (
 	"BE_Manage_device/config"
-	"BE_Manage_device/constant"
 	"BE_Manage_device/internal/domain/entity"
 	"BE_Manage_device/internal/domain/repository"
-	"BE_Manage_device/pkg"
 	"BE_Manage_device/pkg/interfaces"
 	"bytes"
 	"encoding/json"
 	"errors"
 	"fmt"
 	"io"
-	"math"
 	"mime/multipart"
 	"net/http"
-	"slices"
-	"strconv"
 	"strings"
 	"sync"
 	"time"
 
-	"github.com/gin-gonic/gin"
-	"github.com/golang-jwt/jwt/v5"
 	log "github.com/sirupsen/logrus"
 	"github.com/skip2/go-qrcode"
 	"gorm.io/gorm"
 )
-
-func GetUserIdFromContext(c *gin.Context) int64 {
-	userID, exists := c.Get("userID")
-	if exists {
-		log.Info("userID:", userID)
-	} else {
-		log.Error("Happened error when get userId from gin Context")
-		pkg.PanicExeption(constant.UnknownError)
-	}
-	str := fmt.Sprint(userID)
-
-	userIdConvert, err := strconv.ParseInt(str, 10, 64)
-	if err != nil {
-		log.Error("Happened error when get userId in token. Error", err)
-		pkg.PanicExeption(constant.UnknownError)
-	}
-	return userIdConvert
-}
-
-func LogEmailError(action string, to string, err error) {
-	log.WithFields(log.Fields{
-		"action": action,
-		"to":     to,
-		"error":  err,
-	}).Error("❌ Gửi email thất bại")
-}
-
-func LogEmailSuccess(action string, to string) {
-	log.WithFields(log.Fields{
-		"action": action,
-		"to":     to,
-	}).Info("✅ Gửi email thành công")
-}
-
-func GenerateTokens(userId int64, email string) (string, string, error) {
-	// Access Token (15 phút)
-	accessToken := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
-		"userId": userId,
-		"email":  email,
-		"exp":    time.Now().Add(10 * time.Hour).Unix(),
-	})
-	accessString, err := accessToken.SignedString([]byte(config.AccessSecret))
-	if err != nil {
-		return "", "", err
-	}
-
-	// Refresh Token (7 ngày)
-	refreshToken := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
-		"userId": userId,
-		"email":  email,
-		"exp":    time.Now().Add(50 * time.Hour).Unix(),
-	})
-	refreshString, err := refreshToken.SignedString([]byte(config.RefreshSecret))
-	if err != nil {
-		return "", "", err
-	}
-
-	return accessString, refreshString, nil
-}
 
 type SupabaseUploader struct {
 	ProjectRef string
@@ -251,12 +185,7 @@ func CheckAndSenMaintenanceNotification(db *gorm.DB, emailNotifier interfaces.Em
 	startOfDay := time.Now().Truncate(24 * time.Hour)
 	endOfDay := startOfDay.Add(24 * time.Hour)
 	var schedules []entity.MaintenanceSchedules
-<<<<<<< HEAD
-	err := db.Where("start_date <= ? AND end_date >= ?", today, today).Preload("Asset").Preload("Asset.OnwerUser").Find(&schedules).Error
-	log.Info("schedules", len(schedules))
-=======
 	err := db.Where("start_date <= ? AND end_date >= ?", startOfDay, endOfDay).Preload("Asset").Preload("Asset.OnwerUser").Find(&schedules).Error
->>>>>>> 23cb60b (Update gin_helpers.go)
 	if err != nil {
 		log.Printf("Error fetching maintenance schedules: %v", err)
 		return
@@ -320,6 +249,11 @@ func CheckAndSenMaintenanceNotification(db *gorm.DB, emailNotifier interfaces.Em
 			</html>
 		`, asset.AssetName, s.StartDate.Format("Jan 2, 2006"), s.EndDate.Format("Jan 2, 2006"))
 
+			// 5. Cập nhật lifecycle
+			if _, err := assetRepo.UpdateAssetLifeCycleStage(asset.Id, "Under Maintenance", tx); err != nil {
+				return fmt.Errorf("error updating asset stage: %w", err)
+			}
+
 			// 6. Ghi log notification
 			notify := entity.MaintenanceNotifications{
 				ScheduleId: s.Id,
@@ -328,11 +262,6 @@ func CheckAndSenMaintenanceNotification(db *gorm.DB, emailNotifier interfaces.Em
 			if err := tx.Create(&notify).Error; err != nil {
 				return fmt.Errorf("error inserting notification: %w", err)
 			}
-			// 5. Cập nhật lifecycle
-			if _, err := assetRepo.UpdateAssetLifeCycleStage(asset.Id, "Under Maintenance", tx); err != nil {
-				return fmt.Errorf("error updating asset stage: %w", err)
-			}
-
 			assetLog := entity.AssetLog{
 				AssetId:       asset.Id,
 				ChangeSummary: fmt.Sprintf("Asset %d has started maintenance", asset.Id),
@@ -342,7 +271,6 @@ func CheckAndSenMaintenanceNotification(db *gorm.DB, emailNotifier interfaces.Em
 			if _, err := assetLogRepo.Create(&assetLog, tx); err != nil {
 				return fmt.Errorf("error create asset log: %w", err)
 			}
-
 			job.Emails = emails
 			job.Subject = subject
 			job.Body = body
@@ -552,54 +480,6 @@ func SendEmailsForWarrantyExpiry(db *gorm.DB, emailNotifier interfaces.EmailNoti
 	}
 	close(jobsQueue)
 	wg.Wait()
-}
-
-func UserHasPermission(db *gorm.DB, userId int64, permSlug []string, accessLevel []string) (bool, error) {
-	var user entity.Users
-	err := db.Preload("Role.RolePermissions.Permission").
-		First(&user, userId).Error
-	if err != nil {
-		return false, err
-	}
-
-	for _, rolePerm := range user.Role.RolePermissions {
-		if accessLevel == nil {
-			if slices.Contains(permSlug, rolePerm.Permission.Slug) && rolePerm.AccessLevel == "full" {
-				return true, nil
-			}
-		} else {
-			if slices.Contains(permSlug, rolePerm.Permission.Slug) && slices.Contains(accessLevel, rolePerm.AccessLevel) {
-				return true, nil
-			}
-		}
-	}
-	return false, nil
-}
-
-// Hàm tính giá trị còn lại của tài sản
-func CurrentAssetValue(
-	originalCost float64,
-	salvageValue float64,
-	usefulLifeYears float64,
-	startDate, currentDate time.Time,
-) float64 {
-
-	// Tính số năm đã sử dụng (dạng float, có thể lẻ tháng)
-	yearsUsed := currentDate.Sub(startDate).Hours() / (24 * 365)
-
-	if yearsUsed < 0 {
-		yearsUsed = 0 // chưa đến ngày bắt đầu sử dụng
-	}
-	if yearsUsed > usefulLifeYears {
-		yearsUsed = usefulLifeYears // không vượt quá thời gian sử dụng
-	}
-
-	annualDepreciation := (originalCost - salvageValue) / usefulLifeYears
-	accumulatedDepreciation := yearsUsed * annualDepreciation
-
-	// Giá trị còn lại không thấp hơn salvage value
-	currentValue := math.Max(originalCost-accumulatedDepreciation, salvageValue)
-	return currentValue
 }
 
 func PtrInt64(i int64) *int64 {

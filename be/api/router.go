@@ -5,6 +5,7 @@ import (
 	"BE_Manage_device/api/middleware"
 	"BE_Manage_device/config"
 	"BE_Manage_device/internal/domain/repository"
+	"time"
 
 	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
@@ -13,6 +14,7 @@ import (
 func SetupRoutes(r *gin.Engine, userHandler *handler.UserHandler, LocationHandler *handler.LocationHandler, CategoriesHandler *handler.CategoriesHandler, DepartmentsHandler *handler.DepartmentsHandler, AssetsHandler *handler.AssetsHandler, RoleHandler *handler.RoleHandler, AssignmentHandler *handler.AssignmentHandler, AssetLogHandler *handler.AssetLogHandler, RequestTransferHandler *handler.RequestTransferHandler, MaintenanceSchedulesHandler *handler.MaintenanceSchedulesHandler, SSEHandler *handler.SSEHandler, NotificationHandler *handler.NotificationHandler, session repository.UsersSessionRepository, db *gorm.DB) {
 	//users
 	r.Use(middleware.CORSMiddleware())
+	r.Use(middleware.TimeoutMiddleware(5 * time.Second))
 	api := r.Group("/api")
 	api.POST("/auth/register", userHandler.Register)                  // đã check
 	api.POST("/auth/login", userHandler.Login)                        //dã check
