@@ -1,18 +1,16 @@
 package utils
 
 import (
-	"encoding/csv"
 	"fmt"
 	"log"
-	"os"
 	"time"
 
 	"gorm.io/gorm"
 )
 
 // KillIdleSessions terminates sessions that are idle in transaction > 5 minutes
-// and logs the result to a CSV file.
-func KillIdleSessions(db *gorm.DB, logPath string) error {
+// and logs the result to PostgreSQL table `session_kill_logs`.
+func KillIdleSessions(db *gorm.DB) error {
 	sqlDB, err := db.DB()
 	if err != nil {
 		return fmt.Errorf("failed to get raw DB: %w", err)
@@ -40,20 +38,6 @@ func KillIdleSessions(db *gorm.DB, logPath string) error {
 	}
 	defer rows.Close()
 
-	// Open log file
-	logFile, err := os.OpenFile(logPath, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
-	if err != nil {
-		return fmt.Errorf("log file error: %w", err)
-	}
-	defer logFile.Close()
-	writer := csv.NewWriter(logFile)
-
-	// Write header if file is new
-	if stat, _ := logFile.Stat(); stat.Size() == 0 {
-		writer.Write([]string{"killed_at", "pid", "usename", "client_addr", "query", "state", "duration", "terminated"})
-	}
-
-	// Loop through results
 	for rows.Next() {
 		var (
 			killedAt   time.Time
@@ -71,21 +55,20 @@ func KillIdleSessions(db *gorm.DB, logPath string) error {
 			continue
 		}
 
-		record := []string{
-			killedAt.Format(time.RFC3339),
-			fmt.Sprintf("%d", pid),
-			usename,
-			clientAddr,
-			queryText,
-			state,
-			duration.String(),
-			fmt.Sprintf("%v", terminated),
-		}
+		// Ghi vào bảng session_kill_logs
+		_, err := sqlDB.Exec(`
+			INSERT INTO session_kill_logs 
+			(killed_at, pid, usename, client_addr, query, state, duration, terminated)
+			VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+		`, killedAt, pid, usename, clientAddr, queryText, state, duration, terminated)
 
-		writer.Write(record)
+		if err != nil {
+			log.Printf("Insert log error: %v", err)
+		} else {
+			log.Printf("✅ Session pid=%d terminated and logged", pid)
+		}
 	}
 
-	writer.Flush()
-	log.Println("✔ Idle sessions killed and logged.")
+	log.Println("✔ Idle sessions checked and logged to DB.")
 	return nil
 }

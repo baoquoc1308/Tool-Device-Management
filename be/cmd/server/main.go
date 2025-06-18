@@ -110,7 +110,7 @@ func main() {
 
 	_, err = c.AddFunc("*/10 * * * *", func() {
 		log.Println("🔔 Running kill session")
-		utils.KillIdleSessions(db, "pg_killed_sessions_log.csv")
+		utils.KillIdleSessions(db)
 	})
 	if err != nil {
 		log.Fatalf("❌ Failed to schedule cron job: %v", err)
