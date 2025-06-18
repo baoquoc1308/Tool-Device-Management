@@ -15,13 +15,16 @@ import (
 )
 
 type UserService struct {
-	repo            repository.UserRepository
-	emailService    *EmailService
-	userSessionRepo repository.UsersSessionRepository
+	repo               repository.UserRepository
+	emailService       *EmailService
+	userSessionRepo    repository.UsersSessionRepository
+	roleRepository     repository.RoleRepository
+	assetRepo          repository.AssetsRepository
+	userRBACRepository repository.UserRBACRepository
 }
 
-func NewUserService(repo repository.UserRepository, emailService *EmailService, userSessionRepo repository.UsersSessionRepository) *UserService {
-	return &UserService{repo: repo, emailService: emailService, userSessionRepo: userSessionRepo}
+func NewUserService(repo repository.UserRepository, emailService *EmailService, userSessionRepo repository.UsersSessionRepository, roleRepository repository.RoleRepository, assetRepo repository.AssetsRepository, userRBACRepository repository.UserRBACRepository) *UserService {
+	return &UserService{repo: repo, emailService: emailService, userSessionRepo: userSessionRepo, roleRepository: roleRepository, assetRepo: assetRepo, userRBACRepository: userRBACRepository}
 }
 
 func (service *UserService) Register(firstName, lastName, password, email, redirectUrl string) (*entity.Users, error) {
@@ -29,13 +32,14 @@ func (service *UserService) Register(firstName, lastName, password, email, redir
 	if err != nil {
 		return nil, err
 	}
+	role := service.roleRepository.GetRoleBySlug("viewer")
 	token := uuid.New().String()
 	users := &entity.Users{
 		FirstName: firstName,
 		LastName:  lastName,
 		Password:  string(hashedPassword),
 		Email:     email,
-		RoleId:    1,
+		RoleId:    role.Id,
 		IsActive:  false,
 		Token:     token,
 	}
@@ -50,7 +54,7 @@ func (service *UserService) Register(firstName, lastName, password, email, redir
 func (service *UserService) Login(email string, password string) (*entity.Users, string, string, error) {
 	user, err := service.repo.FindByEmail(email)
 	if err != nil {
-		return nil, "", "", errors.New("email have")
+		return nil, "", "", errors.New("email dont; have")
 	}
 	if err := bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(password)); err != nil {
 		return nil, "", "", errors.New("invalid email or password")
@@ -93,7 +97,28 @@ func (service *UserService) Activate(token string) error {
 		return err
 	}
 	err = service.repo.Update(users)
+	go service.SetRole(users.Id, users.RoleId)
 	return err
+}
+
+func (service *UserService) SetRole(userId int64, roleId int64) {
+	tx := service.repo.GetDB().Begin()
+	assets, _ := service.assetRepo.GetAllAsset()
+	for _, asset := range assets {
+		userRbac := entity.UserRbac{
+			AssetId: asset.Id,
+			UserId:  userId,
+			RoleId:  roleId,
+		}
+		err := service.userRBACRepository.Create(&userRbac, tx)
+		if err != nil {
+			tx.Rollback()
+		}
+	}
+	var err error
+	if err = tx.Commit().Error; err != nil {
+		return
+	}
 }
 
 func (service *UserService) FindUserByEmail(email string) (*entity.Users, error) {
@@ -121,7 +146,7 @@ func (service *UserService) CheckPasswordReset(email string, redirectUrl string)
 
 	tokenPW := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
 		"email": email,
-		"exp":   time.Now().Add(2 * time.Minute).Unix(),
+		"exp":   time.Now().Add(10 * time.Minute).Unix(),
 	})
 	tokenPWstring, err := tokenPW.SignedString([]byte(config.PasswordSecret))
 	if err != nil {
@@ -173,5 +198,104 @@ func (service *UserService) FindSessionById(userId int64) (*entity.UsersSessions
 
 func (service *UserService) UpdateInvoked(userSession entity.UsersSessions) error {
 	err := service.userSessionRepo.UpdateIsRevoked(&userSession)
+	return err
+}
+
+func (service *UserService) GetAllUser() []*entity.Users {
+	users := service.repo.GetAllUser()
+	return users
+}
+
+func (service *UserService) UpdateInformation(id int64, firstName, lastName string) (*entity.Users, error) {
+	user := entity.Users{Id: id, FirstName: firstName, LastName: lastName}
+	userUpdated, err := service.repo.UpdateUser(&user)
+	if err != nil {
+		return nil, err
+	}
+	return userUpdated, nil
+}
+
+func (service *UserService) UpdateRole(userId int64, setRoleUserId int64, slug string) (*entity.Users, error) {
+	roles := service.roleRepository.GetRoleBySlug(slug)
+	if roles == nil {
+		return nil, errors.New("something went wrong ")
+	}
+	user := entity.Users{Id: setRoleUserId, RoleId: roles.Id}
+	userUpdated, err := service.repo.UpdateUser(&user)
+	if err != nil {
+		return nil, err
+	}
+	return userUpdated, nil
+}
+
+func (service *UserService) GetAllUserOfDepartment(departmentId int64) ([]*entity.Users, error) {
+	user, err := service.repo.GetAllUserOfDepartment(departmentId)
+	if err != nil {
+		return nil, err
+	}
+	return user, nil
+}
+
+func (service *UserService) UpdateDepartment(userId int64, departmentId int64) error {
+	err := service.repo.UpdateDepartment(userId, departmentId)
+	if err != nil {
+		return err
+	}
+	go service.assetRepo.DeleteOwnerAssetOfOwnerId(userId)
+	return err
+}
+
+func (service *UserService) UpdateHeadDep(id int64) error {
+	user, err := service.repo.FindByUserId(id)
+	if err != nil {
+		return err
+	}
+	if user.IsHeadDepartment {
+		err := service.repo.UpdateHeadDep(id, !user.IsHeadDepartment)
+		return err
+	} else {
+		if user.DepartmentId == nil {
+			return errors.New("user don't have department")
+		}
+		err := service.repo.CheckHeadDep(*user.DepartmentId)
+		if err != nil {
+			return err
+		}
+		err = service.repo.UpdateHeadDep(id, !user.IsHeadDepartment)
+		return err
+	}
+}
+
+func (service *UserService) UpdateManagerDep(id int64) error {
+	user, err := service.repo.FindByUserId(id)
+	if err != nil {
+		return err
+	}
+	if user.IsAssetManager {
+		err := service.repo.UpdateManagerDep(id, !user.IsAssetManager)
+		return err
+	} else {
+		if user.DepartmentId == nil {
+			return errors.New("user don't have department")
+		}
+		err := service.repo.CheckManagerDep(*user.DepartmentId)
+		if err != nil {
+			return err
+		}
+		err = service.repo.UpdateManagerDep(id, !user.IsAssetManager)
+		return err
+	}
+}
+
+func (service *UserService) UpdateCanExport(id int64) error {
+	user, err := service.repo.FindByUserId(id)
+	if err != nil {
+		return err
+	}
+	roleViewer := service.roleRepository.GetRoleBySlug("viewer")
+	if user.RoleId != roleViewer.Id {
+		return nil
+	}
+	err = service.repo.UpdateCanExport(id, !user.CanExport)
 	return err
 }

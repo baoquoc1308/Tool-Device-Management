@@ -4,6 +4,7 @@ import (
 	"BE_Manage_device/constant"
 	"BE_Manage_device/internal/domain/repository"
 	"BE_Manage_device/pkg"
+	"BE_Manage_device/pkg/utils"
 	"fmt"
 	"net/http"
 	"strconv"
@@ -13,12 +14,17 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/sirupsen/logrus"
+	"gorm.io/gorm"
 )
 
 func AuthMiddleware(secretKey string, session repository.UsersSessionRepository) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		defer pkg.PanicHandler(c)
 		authHeader := c.GetHeader("Authorization")
+		if authHeader == "" {
+			pkg.PanicExeption(constant.Unauthorized, "Unauthorized Access Token")
+			c.Abort()
+		}
 		tokenString := strings.TrimPrefix(authHeader, "Bearer ")
 		token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
 			if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
@@ -82,6 +88,44 @@ func CORSMiddleware() gin.HandlerFunc {
 			return
 		}
 
+		c.Next()
+	}
+}
+
+func RequirePermission(permSlug []string, accessLevel []string, db *gorm.DB) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		defer pkg.PanicHandler(c)
+		userID, exists := c.Get("userID")
+		if !exists {
+			pkg.PanicExeption(constant.Unauthorized, "Unauthorized Access Token")
+			c.Abort()
+			return
+		}
+		if exists {
+			logrus.Info("userID:", userID)
+		} else {
+			logrus.Error("Happened error when get userId from gin Context")
+			pkg.PanicExeption(constant.UnknownError)
+		}
+		str := fmt.Sprint(userID)
+
+		userIdConvert, err := strconv.ParseInt(str, 10, 64)
+		if err != nil {
+			pkg.PanicExeption(constant.UnknownError, "Internal server error")
+			c.Abort()
+			return
+		}
+		ok, err := utils.UserHasPermission(db, userIdConvert, permSlug, accessLevel)
+		if err != nil {
+			pkg.PanicExeption(constant.UnknownError, "Internal server error")
+			c.Abort()
+			return
+		}
+		if !ok {
+			pkg.PanicExeption(constant.StatusForbidden, "Forbidden")
+			c.Abort()
+			return
+		}
 		c.Next()
 	}
 }

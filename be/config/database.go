@@ -11,8 +11,8 @@ import (
 
 var roles = []entity.Roles{
 	{Id: 1, Title: "Admin", Slug: "admin", Description: "Full access to system", Activated: true, Created_at: time.Now()},
-	{Id: 2, Title: "Asset Manager", Slug: "asset-manager", Description: "Manages assets", Activated: true, Created_at: time.Now()},
-	{Id: 3, Title: "Department Head", Slug: "department-head", Description: "Oversees department", Activated: true, Created_at: time.Now()},
+	{Id: 2, Title: "Asset Manager", Slug: "assetManager", Description: "Manages assets", Activated: true, Created_at: time.Now()},
+	{Id: 3, Title: "Department Head", Slug: "departmentHead", Description: "Oversees department", Activated: true, Created_at: time.Now()},
 	{Id: 4, Title: "Viewer", Slug: "viewer", Description: "Read-only access", Activated: true, Created_at: time.Now()},
 }
 
@@ -77,6 +77,7 @@ var rolePermissions = []entity.RolePermission{
 
 	// Department Head
 	{RoleId: 3, PermissionId: 4, AccessLevel: "scoped", Created_at: time.Now()},
+	{RoleId: 3, PermissionId: 6, AccessLevel: "can-request", Created_at: time.Now()},
 	{RoleId: 3, PermissionId: 7, AccessLevel: "view", Created_at: time.Now()},
 	{RoleId: 3, PermissionId: 10, AccessLevel: "view", Created_at: time.Now()},
 	{RoleId: 3, PermissionId: 12, AccessLevel: "scoped", Created_at: time.Now()},
@@ -90,12 +91,146 @@ var rolePermissions = []entity.RolePermission{
 	{RoleId: 4, PermissionId: 13, AccessLevel: "conditional", Created_at: time.Now()},
 }
 
+func Int64Ptr(i int64) *int64 {
+	return &i
+}
+
+var users = []entity.Users{{FirstName: "Admin",
+	LastName: "Admin",
+	RoleId:   1,
+	Email:    "admin@gmail.com",
+	Password: "$2a$10$uD2Sp/ceVMQs.Fxa9883Lejcy4QSiEsWFIihuosOkCqwQaCrs011.",
+	IsActive: true},
+	{FirstName: "Manager",
+		LastName:       "asset 1",
+		RoleId:         2,
+		Email:          "ManagerAsset1@gmail.com",
+		Password:       "$2a$10$Rkga1eAiQ4xSFSfIA.ZFyuraVz8lAE7/d.OsrVHb8Cd2J/KoVnkWu",
+		IsActive:       true,
+		DepartmentId:   Int64Ptr(1),
+		IsAssetManager: true},
+	{FirstName: "Manager",
+		LastName:       "asset 2",
+		RoleId:         2,
+		Email:          "ManagerAsset2@gmail.com",
+		Password:       "$2a$10$AGvvpScnwlpreNybde2RYOu3YwXWR5upqH4CYgY4kyrR9IUOS/2SC",
+		IsActive:       true,
+		DepartmentId:   Int64Ptr(2),
+		IsAssetManager: true},
+	{FirstName: "Manager",
+		LastName:       "asset 3",
+		RoleId:         2,
+		Email:          "ManagerAsset3@gmail.com",
+		Password:       "$2a$10$gPgRynYgAnJga.yDxY/E7OcjJFMFv4fsB3lL4lvnsvmpigYNMNJ2W",
+		IsActive:       true,
+		DepartmentId:   Int64Ptr(3),
+		IsAssetManager: true},
+	{FirstName: "Manager",
+		LastName:       "asset 4",
+		RoleId:         2,
+		Email:          "ManagerAsset4@gmail.com",
+		Password:       "$2a$10$Uu4bpMgDh5BqgCoxNNMD6ePiPXYJHOdCmDGf9JO7LflS6rxVo29t6",
+		IsActive:       true,
+		DepartmentId:   Int64Ptr(4),
+		IsAssetManager: true},
+	{FirstName: "Head",
+		LastName:         "Department 1",
+		RoleId:           3,
+		Email:            "HeadDepartment1@gmail.com",
+		Password:         "$2a$10$6FvD1M1qmg77Us8nURZJLu/aAL5b.nmazfg5vWTjF7uyUt4ysnVRC",
+		IsActive:         true,
+		DepartmentId:     Int64Ptr(1),
+		IsHeadDepartment: true},
+	{FirstName: "Head",
+		LastName:         "Department 2",
+		RoleId:           3,
+		Email:            "HeadDepartment2@gmail.com",
+		Password:         "$2a$10$5FwA7C7XsyrWP0hW5CXtfOx8bpLT8aGso6SZbIlMtdVNvvJA/KxWe",
+		IsActive:         true,
+		DepartmentId:     Int64Ptr(2),
+		IsHeadDepartment: true},
+	{FirstName: "Head",
+		LastName:         "Department 3",
+		RoleId:           3,
+		Email:            "HeadDepartment3@gmail.com",
+		Password:         "$2a$10$swIr.PfjoxEUxzuj/wDB9.5CyrLJ9ZHlV8x.H7H1ZUMaJCpy69Kha",
+		IsActive:         true,
+		DepartmentId:     Int64Ptr(3),
+		IsHeadDepartment: true},
+	{FirstName: "Head",
+		LastName:         "Department 4",
+		RoleId:           3,
+		Email:            "HeadDepartment4@gmail.com",
+		Password:         "$2a$10$S55fTYiB9AD4bYbyK47i8uiEneajsduoGd8eTsTT0tybfLhasGjzu",
+		IsActive:         true,
+		DepartmentId:     Int64Ptr(4),
+		IsHeadDepartment: true},
+	{FirstName: "Viewer",
+		LastName:     "Department 1",
+		RoleId:       4,
+		Email:        "ViewerDepartment1@gmail.com",
+		Password:     "$2a$10$HpKZlAE1EgXm2qSVUzDNY.Jl21nJdJoJF9N8Eo2h07WrFpKgd3hE6",
+		IsActive:     true,
+		DepartmentId: Int64Ptr(1),
+	},
+	{FirstName: "Viewer",
+		LastName:     "Department 2",
+		RoleId:       4,
+		Email:        "ViewerDepartment2@gmail.com",
+		Password:     "$2a$10$FbSLfcYefGmoqUFZWxIF2.TPb3ujjSsHCKhSYMP86VpEYozx6JCr6",
+		IsActive:     true,
+		DepartmentId: Int64Ptr(2),
+	},
+	{FirstName: "Viewer",
+		LastName:     "Department 3",
+		RoleId:       4,
+		Email:        "ViewerDepartment3@gmail.com",
+		Password:     "$2a$10$wVSYY0LmSYRXbEO3JyRWMu.JnNk.tsjCJgAMMSuWkm58eNMe2XmdW",
+		IsActive:     true,
+		DepartmentId: Int64Ptr(3),
+	},
+	{FirstName: "Viewer",
+		LastName:     "Department 4",
+		RoleId:       4,
+		Email:        "ViewerDepartment4@gmail.com",
+		Password:     "$2a$10$5t/A3R/jOLUxA2EFuCS/oeZA27i2YZ4PLBQAQ8/CK456dYUpMRrCa",
+		IsActive:     true,
+		DepartmentId: Int64Ptr(4),
+	},
+}
+
+var locations = []entity.Locations{
+	{Id: 1, LocationName: "307/12 Nguyen Van Troi,Ward 1, Tan Binh District,HCMC, Viet Nam"},
+}
+var departments = []entity.Departments{
+	{Id: 1, LocationId: 1, DepartmentName: "PG1"},
+	{Id: 2, LocationId: 1, DepartmentName: "PG2"},
+	{Id: 3, LocationId: 1, DepartmentName: "PG3"},
+	{Id: 4, LocationId: 1, DepartmentName: "PG4"},
+}
+
 func ConnectToDB() *gorm.DB {
 	db, err := gorm.Open(postgres.Open(DB_DNS), &gorm.Config{})
 	if err != nil {
 		log.Fatal("Error connecting to database. Error:", err)
 	}
-	err = db.AutoMigrate(&entity.Roles{}, &entity.Permission{}, &entity.RolePermission{}, &entity.Users{}, &entity.UsersSessions{}, &entity.UserRbac{}, &entity.Locations{}, &entity.Departments{}, &entity.Categories{}, &entity.Assets{}, &entity.AssetLog{}, entity.Assignments{})
+	createEnumSQL := `
+	DO $$
+	BEGIN
+		IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'asset_status') THEN
+			CREATE TYPE asset_status AS ENUM (
+				'New', 
+				'In Use', 
+				'Under Maintenance', 
+				'Retired', 
+				'Disposed'
+			);
+		END IF;
+	END
+	$$;
+	`
+	db.Exec(createEnumSQL)
+	err = db.AutoMigrate(&entity.Roles{}, &entity.Permission{}, &entity.RolePermission{}, &entity.Users{}, &entity.UsersSessions{}, &entity.UserRbac{}, &entity.Locations{}, &entity.Departments{}, &entity.Categories{}, &entity.Assets{}, &entity.AssetLog{}, &entity.Assignments{}, &entity.RequestTransfer{}, &entity.Notifications{}, &entity.MaintenanceSchedules{}, &entity.MaintenanceNotifications{})
 	if err != nil {
 		log.Fatal("Error migrate to database. Error:", err)
 	}
@@ -114,6 +249,17 @@ func ConnectToDB() *gorm.DB {
 		var existing entity.RolePermission
 		db.Where("role_id = ? and permission_id = ?", rolePermission.RoleId, rolePermission.PermissionId).FirstOrCreate(&existing, rolePermission)
 	}
-
+	for _, location := range locations {
+		var existing entity.Locations
+		db.Where("location_name = ?", existing.LocationName).FirstOrCreate(&existing, location)
+	}
+	for _, department := range departments {
+		var existing entity.Departments
+		db.Where("department_name = ?", existing.DepartmentName).FirstOrCreate(&existing, department)
+	}
+	for _, user := range users {
+		var existing entity.Users
+		db.Where("email = ?", user.Email).FirstOrCreate(&existing, user)
+	}
 	return db
 }

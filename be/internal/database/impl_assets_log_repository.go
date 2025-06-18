@@ -15,7 +15,29 @@ func NewPostgreSQLAssetsLogRepository(db *gorm.DB) repository.AssetsLogRepositor
 	return &PostgreSQLAssetsLogrepository{db: db}
 }
 
-func (r *PostgreSQLAssetsLogrepository) Create(assetsLog *entity.AssetLog) (*entity.AssetLog, error) {
-	result := r.db.Create(assetsLog)
+func (r *PostgreSQLAssetsLogrepository) Create(assetsLog *entity.AssetLog, tx *gorm.DB) (*entity.AssetLog, error) {
+	result := tx.Create(assetsLog)
 	return assetsLog, result.Error
+}
+
+func (r *PostgreSQLAssetsLogrepository) GetLogByAssetId(assetId int64) ([]*entity.AssetLog, error) {
+	assetLogs := []*entity.AssetLog{}
+	result := r.db.Model(entity.AssetLog{}).Where("asset_id = ?", assetId).Find(&assetLogs)
+	if result.Error != nil {
+		return nil, result.Error
+	}
+	return assetLogs, nil
+}
+
+func (r *PostgreSQLAssetsLogrepository) GetDB() *gorm.DB {
+	return r.db
+}
+
+func (r *PostgreSQLAssetsLogrepository) GetNewLogByAssetId(assetId int64) (*entity.AssetLog, error) {
+	var assetLogs entity.AssetLog
+	result := r.db.Model(entity.AssetLog{}).Where("asset_id = ?", assetId).Order("timestamp DESC").First(&assetLogs)
+	if result.Error != nil {
+		return nil, result.Error
+	}
+	return &assetLogs, nil
 }
