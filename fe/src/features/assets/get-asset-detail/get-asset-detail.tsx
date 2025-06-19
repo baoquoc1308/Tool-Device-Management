@@ -19,6 +19,7 @@ import {
 } from '@/components/ui'
 
 import { ArrowLeft, Pencil, Loader2, Trash2 } from 'lucide-react'
+import { useAppSelector } from '@/hooks'
 
 import {
   AssetBadge,
@@ -40,7 +41,10 @@ const GetAssetDetail = () => {
   const [isDialogOpen, setIsDialogOpen] = useState(false)
   const [asset, setAsset] = useState<AssetsType>()
   const navigate = useNavigate()
-
+  const user = useAppSelector((state) => state.auth.user)
+  const canEditAsset = () => {
+    return user.role.slug === 'admin' || user.role.slug === 'assetManager'
+  }
   const getAssetData = () => {
     startTransition(async () => {
       if (!id) return
@@ -96,7 +100,7 @@ const GetAssetDetail = () => {
           <h1 className='text-3xl font-semibold'>{asset.assetName}</h1>
           <AssetBadge asset={asset} />
         </div>
-        {asset.status !== 'Disposed' && (
+        {asset.status !== 'Disposed' && canEditAsset() && (
           <div className='flex items-center space-x-2'>
             <Link to={`/assets/update/${id}`}>
               <Button variant='outline'>
@@ -148,14 +152,16 @@ const GetAssetDetail = () => {
                 <CardTitle>Maintenance Schedule</CardTitle>
                 <CardDescription>Upcoming and past maintenance schedules</CardDescription>
               </CardHeader>
-              <div className='flex items-center space-x-2 p-4'>
-                <Button
-                  variant={'outline'}
-                  onClick={() => setIsDialogOpen(true)}
-                >
-                  Update schedules
-                </Button>
-              </div>
+              {user.role.slug !== 'viewer' && (
+                <div className='flex items-center space-x-2 p-4'>
+                  <Button
+                    variant={'outline'}
+                    onClick={() => setIsDialogOpen(true)}
+                  >
+                    Update schedules
+                  </Button>
+                </div>
+              )}
             </div>
 
             <CardContent>
