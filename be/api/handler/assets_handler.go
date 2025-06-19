@@ -308,7 +308,6 @@ func (h *AssetsHandler) Update(c *gin.Context) {
 			Email:     asset.OnwerUser.Email,
 		}
 	}
-	config.Rdb.Del(config.Ctx, "assets:all")
 	c.JSON(http.StatusOK, pkg.BuildReponseSuccess(http.StatusOK, constant.Success, assetResponse))
 }
 
@@ -389,34 +388,13 @@ func (h *AssetsHandler) GetAssetById(c *gin.Context) {
 func (h *AssetsHandler) GetAllAsset(c *gin.Context) {
 	defer pkg.PanicHandler(c)
 	var assets []*entity.Assets
-	val, err := config.Rdb.Get(config.Ctx, cacheKey).Result()
-	if err == nil {
-		// ✅ Dữ liệu có trong Redis, trả về
-		var cached []entity.Assets
-		if err := json.Unmarshal([]byte(val), &cached); err == nil {
-			ttl, err := config.Rdb.TTL(config.Ctx, cacheKey).Result()
-			if err == nil && ttl > 0 {
-				newTTL := ttl * 2
-				if newTTL > maxTTL {
-					newTTL = maxTTL
-				}
-				config.Rdb.Expire(config.Ctx, cacheKey, newTTL)
-			}
-			for _, a := range cached {
-				copy := a
-				assets = append(assets, &copy)
-			}
-		} else {
-			log.Error("Happened error when get all assets. Error", err)
-			pkg.PanicExeption(constant.UnknownError, "Happened error when get all assets in redis")
-		}
-	} else {
-		assets, err = h.service.GetAllAsset()
-		if err != nil {
-			log.Error("Happened error when get all assets. Error", err)
-			pkg.PanicExeption(constant.UnknownError, "Happened error when get all assets")
-		}
+	userID := utils.GetUserIdFromContext(c)
+	assets, err := h.service.GetAllAsset(userID)
+	if err != nil {
+		log.Error("Happened error when get all assets. Error", err)
+		pkg.PanicExeption(constant.UnknownError, "Happened error when get all assets")
 	}
+
 	assetsResponse := []dto.AssetResponse{}
 	for _, asset := range assets {
 		assetResponse := dto.AssetResponse{
@@ -494,7 +472,6 @@ func (h *AssetsHandler) DeleteAsset(c *gin.Context) {
 	if err != nil {
 		pkg.PanicExeption(constant.UnknownError, "Happened error when delete assets")
 	}
-	config.Rdb.Del(config.Ctx, "assets:all")
 	c.JSON(http.StatusOK, pkg.BuildReponseSuccessNoData(http.StatusOK, constant.Success))
 }
 
@@ -538,7 +515,6 @@ func (h *AssetsHandler) UpdateAssetRetired(c *gin.Context) {
 	if err != nil {
 		pkg.PanicExeption(constant.UnknownError, "Happened error when retired assets")
 	}
-	config.Rdb.Del(config.Ctx, "assets:all")
 	c.JSON(http.StatusOK, pkg.BuildReponseSuccess(http.StatusOK, constant.Success, asset))
 }
 

@@ -139,8 +139,17 @@ func (service *AssetsService) GetAssetById(userId int64, assertId int64) (*entit
 	return assert, err
 }
 
-func (service *AssetsService) GetAllAsset() ([]*entity.Assets, error) {
-	assets, err := service.repo.GetAllAsset()
+func (service *AssetsService) GetAllAsset(userId int64) ([]*entity.Assets, error) {
+	user, err := service.userRepository.FindByUserId(userId)
+	if err != nil {
+		return nil, err
+	}
+	var assets []*entity.Assets
+	if user.Role.Slug == "departmentHead" {
+		assets, err = service.repo.GetAllAssetOfDep(*user.DepartmentId)
+	} else {
+		assets, err = service.repo.GetAllAsset()
+	}
 	if err != nil {
 		return nil, err
 	}

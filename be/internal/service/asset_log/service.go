@@ -58,29 +58,47 @@ func (service *AssetLogService) Filter(userId int64, assetId int64, action, star
 	assetLogResponses := []dto.AssetLogsResponse{}
 	for _, assetLog := range asset_logs {
 		var assetLogResponse dto.AssetLogsResponse
+
 		assetLogResponse.Action = assetLog.Action
 		assetLogResponse.Timestamp = assetLog.Timestamp.Format("2006-01-02")
 		assetLogResponse.ChangeSummary = assetLog.ChangeSummary
-		//byUser
-		assetLogResponse.ByUser.Id = *assetLog.ByUserId
-		assetLogResponse.ByUser.FirstName = assetLog.ByUser.FirstName
-		assetLogResponse.ByUser.LastName = assetLog.ByUser.LastName
-		assetLogResponse.ByUser.Email = assetLog.ByUser.Email
-		//assignUser
-		if assetLog.AssignUser != nil {
-			assetLogResponse.AssignUser = &dto.UserResponseInAssetLog{}
-			assetLogResponse.AssignUser.Id = assetLog.AssignUser.Id
-			assetLogResponse.AssignUser.FirstName = assetLog.AssignUser.FirstName
-			assetLogResponse.AssignUser.LastName = assetLog.AssignUser.LastName
-			assetLogResponse.AssignUser.Email = assetLog.AssignUser.Email
+
+		// byUser
+		if assetLog.ByUserId != nil {
+			assetLogResponse.ByUser.Id = *assetLog.ByUserId
 		}
-		//asset
+		if assetLog.ByUser != nil {
+			assetLogResponse.ByUser.FirstName = assetLog.ByUser.FirstName
+			assetLogResponse.ByUser.LastName = assetLog.ByUser.LastName
+			assetLogResponse.ByUser.Email = assetLog.ByUser.Email
+		}
+
+		// assignUser
+		if assetLog.AssignUser != nil {
+			assetLogResponse.AssignUser = &dto.UserResponseInAssetLog{
+				Id:        assetLog.AssignUser.Id,
+				FirstName: assetLog.AssignUser.FirstName,
+				LastName:  assetLog.AssignUser.LastName,
+				Email:     assetLog.AssignUser.Email,
+			}
+		}
+
+		// asset
+
 		assetLogResponse.Asset.AssetName = assetLog.Asset.AssetName
 		assetLogResponse.Asset.Id = assetLog.Asset.Id
 		assetLogResponse.Asset.SerialNumber = assetLog.Asset.SerialNumber
-		assetLogResponse.Asset.ImageUpload = *assetLog.Asset.ImageUpload
-		assetLogResponse.Asset.FileAttachment = *assetLog.Asset.FileAttachment
-		assetLogResponse.Asset.QrUrl = *assetLog.Asset.QrUrl
+
+		if assetLog.Asset.ImageUpload != nil {
+			assetLogResponse.Asset.ImageUpload = *assetLog.Asset.ImageUpload
+		}
+		if assetLog.Asset.FileAttachment != nil {
+			assetLogResponse.Asset.FileAttachment = *assetLog.Asset.FileAttachment
+		}
+		if assetLog.Asset.QrUrl != nil {
+			assetLogResponse.Asset.QrUrl = *assetLog.Asset.QrUrl
+		}
+
 		assetLogResponses = append(assetLogResponses, assetLogResponse)
 	}
 	return assetLogResponses, nil
