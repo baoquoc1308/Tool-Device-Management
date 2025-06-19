@@ -19,6 +19,7 @@ func SetupRoutes(r *gin.Engine, userHandler *handler.UserHandler, LocationHandle
 	registerAuthRoutes(api, userHandler, SSEHandler)
 	registerUserRoutes(api, userHandler, session, db)
 	registerLocationsRoutes(api, LocationHandler, session, db)
+	registerCategoriesRoutes(api, CategoriesHandler, session, db)
 	registerDepartmentRoutes(api, DepartmentsHandler, session, db)
 	registerAssetsRoutes(api, AssetsHandler, session, db)
 	registerRoleRoutes(api, RoleHandler, session, db)
