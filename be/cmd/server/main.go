@@ -1,18 +1,16 @@
 package main
 
 import (
-	"BE_Manage_device/api"
 	"BE_Manage_device/api/handler"
+	api "BE_Manage_device/api/router"
 	"BE_Manage_device/cmd/server/docs"
 	"BE_Manage_device/config"
-	"BE_Manage_device/internal/database"
-	"BE_Manage_device/internal/domain/service"
-	"BE_Manage_device/pkg/utils"
+	"BE_Manage_device/internal/repository"
+	"BE_Manage_device/internal/service"
+	cronjob "BE_Manage_device/pkg/cron_job"
 	"log"
-	"time"
 
 	"github.com/gin-contrib/pprof"
-	"github.com/robfig/cron/v3"
 
 	"github.com/gin-gonic/gin"
 	swaggerFiles "github.com/swaggo/files"
@@ -22,55 +20,33 @@ import (
 func main() {
 	config.LoadEnv()
 	db := config.ConnectToDB()
-	userRepository := database.NewPostgreSQLUserRepository(db)
-	userSessionRepository := database.NewPostgreSQLUserSessionRepository(db)
-	locationRepository := database.NewPostgreSQLLocationRepository(db)
-	categoriesRepository := database.NewPostgreSQLCategoriesRepository(db)
-	departmentRepository := database.NewPostgreSQLDepartmentsRepository(db)
-	assetsRepository := database.NewPostgreSQLAssetsRepository(db)
-	assetsLogRepository := database.NewPostgreSQLAssetsLogRepository(db)
-	roleRepository := database.NewPostgreSQLRoleRepository(db)
-	userRBACRepository := database.NewPostgreSQLUserRBACRepository(db)
-	assignmentRepository := database.NewPostgreSQLAssignmentRepository(db)
-	requestTransferRepository := database.NewPostgreSQLRequestTransferRepository(db)
-	emailService := service.NewEmailService(config.SmtpPasswd)
-	maintenanceRepository := database.NewPostgreSQLMaintenanceSchedulesRepository(db)
-	notificationRepository := database.NewPostgreSQLNotificationRepository(db)
+	config.InitRedis()
+	repos := repository.NewRepository(db)
+	services := service.NewServices(repos, config.SmtpPasswd)
 	//User
-	userService := service.NewUserService(userRepository, emailService, userSessionRepository, roleRepository, assetsRepository, userRBACRepository)
-	userHandler := handler.NewUserHandler(userService)
+	userHandler := handler.NewUserHandler(services.User)
 	//Location
-	locationService := service.NewLocationService(locationRepository)
-	locationHandler := handler.NewLocationHandler(locationService)
+	locationHandler := handler.NewLocationHandler(services.Location)
 	//Categories
-	categoriesService := service.NewCategoriesService(categoriesRepository)
-	categoriesHandler := handler.NewCategoriesHandler(categoriesService)
+	categoriesHandler := handler.NewCategoriesHandler(services.Categories)
 	//Department
-	departmentService := service.NewDepartmentsService(departmentRepository)
-	departmentHandler := handler.NewDepartmentsHandler(departmentService)
+	departmentHandler := handler.NewDepartmentsHandler(services.Department)
 	//SSE
-	notificationsService := service.NewNotificationService(notificationRepository)
-	SSeHandler := handler.NewSSEHandler(notificationsService)
+	SSeHandler := handler.NewSSEHandler(services.Notification)
 	//Assets
-	assetsService := service.NewAssetsService(assetsRepository, assetsLogRepository, roleRepository, userRBACRepository, userRepository, assignmentRepository, departmentRepository, notificationsService)
-	assetsHandler := handler.NewAssetsHandler(assetsService)
+	assetsHandler := handler.NewAssetsHandler(services.Assets)
 	//Role
-	roleService := service.NewRoleService(roleRepository)
-	roleHandler := handler.NewRoleHandler(roleService)
+	roleHandler := handler.NewRoleHandler(services.Role)
 	//Assignment
-	assignmentService := service.NewAssignmentService(assignmentRepository, assetsLogRepository, assetsRepository, departmentRepository, userRepository, notificationsService)
-	assignmentHandler := handler.NewAssignmentHandler(assignmentService)
+	assignmentHandler := handler.NewAssignmentHandler(services.Assignment)
 	//AssetLog
-	assetLogService := service.NewAssetLogService(assetsLogRepository, userRepository, roleRepository, assetsRepository)
-	assetLogHandler := handler.NewAssetLogHandler(assetLogService)
+	assetLogHandler := handler.NewAssetLogHandler(services.AssetLog)
 	//Request Transfer
-	requestTransferService := service.NewRequestTransferService(requestTransferRepository, assignmentService, userRepository, assetsRepository)
-	requestTransferHandler := handler.NewRequestTransferHandler(requestTransferService)
+	requestTransferHandler := handler.NewRequestTransferHandler(services.RequestTransfer)
 	//Maintenance
-	MaintenanceService := service.NewMaintenanceSchedulesService(maintenanceRepository, assetsRepository, userRepository, notificationsService)
-	maintenanceHandler := handler.NewMaintenanceSchedulesHandler(MaintenanceService)
+	maintenanceHandler := handler.NewMaintenanceSchedulesHandler(services.MaintenanceSchedules)
 	// Notification
-	notificationsHandler := handler.NewNotificationHandler(notificationsService)
+	notificationsHandler := handler.NewNotificationHandler(services.Notification)
 	docs.SwaggerInfo.Title = "API Tool device manage"
 	docs.SwaggerInfo.Description = "App Tool device manage"
 	docs.SwaggerInfo.Version = "1.0"
@@ -80,43 +56,10 @@ func main() {
 
 	r := gin.Default()
 	pprof.Register(r)
-	api.SetupRoutes(r, userHandler, locationHandler, categoriesHandler, departmentHandler, assetsHandler, roleHandler, assignmentHandler, assetLogHandler, requestTransferHandler, maintenanceHandler, SSeHandler, notificationsHandler, userSessionRepository, db)
+	api.SetupRoutes(r, userHandler, locationHandler, categoriesHandler, departmentHandler, assetsHandler, roleHandler, assignmentHandler, assetLogHandler, requestTransferHandler, maintenanceHandler, SSeHandler, notificationsHandler, repos.UserSession, db)
 	r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 
-	c := cron.New(cron.WithLocation(time.FixedZone("Asia/Ho_Chi_Minh", 7*3600)))
-
-	_, err := c.AddFunc("0 8 * * *", func() {
-		log.Println("🔔 Running maintenance notification check at 8:00 AM")
-		utils.CheckAndSenMaintenanceNotification(db, emailService, assetsRepository, userRepository, notificationsService, assetsLogRepository)
-	})
-	if err != nil {
-		log.Fatalf("❌ Failed to schedule cron job: %v", err)
-	}
-	_, err = c.AddFunc("1 8 * * *", func() {
-		log.Println("🔔 Running warranty notification check at 8:00 AM")
-		utils.SendEmailsForWarrantyExpiry(db, emailService, notificationsService, assetsRepository, userRepository)
-	})
-	if err != nil {
-		log.Fatalf("❌ Failed to schedule cron job: %v", err)
-	}
-
-	_, err = c.AddFunc("0 9 * * *", func() {
-		log.Println("🔔 Running update status when finish maintenance check at 8:00 AM")
-		utils.UpdateStatusWhenFinishMaintenance(db, assetsRepository, userRepository, notificationsService, assetsLogRepository)
-	})
-	if err != nil {
-		log.Fatalf("❌ Failed to schedule cron job: %v", err)
-	}
-
-	_, err = c.AddFunc("*/10 * * * *", func() {
-		log.Println("🔔 Running kill session")
-		utils.KillIdleSessions(db)
-	})
-	if err != nil {
-		log.Fatalf("❌ Failed to schedule cron job: %v", err)
-	}
-
-	c.Start()
+	cronjob.InitCronJobs(db, services.Email, repos.Assets, repos.User, services.Notification, repos.AssetsLog)
 
 	if err := r.Run(config.Port); err != nil {
 		log.Fatal("failed to run server:", err)

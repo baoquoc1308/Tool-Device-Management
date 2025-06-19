@@ -1,15 +1,18 @@
 package handler
 
 import (
+	"BE_Manage_device/config"
 	"BE_Manage_device/constant"
 	"BE_Manage_device/internal/domain/dto"
 	"BE_Manage_device/internal/domain/entity"
 	"BE_Manage_device/internal/domain/filter"
-	"BE_Manage_device/internal/domain/service"
+	service "BE_Manage_device/internal/service/asset"
+
 	"BE_Manage_device/pkg"
 	"BE_Manage_device/pkg/utils"
 	"bytes"
 	"encoding/csv"
+	"encoding/json"
 	"net/http"
 	"strconv"
 	"time"
@@ -17,6 +20,12 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/phpdave11/gofpdf"
 	log "github.com/sirupsen/logrus"
+)
+
+const (
+	cacheKey   = "assets:all"
+	initialTTL = 10 * time.Minute
+	maxTTL     = 1 * time.Hour
 )
 
 type AssetsHandler struct {
@@ -164,6 +173,7 @@ func (h *AssetsHandler) Create(c *gin.Context) {
 			Email:     asset.OnwerUser.Email,
 		}
 	}
+	config.Rdb.Del(config.Ctx, "assets:all")
 	c.JSON(http.StatusCreated, pkg.BuildReponseSuccess(http.StatusCreated, constant.Success, assetResponse))
 }
 
@@ -298,6 +308,7 @@ func (h *AssetsHandler) Update(c *gin.Context) {
 			Email:     asset.OnwerUser.Email,
 		}
 	}
+	config.Rdb.Del(config.Ctx, "assets:all")
 	c.JSON(http.StatusOK, pkg.BuildReponseSuccess(http.StatusOK, constant.Success, assetResponse))
 }
 
@@ -377,10 +388,34 @@ func (h *AssetsHandler) GetAssetById(c *gin.Context) {
 // @Security JWT
 func (h *AssetsHandler) GetAllAsset(c *gin.Context) {
 	defer pkg.PanicHandler(c)
-	assets, err := h.service.GetAllAsset()
-	if err != nil {
-		log.Error("Happened error when get all assets. Error", err)
-		pkg.PanicExeption(constant.UnknownError, "Happened error when get all assets")
+	var assets []*entity.Assets
+	val, err := config.Rdb.Get(config.Ctx, cacheKey).Result()
+	if err == nil {
+		// ✅ Dữ liệu có trong Redis, trả về
+		var cached []entity.Assets
+		if err := json.Unmarshal([]byte(val), &cached); err == nil {
+			ttl, err := config.Rdb.TTL(config.Ctx, cacheKey).Result()
+			if err == nil && ttl > 0 {
+				newTTL := ttl * 2
+				if newTTL > maxTTL {
+					newTTL = maxTTL
+				}
+				config.Rdb.Expire(config.Ctx, cacheKey, newTTL)
+			}
+			for _, a := range cached {
+				copy := a
+				assets = append(assets, &copy)
+			}
+		} else {
+			log.Error("Happened error when get all assets. Error", err)
+			pkg.PanicExeption(constant.UnknownError, "Happened error when get all assets in redis")
+		}
+	} else {
+		assets, err = h.service.GetAllAsset()
+		if err != nil {
+			log.Error("Happened error when get all assets. Error", err)
+			pkg.PanicExeption(constant.UnknownError, "Happened error when get all assets")
+		}
 	}
 	assetsResponse := []dto.AssetResponse{}
 	for _, asset := range assets {
@@ -418,6 +453,9 @@ func (h *AssetsHandler) GetAllAsset(c *gin.Context) {
 		}
 		assetsResponse = append(assetsResponse, assetResponse)
 	}
+	// ✅ Cache lại dữ liệu
+	bytes, _ := json.Marshal(assets)
+	config.Rdb.Set(config.Ctx, cacheKey, bytes, 10*time.Minute)
 	c.JSON(http.StatusOK, pkg.BuildReponseSuccess(http.StatusOK, constant.Success, assetsResponse))
 }
 
@@ -456,6 +494,7 @@ func (h *AssetsHandler) DeleteAsset(c *gin.Context) {
 	if err != nil {
 		pkg.PanicExeption(constant.UnknownError, "Happened error when delete assets")
 	}
+	config.Rdb.Del(config.Ctx, "assets:all")
 	c.JSON(http.StatusOK, pkg.BuildReponseSuccessNoData(http.StatusOK, constant.Success))
 }
 
@@ -499,6 +538,7 @@ func (h *AssetsHandler) UpdateAssetRetired(c *gin.Context) {
 	if err != nil {
 		pkg.PanicExeption(constant.UnknownError, "Happened error when retired assets")
 	}
+	config.Rdb.Del(config.Ctx, "assets:all")
 	c.JSON(http.StatusOK, pkg.BuildReponseSuccess(http.StatusOK, constant.Success, asset))
 }
 

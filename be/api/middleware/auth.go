@@ -2,7 +2,8 @@ package middleware
 
 import (
 	"BE_Manage_device/constant"
-	"BE_Manage_device/internal/domain/repository"
+	repository "BE_Manage_device/internal/repository/user_session"
+
 	"BE_Manage_device/pkg"
 	"BE_Manage_device/pkg/utils"
 	"context"

@@ -1,15 +1,23 @@
 package handler
 
 import (
+	"BE_Manage_device/config"
 	"BE_Manage_device/constant"
 	"BE_Manage_device/internal/domain/dto"
-	"BE_Manage_device/internal/domain/service"
+	"BE_Manage_device/internal/domain/entity"
+	service "BE_Manage_device/internal/service/categories"
+
 	"BE_Manage_device/pkg"
+	"encoding/json"
 	"net/http"
 	"strconv"
 
 	"github.com/gin-gonic/gin"
 	log "github.com/sirupsen/logrus"
+)
+
+const (
+	cacheKeyCategories = "categories:all"
 )
 
 type CategoriesHandler struct {
@@ -45,6 +53,7 @@ func (h *CategoriesHandler) Create(c *gin.Context) {
 		log.Error("Happened error when create category. Error", err)
 		pkg.PanicExeption(constant.UnknownError, "Happened error when create category")
 	}
+	config.Rdb.Del(config.Ctx, cacheKeyCategories)
 	c.JSON(http.StatusCreated, pkg.BuildReponseSuccess(http.StatusCreated, constant.Success, location))
 }
 
@@ -62,10 +71,34 @@ func (h *CategoriesHandler) Create(c *gin.Context) {
 // @Security JWT
 func (h *CategoriesHandler) GetAll(c *gin.Context) {
 	defer pkg.PanicHandler(c)
-	categories, err := h.service.GetAll()
-	if err != nil {
-		log.Error("Happened error when get all categories. Error", err)
-		pkg.PanicExeption(constant.UnknownError, "Happened error when get all categories")
+	var categories []*entity.Categories
+	val, err := config.Rdb.Get(config.Ctx, cacheKeyCategories).Result()
+	if err == nil {
+		// ✅ Dữ liệu có trong Redis, trả về
+		var cached []entity.Categories
+		if err := json.Unmarshal([]byte(val), &cached); err == nil {
+			ttl, err := config.Rdb.TTL(config.Ctx, cacheKeyCategories).Result()
+			if err == nil && ttl > 0 {
+				newTTL := ttl * 2
+				if newTTL > maxTTL {
+					newTTL = maxTTL
+				}
+				config.Rdb.Expire(config.Ctx, cacheKeyCategories, newTTL)
+			}
+			for _, a := range cached {
+				copy := a
+				categories = append(categories, &copy)
+			}
+		} else {
+			log.Error("Happened error when get all categories. Error", err)
+			pkg.PanicExeption(constant.UnknownError, "Happened error when get all categories in redis")
+		}
+	} else {
+		categories, err = h.service.GetAll()
+		if err != nil {
+			log.Error("Happened error when get all categories. Error", err)
+			pkg.PanicExeption(constant.UnknownError, "Happened error when get all categories")
+		}
 	}
 	c.JSON(http.StatusOK, pkg.BuildReponseSuccess(http.StatusOK, constant.Success, categories))
 }
@@ -97,5 +130,6 @@ func (h *CategoriesHandler) Delete(c *gin.Context) {
 		log.Error("Happened error when delete category. Error", err)
 		pkg.PanicExeption(constant.UnknownError, err.Error())
 	}
+	config.Rdb.Del(config.Ctx, cacheKeyCategories)
 	c.JSON(http.StatusOK, pkg.BuildReponseSuccessNoData(http.StatusOK, constant.Success))
 }

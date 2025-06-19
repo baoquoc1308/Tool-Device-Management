@@ -3,7 +3,7 @@ package utils
 import (
 	"BE_Manage_device/config"
 	"BE_Manage_device/internal/domain/entity"
-	"BE_Manage_device/internal/domain/repository"
+
 	"BE_Manage_device/pkg/interfaces"
 	"bytes"
 	"encoding/json"
@@ -15,6 +15,11 @@ import (
 	"strings"
 	"sync"
 	"time"
+
+	asset_log "BE_Manage_device/internal/repository/asset_log"
+	repository "BE_Manage_device/internal/repository/asset_log"
+	asset "BE_Manage_device/internal/repository/assets"
+	user "BE_Manage_device/internal/repository/user"
 
 	log "github.com/sirupsen/logrus"
 	"github.com/skip2/go-qrcode"
@@ -181,7 +186,7 @@ type notificationJob struct {
 	Body    string
 }
 
-func CheckAndSenMaintenanceNotification(db *gorm.DB, emailNotifier interfaces.EmailNotifier, assetRepo repository.AssetsRepository, userRepo repository.UserRepository, notification interfaces.Notification, assetLogRepo repository.AssetsLogRepository) {
+func CheckAndSenMaintenanceNotification(db *gorm.DB, emailNotifier interfaces.EmailNotifier, assetRepo asset.AssetsRepository, userRepo user.UserRepository, notification interfaces.Notification, assetLogRepo repository.AssetsLogRepository) {
 	startOfDay := time.Now().Truncate(24 * time.Hour)
 	endOfDay := startOfDay.Add(24 * time.Hour)
 	var schedules []entity.MaintenanceSchedules
@@ -324,7 +329,7 @@ func CheckAndSenMaintenanceNotification(db *gorm.DB, emailNotifier interfaces.Em
 	wg.Wait()
 }
 
-func UpdateStatusWhenFinishMaintenance(db *gorm.DB, assetRepo repository.AssetsRepository, userRepo repository.UserRepository, notification interfaces.Notification, assetLogRepo repository.AssetsLogRepository) {
+func UpdateStatusWhenFinishMaintenance(db *gorm.DB, assetRepo asset.AssetsRepository, userRepo user.UserRepository, notification interfaces.Notification, assetLogRepo asset_log.AssetsLogRepository) {
 	assets, err := assetRepo.GetAssetByStatus("Under Maintenance")
 	if err != nil {
 		log.Printf("❌ Error fetching assets with status 'Under Maintenance': %v", err)
@@ -378,7 +383,7 @@ func UpdateStatusWhenFinishMaintenance(db *gorm.DB, assetRepo repository.AssetsR
 	}
 }
 
-func SendEmailsForWarrantyExpiry(db *gorm.DB, emailNotifier interfaces.EmailNotifier, notification interfaces.Notification, assetRepo repository.AssetsRepository, userRepo repository.UserRepository) {
+func SendEmailsForWarrantyExpiry(db *gorm.DB, emailNotifier interfaces.EmailNotifier, notification interfaces.Notification, assetRepo asset.AssetsRepository, userRepo user.UserRepository) {
 	assets, err := assetRepo.GetAssetsWasWarrantyExpiry()
 	if err != nil {
 		log.Printf("❌ Error fetching assets : %v", err)
