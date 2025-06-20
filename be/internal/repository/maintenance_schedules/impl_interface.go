@@ -61,7 +61,7 @@ func (r *PostgreSQLMaintenanceSchedulesRepository) GetAllMaintenanceSchedules() 
 	startOfDay := time.Now().Truncate(24 * time.Hour)
 	endOfDay := startOfDay.Add(24 * time.Hour)
 	maintenances := []*entity.MaintenanceSchedules{}
-	result := r.db.Model(entity.MaintenanceSchedules{}).Joins("join assets on assets.id = maintenance_schedules.asset_id").Where("end_date >= ?", endOfDay).Preload("Asset").Find(&maintenances)
+	result := r.db.Model(entity.MaintenanceSchedules{}).Joins("join assets on assets.id = maintenance_schedules.asset_id").Where("end_date >= ?", endOfDay).Where("assets.status != ? and assets.status != ?","Disposed","Retired").Preload("Asset").Find(&maintenances)
 	if result.Error != nil {
 		return nil, result.Error
 	}
