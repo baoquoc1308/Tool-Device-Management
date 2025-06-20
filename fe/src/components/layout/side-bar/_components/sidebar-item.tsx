@@ -7,9 +7,9 @@ export const SidebarNav = () => {
   const canCreateAsset = role === 'admin' || (role === 'assetManager' && 'limited scope')
   const canUpdateSchedule = role === 'admin' || role === 'assetManager' || role === 'departmentHead'
   const canCreateSchedule = role === 'admin' || role === 'assetManager'
-  const canTransferRequests = role === 'admin' || role === 'assetManager'
+  const canTransferRequests = role === 'admin' || role === 'assetManager' || role === 'departmentHead'
   const canViewAssignments = role === 'admin' || role === 'assetManager'
-  const canCreateRequestTransfer = role === 'departmentHead'
+  const canCreateTransfer = role === 'departmentHead'
   const data = {
     navMain: [
       {
@@ -66,16 +66,16 @@ export const SidebarNav = () => {
         icon: SendToBack,
         active: true,
         haveChildren: true,
+        show: canTransferRequests,
         items: [
           {
             title: 'All transfers',
             url: '/transfers',
-            show: canTransferRequests,
           },
           {
             title: 'Create new request transfer',
             url: '/transfers/create-request-transfer',
-            show: canCreateRequestTransfer,
+            show: canCreateTransfer,
           },
         ].filter((item) => item.show !== false),
       },

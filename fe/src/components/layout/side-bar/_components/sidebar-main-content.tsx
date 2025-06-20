@@ -32,7 +32,6 @@ export function SidebarMainContent({
       <SidebarGroupLabel>Tool Device Management</SidebarGroupLabel>
       <SidebarMenu>
         {items
-
           .filter((item) => item.show !== false)
           .map((item) => {
             return item.haveChildren ? (

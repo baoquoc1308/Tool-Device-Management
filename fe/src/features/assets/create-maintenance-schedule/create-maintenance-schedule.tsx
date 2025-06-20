@@ -60,7 +60,6 @@ const CreateMaintenanceSchedule = () => {
       endDate: undefined,
     })
     setIsSubmitting(false)
-    navigate('/assets/maintenance-schedule')
   }
   const handleStartDateChange = (value: Date) => {
     form.setValue('startDate', value)
