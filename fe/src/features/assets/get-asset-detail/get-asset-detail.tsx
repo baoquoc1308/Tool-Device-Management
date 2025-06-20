@@ -40,10 +40,12 @@ const GetAssetDetail = () => {
   const [isDeleting, startDeletingTransition] = useTransition()
   const [isDialogOpen, setIsDialogOpen] = useState(false)
   const [asset, setAsset] = useState<AssetsType>()
+
   const navigate = useNavigate()
   const user = useAppSelector((state) => state.auth.user)
+  const role = user.role.slug
   const canEditAsset = () => {
-    return user.role.slug === 'admin' || user.role.slug === 'assetManager'
+    return role === 'admin' || role === 'assetManager'
   }
   const getAssetData = () => {
     startTransition(async () => {
@@ -145,29 +147,31 @@ const GetAssetDetail = () => {
           </Card>
 
           {/* Asset History Log */}
-          <ViewAssetLog id={id || ''} />
-          <Card className='w-full'>
-            <div className='flex items-center justify-between'>
-              <CardHeader className='flex-1'>
-                <CardTitle>Maintenance Schedule</CardTitle>
-                <CardDescription>Upcoming and past maintenance schedules</CardDescription>
-              </CardHeader>
-              {user.role.slug !== 'viewer' && (
-                <div className='flex items-center space-x-2 p-4'>
-                  <Button
-                    variant={'outline'}
-                    onClick={() => setIsDialogOpen(true)}
-                  >
-                    Update schedules
-                  </Button>
-                </div>
-              )}
-            </div>
+          {role !== 'viewer' && role !== 'departmentHead' && <ViewAssetLog id={id || ''} />}
+          {role !== 'viewer' && (
+            <Card className='w-full'>
+              <div className='flex items-center justify-between'>
+                <CardHeader className='flex-1'>
+                  <CardTitle>Maintenance Schedule</CardTitle>
+                  <CardDescription>Upcoming and past maintenance schedules</CardDescription>
+                </CardHeader>
+                {role !== 'departmentHead' && (
+                  <div className='flex items-center space-x-2 p-4'>
+                    <Button
+                      variant={'outline'}
+                      onClick={() => setIsDialogOpen(true)}
+                    >
+                      Update schedules
+                    </Button>
+                  </div>
+                )}
+              </div>
 
-            <CardContent>
-              <AssetMaintenanceSchedule id={id || ''} />
-            </CardContent>
-          </Card>
+              <CardContent>
+                <AssetMaintenanceSchedule id={id || ''} />
+              </CardContent>
+            </Card>
+          )}
         </div>
 
         {/* Second column - Tabs Container */}
@@ -200,7 +204,7 @@ const GetAssetDetail = () => {
             {/* Tab content with flex-grow to fill available space */}
             <TabsContent
               value='image'
-              className='mt-4 flex flex-grow'
+              className='flex flex-grow'
             >
               <Card className='w-full'>
                 <CardContent className='flex h-full items-center justify-center py-4'>

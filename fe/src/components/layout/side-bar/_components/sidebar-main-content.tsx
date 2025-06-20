@@ -35,7 +35,6 @@ export function SidebarMainContent({
 
           .filter((item) => item.show !== false)
           .map((item) => {
-            console.log('🚀 ~ {items.map ~ items:', items)
             return item.haveChildren ? (
               <Collapsible
                 key={item.title}

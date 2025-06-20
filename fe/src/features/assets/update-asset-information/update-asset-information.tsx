@@ -38,7 +38,7 @@ const UpdateAssetInformation = () => {
   const { id } = useParams()
   const navigate = useNavigate()
   const [isPending, startTransition] = useTransition()
-  const [isGetDataPending, startGetDataTransition] = useTransition()
+  const [isGetDataPending, setIsGetDataPending] = useState<boolean>(false)
   const [asset, setAsset] = useState<AssetsType>()
   const [categories, setCategories] = useState<CategoryType[]>([])
   const [departments, setDepartments] = useState<DepartmentType[]>([])
@@ -62,25 +62,26 @@ const UpdateAssetInformation = () => {
     mode: 'onChange',
   })
 
-  const getAssetData = () => {
-    startGetDataTransition(async () => {
-      if (!id) return
-      await getData(getAllCategories, setCategories)
-      await getData(getAllDepartment, setDepartments)
-      const data = await getData(() => getAssetInformation(id), setAsset)
-      if (data?.imageUpload) {
-        setImagePreview(data.imageUpload)
-      }
+  const getAssetData = async () => {
+    setIsGetDataPending(true)
+    if (!id) return
+    await getData(getAllCategories, setCategories)
+    await getData(getAllDepartment, setDepartments)
+    const data = await getData(() => getAssetInformation(id), setAsset)
+    if (data?.imageUpload) {
+      setImagePreview(data.imageUpload)
+    }
 
-      if (data?.fileAttachment) {
-        setFileAttachmentName(data.fileAttachment)
-      }
-    })
+    if (data?.fileAttachment) {
+      setFileAttachmentName(data.fileAttachment)
+    }
+    setIsGetDataPending(false)
   }
   useEffect(() => {
     getAssetData()
   }, [id])
   useEffect(() => {
+    if (!asset) return
     form.reset({
       assetName: asset?.assetName,
       serialNumber: asset?.serialNumber,
@@ -94,6 +95,7 @@ const UpdateAssetInformation = () => {
       file: asset?.fileAttachment ? asset?.fileAttachment : '',
     })
   }, [asset])
+
   const onSubmit = (values: CreateAssetFormType) => {
     startTransition(async () => {
       if (typeof values.image === 'string') {

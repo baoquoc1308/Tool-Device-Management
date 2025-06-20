@@ -5,7 +5,6 @@ export const SidebarNav = () => {
   const user = useAppSelector((state) => state.auth.user)
   const role = user.role.slug
   const canCreateAsset = role === 'admin' || (role === 'assetManager' && 'limited scope')
-
   const canUpdateSchedule = role === 'admin' || role === 'assetManager' || role === 'departmentHead'
   const canCreateSchedule = role === 'admin' || role === 'assetManager' || role === 'departmentHead'
   const canTransferRequests = role === 'admin' || role === 'assetManager'

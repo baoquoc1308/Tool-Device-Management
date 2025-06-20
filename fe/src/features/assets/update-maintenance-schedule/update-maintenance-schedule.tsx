@@ -12,7 +12,7 @@ import {
 import { Check, Loader2 } from 'lucide-react'
 import { FormProvider, useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
-import React, { useTransition } from 'react'
+import React, { useState } from 'react'
 import { type UpdateMaintenanceScheduleType, updateMaintenanceScheduleSchema } from './model/schema'
 import { updateMaintenanceSchedule } from '../api'
 import { toast } from 'sonner'
@@ -27,7 +27,7 @@ const UpdateMaintenanceSchedule = ({
   isDialogOpen: boolean
   setIsDialogOpen: React.Dispatch<React.SetStateAction<boolean>>
 }) => {
-  const [isProcessing, startTransition] = useTransition()
+  const [isProcessing, setIsProcessing] = useState<boolean>(false)
 
   const form = useForm<UpdateMaintenanceScheduleType>({
     resolver: zodResolver(updateMaintenanceScheduleSchema),
@@ -39,19 +39,20 @@ const UpdateMaintenanceSchedule = ({
   })
 
   const onSubmit = async (data: UpdateMaintenanceScheduleType) => {
-    startTransition(async () => {
-      const response = await tryCatch(updateMaintenanceSchedule(id, data))
-      if (response.error) {
-        toast.error(response.error.message || 'Failed to update maintenance schedule')
-        return
-      }
-      toast.success('Maintenance schedule updated successfully')
-      form.reset({
-        startDate: undefined,
-        endDate: undefined,
-      })
-      setIsDialogOpen(false)
+    setIsProcessing(true)
+    const response = await tryCatch(updateMaintenanceSchedule(id, data))
+    if (response.error) {
+      toast.error(response.error.message || 'Failed to update maintenance schedule')
+      setIsProcessing(false)
+      return
+    }
+    toast.success('Maintenance schedule updated successfully')
+    form.reset({
+      startDate: undefined,
+      endDate: undefined,
     })
+    setIsDialogOpen(false)
+    setIsProcessing(false)
   }
   const handleStartDateChange = (value: Date) => {
     form.setValue('startDate', value)
@@ -63,6 +64,7 @@ const UpdateMaintenanceSchedule = ({
       form.clearErrors('endDate')
     }
   }
+
   return (
     <Dialog
       open={isDialogOpen}

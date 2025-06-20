@@ -89,7 +89,7 @@ const NumberNotification = () => {
                 notifications.map((notification, index) => (
                   <div
                     key={index}
-                    onClick={() => clickNotification(notification.id.toString())}
+                    onClick={() => clickNotification(notification.assetId.toString())}
                     className={cn(
                       'hover:bg-accent p-3 transition-colors',
                       'border-b last:border-b-0',
