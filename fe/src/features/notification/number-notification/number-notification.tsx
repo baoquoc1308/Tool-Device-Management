@@ -20,7 +20,7 @@ const NumberNotification = () => {
   const [unreadCount, setUnreadCount] = useState(0)
   const [notifications, setNotifications] = useState<NotificationType[]>([])
   const [isPending, setIsPending] = useState(false)
-
+  console.log('notifications', notifications)
   const getNotifications = async () => {
     setIsPending(true)
     const response = await tryCatch(getAllNotifications())
@@ -37,6 +37,7 @@ const NumberNotification = () => {
 
   const clickNotification = async (id: string) => {
     const response = await tryCatch(updateReadNotification(id))
+
     if (response.error) {
       toast.error(response.error.message || 'Failed to seen notification')
       return
@@ -89,7 +90,7 @@ const NumberNotification = () => {
                 notifications.map((notification, index) => (
                   <div
                     key={index}
-                    onClick={() => clickNotification(notification.assetId.toString())}
+                    onClick={() => clickNotification(notification.id.toString())}
                     className={cn(
                       'hover:bg-accent p-3 transition-colors',
                       'border-b last:border-b-0',
