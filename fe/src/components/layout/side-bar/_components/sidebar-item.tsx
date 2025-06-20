@@ -6,8 +6,9 @@ export const SidebarNav = () => {
   const role = user.role.slug
   const canCreateAsset = role === 'admin' || (role === 'assetManager' && 'limited scope')
   const canUpdateSchedule = role === 'admin' || role === 'assetManager' || role === 'departmentHead'
-  const canCreateSchedule = role === 'admin' || role === 'assetManager' || role === 'departmentHead'
+  const canCreateSchedule = role === 'admin' || role === 'assetManager'
   const canTransferRequests = role === 'admin' || role === 'assetManager'
+  const canViewAssignments = role === 'admin' || role === 'assetManager'
   const data = {
     navMain: [
       {
@@ -50,6 +51,7 @@ export const SidebarNav = () => {
         icon: NotebookPen,
         active: true,
         haveChildren: true,
+        show: canViewAssignments,
         items: [
           {
             title: 'All assignments',

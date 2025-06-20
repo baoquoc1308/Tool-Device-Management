@@ -6,6 +6,7 @@ import type { MaintenanceSchedule } from '../model'
 import { Calendar } from 'lucide-react'
 import { UpdateMaintenanceSchedule } from '../../update-maintenance-schedule'
 import { useState } from 'react'
+import { useAppSelector } from '@/hooks'
 export const columnTableMaintenance: ColumnDef<MaintenanceSchedule>[] = [
   {
     accessorKey: 'asset.assetName',
@@ -53,6 +54,7 @@ export const columnTableMaintenance: ColumnDef<MaintenanceSchedule>[] = [
     cell: ({ row }) => {
       const id = row.original.id
       const [isDialogOpen, setIsDialogOpen] = useState(false)
+      const role = useAppSelector((state) => state.auth.user?.role.slug)
       return (
         <div className='flex items-center gap-2'>
           <UpdateMaintenanceSchedule
@@ -67,16 +69,18 @@ export const columnTableMaintenance: ColumnDef<MaintenanceSchedule>[] = [
           >
             <Link to={`/assets/${row.original.asset.id}`}>View Asset</Link>
           </Button>
-          <Button
-            variant='outline'
-            size='sm'
-            onClick={() => {
-              setIsDialogOpen(true)
-            }}
-          >
-            <Calendar className='mr-2 h-4 w-4' />
-            Update Schedule
-          </Button>
+          {role !== 'Viewer' && role !== 'departmentHead' && (
+            <Button
+              variant='outline'
+              size='sm'
+              onClick={() => {
+                setIsDialogOpen(true)
+              }}
+            >
+              <Calendar className='mr-2 h-4 w-4' />
+              Update Schedule
+            </Button>
+          )}
         </div>
       )
     },
