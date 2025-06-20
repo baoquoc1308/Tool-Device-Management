@@ -10,6 +10,7 @@ export const SidebarNav = () => {
   const canTransferRequests = role === 'admin' || role === 'assetManager' || role === 'departmentHead'
   const canViewAssignments = role === 'admin' || role === 'assetManager'
   const canCreateTransfer = role === 'departmentHead'
+  const canNotViewTransfer = role !== 'departmentHead'
   const data = {
     navMain: [
       {
@@ -71,6 +72,7 @@ export const SidebarNav = () => {
           {
             title: 'All transfers',
             url: '/transfers',
+            show: canNotViewTransfer,
           },
           {
             title: 'Create new request transfer',
