@@ -69,7 +69,7 @@ export const columnTableMaintenance: ColumnDef<MaintenanceSchedule>[] = [
           >
             <Link to={`/assets/${row.original.asset.id}`}>View Asset</Link>
           </Button>
-          {role !== 'Viewer' && role !== 'departmentHead' && (
+          {role !== 'viewer' && role !== 'departmentHead' && (
             <Button
               variant='outline'
               size='sm'
