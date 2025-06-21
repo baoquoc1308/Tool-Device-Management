@@ -43,7 +43,9 @@ const CustomTooltip = ({ active, payload }: any) => {
     return (
       <div className='rounded-lg border bg-white p-2 shadow-lg'>
         <p className='font-medium'>{data.name}</p>
-        <p className='text-sm text-gray-600'>{`${data.value} (${(data.percent * 100).toFixed(1)}%)`}</p>
+        <p className='text-sm text-gray-600'>
+          {`${data.value} (${(data.percent * 100).toFixed(1)}%)`}
+        </p>
       </div>
     )
   }
@@ -69,9 +71,40 @@ const CustomLegend = ({ payload }: any) => {
   )
 }
 
+const applyLargestRemainder = (data: Array<{ value: number, name: string }>) => {
+  if (!data.length) return [];
+  
+  const total = data.reduce((sum, item) => sum + item.value, 0);
+  if (total === 0) return data.map(item => ({ ...item, percent: 0 }));
+
+  const withPercentages = data.map(item => ({
+    ...item,
+    exactPercent: (item.value / total),
+    percent: Math.floor((item.value / total) * 1000) / 1000, 
+    remainder: ((item.value / total) * 1000) % 1 
+  }));
+
+  const totalPercent = withPercentages.reduce((sum, item) => sum + item.percent, 0);
+  
+  const remainingPercent = Math.max(0, 1 - totalPercent);
+  const extraPoints = Math.round(remainingPercent * 1000);
+
+  const sorted = [...withPercentages].sort((a, b) => b.remainder - a.remainder);
+  
+  for (let i = 0; i < extraPoints && sorted.length > 0; i++) {
+    sorted[i % sorted.length].percent += 0.001;
+  }
+
+  return sorted.map(({ name, value, percent }) => ({
+    name,
+    value,
+    percent
+  }));
+};
+
 export const DashboardStats = ({ stats, assets, isPending }: DashboardStatsProps) => {
   const getStatusCount = (status: string) => {
-    return assets.filter((asset) => asset.status === status).length
+    return assets?.filter((asset) => asset.status === status)?.length || 0;
   }
 
   const newCount = getStatusCount('New')
@@ -79,20 +112,14 @@ export const DashboardStats = ({ stats, assets, isPending }: DashboardStatsProps
   const inUseCount = getStatusCount('In Use')
   const underMaintenanceCount = getStatusCount('Under Maintenance')
 
-  const pieChartData = [
+  const rawData = [
     { name: 'In Use', value: inUseCount },
     { name: 'Under Maintenance', value: underMaintenanceCount },
     { name: 'Retired / Disposed', value: retiredAndDisposedCount },
     { name: 'New', value: newCount },
-  ]
-    .filter((item) => item.value > 0)
-    .map((item, _, array) => {
-      const totalDisplayedValues = array.reduce((sum, curr) => sum + curr.value, 0)
-      return {
-        ...item,
-        percent: item.value / totalDisplayedValues,
-      }
-    })
+  ].filter(item => item.value > 0);
+
+  const pieChartData = applyLargestRemainder(rawData);
 
   return (
     <div className='space-y-6'>

@@ -21,7 +21,15 @@ const initialState = {
 const userSlice = createSlice({
   name: 'user',
   initialState,
-  reducers: {},
+  reducers: {
+    clearAuthState: (state) => {
+      // Reset state to initial values
+      state.user = initialState.user
+      state.accessToken = ''
+      state.refreshToken = ''
+      state.loading = false
+    }
+  },
   extraReducers(builder) {
     builder
       .addCase(logIn.pending, (state) => {
@@ -67,4 +75,5 @@ const userSlice = createSlice({
   },
 })
 
+export const { clearAuthState } = userSlice.actions
 export default userSlice.reducer

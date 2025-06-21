@@ -4,6 +4,13 @@ import { useAppSelector } from '@/hooks'
 export const SidebarNav = () => {
   const user = useAppSelector((state) => state.auth.user)
   const role = user.role.slug
+  const loading = useAppSelector((state) => state.auth.loading)
+
+  if (loading || !role) {
+    return {
+      navMain: []
+    }
+  }
   const canCreateAsset = role === 'admin' || (role === 'assetManager' && 'limited scope')
   const canUpdateSchedule = role === 'admin' || role === 'assetManager' || role === 'departmentHead'
   const canCreateSchedule = role === 'admin' || role === 'assetManager'
@@ -18,6 +25,7 @@ export const SidebarNav = () => {
         url: '/',
         icon: LayoutDashboard,
         haveChildren: false,
+        show: true,
       },
       {
         title: 'Assets',
@@ -25,6 +33,7 @@ export const SidebarNav = () => {
         icon: Computer,
         active: true,
         haveChildren: true,
+        show: true,
         items: [
           {
             title: 'All assets',
@@ -95,7 +104,7 @@ export const SidebarNav = () => {
           },
         ],
       },
-    ],
+    ].filter((item) => item.show !== false),
   }
   return data
 }
