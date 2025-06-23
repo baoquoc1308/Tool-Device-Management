@@ -8,7 +8,7 @@ export const SidebarNav = () => {
 
   if (loading || !role) {
     return {
-      navMain: []
+      navMain: [],
     }
   }
   const canCreateAsset = role === 'admin' || (role === 'assetManager' && 'limited scope')
@@ -101,6 +101,10 @@ export const SidebarNav = () => {
           {
             title: 'Assign role',
             url: '/user/assign-role',
+          },
+          {
+            title: 'Assign department',
+            url: '/user/assign-department',
           },
         ],
       },

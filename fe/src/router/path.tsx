@@ -19,7 +19,7 @@ import {
 } from '@/pages/dashboard'
 import { ProtectedRoute, AuthRoute } from './auth-guard'
 import Layout from '@/layout/layout'
-import { AssignRoleForUserPage } from '@/pages/user'
+import { AssignDepartmentForUserPage, AssignRoleForUserPage } from '@/pages/user'
 
 export const router = createBrowserRouter([
   {
@@ -108,6 +108,10 @@ export const router = createBrowserRouter([
               {
                 path: 'assign-role',
                 element: <AssignRoleForUserPage />,
+              },
+              {
+                path: 'assign-department',
+                element: <AssignDepartmentForUserPage />,
               },
             ],
           },
