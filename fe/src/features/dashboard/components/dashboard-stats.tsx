@@ -106,6 +106,50 @@ const applyLargestRemainder = (data: Array<{ value: number; name: string }>) => 
 }
 
 export const DashboardStats = ({ stats, assets, isPending }: DashboardStatsProps) => {
+  if (!isPending && (!assets || assets.length === 0)) {
+    return (
+      <div className='space-y-6'>
+        <div className='grid gap-4 md:grid-cols-2 lg:grid-cols-5'>
+          <Card>
+            <CardContent className='p-4'>
+              <div className='text-muted-foreground text-sm font-medium'>No Assets Available</div>
+            </CardContent>
+          </Card>
+        </div>
+
+        <div className='grid gap-4 md:grid-cols-2'>
+          <Card>
+            <CardHeader>
+              <CardTitle>Asset Status Distribution</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className='text-muted-foreground flex h-[300px] items-center justify-center'>
+                <div className='text-center'>
+                  <p className='text-lg font-medium'>No results.</p>
+                  <p className='text-sm'>Try adjusting your filters or create a new asset.</p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader>
+              <CardTitle>Recent Assets</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className='text-muted-foreground flex h-[300px] items-center justify-center'>
+                <div className='text-center'>
+                  <p className='text-lg font-medium'>No assets found.</p>
+                  <p className='text-sm'>Assets will appear here once available.</p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      </div>
+    )
+  }
+
   const getStatusCount = (status: string) => {
     return assets?.filter((asset) => asset.status === status)?.length || 0
   }
