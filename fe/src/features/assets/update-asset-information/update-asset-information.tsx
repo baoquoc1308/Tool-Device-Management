@@ -81,7 +81,6 @@ const UpdateAssetInformation = () => {
     getAssetData()
   }, [id])
   useEffect(() => {
-    if (!asset) return
     form.reset({
       assetName: asset?.assetName,
       serialNumber: asset?.serialNumber,
