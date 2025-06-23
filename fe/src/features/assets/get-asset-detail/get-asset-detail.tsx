@@ -45,7 +45,11 @@ const GetAssetDetail = () => {
   const user = useAppSelector((state) => state.auth.user)
   const role = user.role.slug
   const canEditAsset = () => {
-    return role === 'admin' || role === 'assetManager'
+    if (role === 'admin') return true
+    if (role === 'assetManager') {
+      return user.department && asset?.department?.id === user.department.id
+    }
+    return false
   }
   const getAssetData = () => {
     startTransition(async () => {
@@ -147,7 +151,12 @@ const GetAssetDetail = () => {
           </Card>
 
           {/* Asset History Log */}
-          {role !== 'viewer' && role !== 'departmentHead' && <ViewAssetLog id={id || ''} />}
+          {role !== 'viewer' &&
+            role !== 'departmentHead' &&
+            (role === 'admin' ||
+              (role === 'assetManager' && (user as any).department?.id === asset?.department?.id)) && (
+              <ViewAssetLog id={id || ''} />
+            )}
           {role !== 'viewer' && (
             <Card className='w-full'>
               <div className='flex items-center justify-between'>

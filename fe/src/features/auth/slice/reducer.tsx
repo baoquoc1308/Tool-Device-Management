@@ -12,6 +12,7 @@ const initialState = {
       id: '',
       slug: '',
     },
+    department: null as { id: number; departmentName: string } | null,
   },
   accessToken: '',
   refreshToken: '',
@@ -28,7 +29,7 @@ const userSlice = createSlice({
       state.accessToken = ''
       state.refreshToken = ''
       state.loading = false
-    }
+    },
   },
   extraReducers(builder) {
     builder
@@ -58,6 +59,7 @@ const userSlice = createSlice({
           state.user.id = action.payload.data.id
           state.user.role.id = action.payload.data.role.id
           state.user.role.slug = action.payload.data.role.slug
+          state.user.department = action.payload.data.department
           Cookies.set('email', action.payload.data.email)
           Cookies.set('firstName', action.payload.data.firstName)
           Cookies.set('lastName', action.payload.data.lastName)
