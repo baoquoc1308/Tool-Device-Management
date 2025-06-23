@@ -66,7 +66,7 @@ export const ViewCardsDataAssets = ({ assets }: { assets: AssetsType[] }) => {
                         asset.status === 'In Use' && 'border-blue-200 bg-blue-100 text-blue-800',
                         asset.status === 'Under Maintenance' && 'border-amber-200 bg-amber-100 text-amber-800',
                         asset.status === 'Retired' && 'border-slate-200 bg-slate-100 text-slate-800',
-                        asset.status === 'Disposed' && 'border-gray-200 bg-gray-100 text-gray-800'
+                        asset.status === 'Disposed' && 'border-red-200 bg-red-100 text-red-800'
                       )}
                     >
                       {asset.status}
