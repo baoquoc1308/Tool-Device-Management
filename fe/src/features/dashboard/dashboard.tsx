@@ -8,6 +8,7 @@ import { getAllAssets, getDataAssetsFilter } from '../assets/api'
 import { tryCatch } from '@/utils'
 import type { DashboardData } from './api/type'
 import { useSearchParams } from 'react-router-dom'
+import { AreaChart } from 'lucide-react'
 
 export const Dashboard = () => {
   const [searchParam, setSearchParam] = useSearchParams()
@@ -89,10 +90,13 @@ export const Dashboard = () => {
   }, [filterData])
 
   return (
-    <div className='space-y-6 p-6'>
-      <div className='flex items-center justify-between'>
-        <h1 className='text-3xl font-bold'>Dashboard</h1>
-        <div className='flex gap-2'>
+    <div className='space-y-4 p-4 sm:space-y-6 sm:p-6'>
+      <div className='flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between'>
+        <h1 className='flex items-center gap-2 text-2xl font-bold sm:text-3xl'>
+          <AreaChart className='h-6 w-6 sm:h-8 sm:w-8' />
+          Dashboard
+        </h1>
+        <div className='flex flex-col gap-2 sm:flex-row'>
           <ExportButton
             stats={stats}
             format='csv'
