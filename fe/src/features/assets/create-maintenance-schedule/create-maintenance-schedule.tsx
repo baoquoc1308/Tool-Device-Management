@@ -16,7 +16,7 @@ import { useEffect, useState } from 'react'
 import { toast } from 'sonner'
 import { useNavigate } from 'react-router-dom'
 import type { AssetsType } from '../view-all-assets'
-import { createMaintenanceSchedule, getAllAssets, getAssetNoSchedule } from '../api'
+import { createMaintenanceSchedule, getAssetNoSchedule } from '../api'
 import { getData, tryCatch } from '@/utils'
 import { type CreateMaintenanceScheduleType, createMaintenanceScheduleSchema } from './model/schema'
 
@@ -60,7 +60,6 @@ const CreateMaintenanceSchedule = () => {
       endDate: undefined,
     })
     setIsSubmitting(false)
-    navigate('/assets/maintenance-schedule')
   }
   const handleStartDateChange = (value: Date) => {
     form.setValue('startDate', value)

@@ -1,8 +1,14 @@
 import { Button } from '@/components'
 import { Plus } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
+import { useAppSelector } from '@/hooks'
 export const ButtonCreateNewAssets = () => {
   const navigate = useNavigate()
+  const user = useAppSelector((state) => state.auth.user)
+
+  if (user.role.slug === 'viewer' || user.role.slug === 'departmentHead') {
+    return null
+  }
   return (
     <Button
       size='sm'

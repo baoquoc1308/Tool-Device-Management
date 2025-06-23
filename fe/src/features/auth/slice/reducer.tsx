@@ -12,6 +12,7 @@ const initialState = {
       id: '',
       slug: '',
     },
+    department: null as { id: number; departmentName: string } | null,
   },
   accessToken: '',
   refreshToken: '',
@@ -21,7 +22,15 @@ const initialState = {
 const userSlice = createSlice({
   name: 'user',
   initialState,
-  reducers: {},
+  reducers: {
+    clearAuthState: (state) => {
+      // Reset state to initial values
+      state.user = initialState.user
+      state.accessToken = ''
+      state.refreshToken = ''
+      state.loading = false
+    },
+  },
   extraReducers(builder) {
     builder
       .addCase(logIn.pending, (state) => {
@@ -50,6 +59,7 @@ const userSlice = createSlice({
           state.user.id = action.payload.data.id
           state.user.role.id = action.payload.data.role.id
           state.user.role.slug = action.payload.data.role.slug
+          state.user.department = action.payload.data.department
           Cookies.set('email', action.payload.data.email)
           Cookies.set('firstName', action.payload.data.firstName)
           Cookies.set('lastName', action.payload.data.lastName)
@@ -67,4 +77,5 @@ const userSlice = createSlice({
   },
 })
 
+export const { clearAuthState } = userSlice.actions
 export default userSlice.reducer

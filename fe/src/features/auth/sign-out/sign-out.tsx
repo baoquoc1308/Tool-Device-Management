@@ -6,16 +6,22 @@ import { useNavigate } from 'react-router-dom'
 import { LoadingSpinner } from '@/components'
 import { LogOut } from 'lucide-react'
 import { tryCatch } from '@/utils'
+import { useAppDispatch } from '@/hooks'
+import { clearAuthState } from '../slice/reducer'
+
 
 const SignOut = () => {
   const navigate = useNavigate()
+  const dispatch = useAppDispatch()
   const [isPending, startTransition] = useTransition()
+
   const handleSignOut = () => {
     startTransition(async () => {
       const response = await tryCatch(signOut())
       if (response.error) {
         toast.error('Sign out failed')
       }
+      dispatch(clearAuthState())
       toast.success('Sign out successfully')
       Object.keys(Cookies.get()).forEach(function (cookieName) {
         Cookies.remove(cookieName)

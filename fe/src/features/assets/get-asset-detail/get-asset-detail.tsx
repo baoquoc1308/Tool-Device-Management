@@ -19,6 +19,7 @@ import {
 } from '@/components/ui'
 
 import { ArrowLeft, Pencil, Loader2, Trash2 } from 'lucide-react'
+import { useAppSelector } from '@/hooks'
 
 import {
   AssetBadge,
@@ -39,8 +40,17 @@ const GetAssetDetail = () => {
   const [isDeleting, startDeletingTransition] = useTransition()
   const [isDialogOpen, setIsDialogOpen] = useState(false)
   const [asset, setAsset] = useState<AssetsType>()
-  const navigate = useNavigate()
 
+  const navigate = useNavigate()
+  const user = useAppSelector((state) => state.auth.user)
+  const role = user.role.slug
+  const canEditAsset = () => {
+    if (role === 'admin') return true
+    if (role === 'assetManager') {
+      return user.department && asset?.department?.id === user.department.id
+    }
+    return false
+  }
   const getAssetData = () => {
     startTransition(async () => {
       if (!id) return
@@ -96,7 +106,7 @@ const GetAssetDetail = () => {
           <h1 className='text-3xl font-semibold'>{asset.assetName}</h1>
           <AssetBadge asset={asset} />
         </div>
-        {asset.status !== 'Disposed' && (
+        {asset.status !== 'Disposed' && canEditAsset() && (
           <div className='flex items-center space-x-2'>
             <Link to={`/assets/update/${id}`}>
               <Button variant='outline'>
@@ -141,27 +151,36 @@ const GetAssetDetail = () => {
           </Card>
 
           {/* Asset History Log */}
-          <ViewAssetLog id={id || ''} />
-          <Card className='w-full'>
-            <div className='flex items-center justify-between'>
-              <CardHeader className='flex-1'>
-                <CardTitle>Maintenance Schedule</CardTitle>
-                <CardDescription>Upcoming and past maintenance schedules</CardDescription>
-              </CardHeader>
-              <div className='flex items-center space-x-2 p-4'>
-                <Button
-                  variant={'outline'}
-                  onClick={() => setIsDialogOpen(true)}
-                >
-                  Update schedules
-                </Button>
+          {role !== 'viewer' &&
+            role !== 'departmentHead' &&
+            (role === 'admin' ||
+              (role === 'assetManager' && (user as any).department?.id === asset?.department?.id)) && (
+              <ViewAssetLog id={id || ''} />
+            )}
+          {role !== 'viewer' && (
+            <Card className='w-full'>
+              <div className='flex items-center justify-between'>
+                <CardHeader className='flex-1'>
+                  <CardTitle>Maintenance Schedule</CardTitle>
+                  <CardDescription>Upcoming and past maintenance schedules</CardDescription>
+                </CardHeader>
+                {role !== 'departmentHead' && (
+                  <div className='flex items-center space-x-2 p-4'>
+                    <Button
+                      variant={'outline'}
+                      onClick={() => setIsDialogOpen(true)}
+                    >
+                      Update schedules
+                    </Button>
+                  </div>
+                )}
               </div>
-            </div>
 
-            <CardContent>
-              <AssetMaintenanceSchedule id={id || ''} />
-            </CardContent>
-          </Card>
+              <CardContent>
+                <AssetMaintenanceSchedule id={id || ''} />
+              </CardContent>
+            </Card>
+          )}
         </div>
 
         {/* Second column - Tabs Container */}
@@ -194,7 +213,7 @@ const GetAssetDetail = () => {
             {/* Tab content with flex-grow to fill available space */}
             <TabsContent
               value='image'
-              className='mt-4 flex flex-grow'
+              className='flex flex-grow'
             >
               <Card className='w-full'>
                 <CardContent className='flex h-full items-center justify-center py-4'>
