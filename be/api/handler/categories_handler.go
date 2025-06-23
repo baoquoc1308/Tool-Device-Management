@@ -77,14 +77,6 @@ func (h *CategoriesHandler) GetAll(c *gin.Context) {
 		// ✅ Dữ liệu có trong Redis, trả về
 		var cached []entity.Categories
 		if err := json.Unmarshal([]byte(val), &cached); err == nil {
-			ttl, err := config.Rdb.TTL(config.Ctx, cacheKeyCategories).Result()
-			if err == nil && ttl > 0 {
-				newTTL := ttl * 2
-				if newTTL > maxTTL {
-					newTTL = maxTTL
-				}
-				config.Rdb.Expire(config.Ctx, cacheKeyCategories, newTTL)
-			}
 			for _, a := range cached {
 				copy := a
 				categories = append(categories, &copy)
@@ -100,6 +92,9 @@ func (h *CategoriesHandler) GetAll(c *gin.Context) {
 			pkg.PanicExeption(constant.UnknownError, "Happened error when get all categories")
 		}
 	}
+	// ✅ Cache lại dữ liệu
+	bytes, _ := json.Marshal(categories)
+	config.Rdb.Set(config.Ctx, cacheKeyCategories, bytes, initialTTL)
 	c.JSON(http.StatusOK, pkg.BuildReponseSuccess(http.StatusOK, constant.Success, categories))
 }
 

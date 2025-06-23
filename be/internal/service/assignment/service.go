@@ -97,7 +97,6 @@ func (service *AssignmentService) Update(userId, assignmentId int64, userIdAssig
 		return nil, err
 	}
 
-
 	// Chuyển phòng ban
 	if departmentId != nil && (*departmentId != asset.DepartmentId) {
 		assetLog := entity.AssetLog{
@@ -160,10 +159,10 @@ func (service *AssignmentService) Update(userId, assignmentId int64, userIdAssig
 	}
 	var userHeadDepart *entity.Users
 	var userManagerAsset *entity.Users
-	if departmentId != nil{
+	if departmentId != nil {
 		userHeadDepart, _ = service.userRepo.GetUserHeadDepartment(*departmentId)
 		userManagerAsset, _ = service.userRepo.GetUserAssetManageOfDepartment(*departmentId)
-	}else{
+	} else {
 		userHeadDepart, _ = service.userRepo.GetUserHeadDepartment(asset.DepartmentId)
 		userManagerAsset, _ = service.userRepo.GetUserAssetManageOfDepartment(asset.DepartmentId)
 	}

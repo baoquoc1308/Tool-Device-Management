@@ -23,6 +23,9 @@ func NewMaintenanceSchedulesService(repo maintenanceSchedules.MaintenanceSchedul
 }
 
 func (service *MaintenanceSchedulesService) Create(userId int64, assetId int64, startDate, endDate time.Time) (*entity.MaintenanceSchedules, error) {
+	loc, _ := time.LoadLocation("Asia/Bangkok") // GMT+7
+	startDate = startDate.In(loc)
+	endDate = endDate.In(loc)
 	userUpdate, err := service.userRepository.FindByUserId(userId)
 	if err != nil {
 		return nil, err
@@ -58,6 +61,13 @@ func (service *MaintenanceSchedulesService) Create(userId int64, assetId int64, 
 	usersToNotifications = append(usersToNotifications, assetCheck.OnwerUser)
 	usersToNotifications = append(usersToNotifications, userHeadDepart)
 	usersToNotifications = append(usersToNotifications, userManagerAsset)
+	filteredUsers := []*entity.Users{}
+	for _, user := range usersToNotifications {
+		if user.Id != userUpdate.Id {
+			filteredUsers = append(filteredUsers, user)
+		}
+	}
+	usersToNotifications = filteredUsers
 	message := fmt.Sprintf("The maintenance schedules (ID: %v) has just been created by %v", maintenance.Id, userUpdate.Email)
 	go func() {
 		defer func() {
@@ -79,6 +89,9 @@ func (service *MaintenanceSchedulesService) GetAllMaintenanceSchedulesByAssetId(
 }
 
 func (service *MaintenanceSchedulesService) Update(userId int64, id int64, startDate time.Time, endDate time.Time) (*entity.MaintenanceSchedules, error) {
+	loc, _ := time.LoadLocation("Asia/Bangkok") // GMT+7
+	startDate = startDate.In(loc)
+	endDate = endDate.In(loc)
 	userUpdate, err := service.userRepository.FindByUserId(userId)
 	if err != nil {
 		return nil, err
@@ -99,6 +112,13 @@ func (service *MaintenanceSchedulesService) Update(userId int64, id int64, start
 	usersToNotifications = append(usersToNotifications, maintenaceUpdate.Asset.OnwerUser)
 	usersToNotifications = append(usersToNotifications, userHeadDepart)
 	usersToNotifications = append(usersToNotifications, userManagerAsset)
+	filteredUsers := []*entity.Users{}
+	for _, user := range usersToNotifications {
+		if user.Id != userUpdate.Id {
+			filteredUsers = append(filteredUsers, user)
+		}
+	}
+	usersToNotifications = filteredUsers
 	message := fmt.Sprintf("The maintenance schedules (ID: %v) has just been updated by %v", maintenaceUpdate.Id, userUpdate.Email)
 	go func() {
 		defer func() {
@@ -132,6 +152,13 @@ func (service *MaintenanceSchedulesService) Delete(userId int64, id int64) error
 	usersToNotifications = append(usersToNotifications, maintenaceUpdate.Asset.OnwerUser)
 	usersToNotifications = append(usersToNotifications, userHeadDepart)
 	usersToNotifications = append(usersToNotifications, userManagerAsset)
+	filteredUsers := []*entity.Users{}
+	for _, user := range usersToNotifications {
+		if user.Id != userUpdate.Id {
+			filteredUsers = append(filteredUsers, user)
+		}
+	}
+	usersToNotifications = filteredUsers
 	message := fmt.Sprintf("The maintenance schedules (ID: %v) has just been deleted by %v", maintenaceUpdate.Id, userUpdate.Email)
 	go func() {
 		defer func() {

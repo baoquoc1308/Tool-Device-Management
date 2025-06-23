@@ -230,6 +230,26 @@ func (service *UserService) UpdateRole(userId int64, setRoleUserId int64, slug s
 	if err != nil {
 		return nil, err
 	}
+	if slug == "assetManager" {
+		service.UpdateManagerDep(setRoleUserId)
+		if userUpdated.IsHeadDepartment {
+			service.UpdateHeadDep(setRoleUserId)
+		}
+	}
+	if slug == "departmentHead" {
+		service.UpdateHeadDep(setRoleUserId)
+		if userUpdated.IsAssetManager {
+			service.UpdateManagerDep(setRoleUserId)
+		}
+	}
+	if slug == "viewer" {
+		if userUpdated.IsHeadDepartment {
+			service.UpdateHeadDep(setRoleUserId)
+		}
+		if userUpdated.IsAssetManager {
+			service.UpdateManagerDep(setRoleUserId)
+		}
+	}
 	return userUpdated, nil
 }
 
@@ -262,10 +282,6 @@ func (service *UserService) UpdateHeadDep(id int64) error {
 		if user.DepartmentId == nil {
 			return errors.New("user don't have department")
 		}
-		err := service.repo.CheckHeadDep(*user.DepartmentId)
-		if err != nil {
-			return err
-		}
 		err = service.repo.UpdateHeadDep(id, !user.IsHeadDepartment)
 		return err
 	}
@@ -283,10 +299,6 @@ func (service *UserService) UpdateManagerDep(id int64) error {
 		if user.DepartmentId == nil {
 			return errors.New("user don't have department")
 		}
-		err := service.repo.CheckManagerDep(*user.DepartmentId)
-		if err != nil {
-			return err
-		}
 		err = service.repo.UpdateManagerDep(id, !user.IsAssetManager)
 		return err
 	}
@@ -303,4 +315,13 @@ func (service *UserService) UpdateCanExport(id int64) error {
 	}
 	err = service.repo.UpdateCanExport(id, !user.CanExport)
 	return err
+}
+
+func (service *UserService) GetUserNotHaveDep() ([]*entity.Users, error) {
+	users, err := service.repo.GetUserNotHaveDep()
+	
+	if err != nil {
+		return nil, err
+	}
+	return users, nil
 }

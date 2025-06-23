@@ -144,8 +144,9 @@ func (r *PostgreSQLAssetsRepository) GetUserHavePermissionNotifications(id int64
 func (r *PostgreSQLAssetsRepository) CheckAssetFinishMaintenance(id int64) (bool, error) {
 	var schedule entity.MaintenanceSchedules
 	err := r.db.
-		Model(&entity.Assets{}).
-		Joins("JOIN maintenance_schedules ON maintenance_schedules.asset_id = assets.id").
+		Debug().
+		Model(&entity.MaintenanceSchedules{}).
+		Joins("JOIN assets ON assets.id = maintenance_schedules.asset_id").
 		Where("assets.id = ?", id).
 		Order("maintenance_schedules.start_date DESC").
 		First(&schedule).Error
@@ -154,14 +155,22 @@ func (r *PostgreSQLAssetsRepository) CheckAssetFinishMaintenance(id int64) (bool
 		logrus.Printf("⚠️ Error checking maintenance for asset %d: %v", id, err)
 		return false, err
 	}
+	loc, _ := time.LoadLocation("Asia/Bangkok")
+	now := time.Now().In(loc)
 
-	return schedule.EndDate.Before(time.Now()), nil
+	startOfDay := time.Date(now.Year(), now.Month(), now.Day(), 0, 0, 0, 0, loc)
+	endOfDay := startOfDay.Add(24 * time.Hour)
+
+	// Chuyển EndDate về đúng timezone
+	endDateInLoc := schedule.EndDate.In(loc)
+
+	return endDateInLoc.Before(endOfDay), nil
 }
 
 func (r *PostgreSQLAssetsRepository) GetAssetByStatus(status string) ([]*entity.Assets, error) {
 	var assets = []*entity.Assets{}
 	result := r.db.Model(entity.Assets{}).Where("status = ?", status).Find(&assets)
-	if result != nil {
+	if result.Error != nil {
 		return nil, result.Error
 	}
 	return assets, nil
@@ -169,12 +178,15 @@ func (r *PostgreSQLAssetsRepository) GetAssetByStatus(status string) ([]*entity.
 
 func (r *PostgreSQLAssetsRepository) GetAssetsWasWarrantyExpiry() ([]*entity.Assets, error) {
 	assets := []*entity.Assets{}
+	loc, _ := time.LoadLocation("Asia/Bangkok")
 
-	today := time.Now().Truncate(24 * time.Hour)
+	now := time.Now().In(loc)
+	startOfDay := time.Date(now.Year(), now.Month(), now.Day(), 0, 0, 0, 0, loc)
+	endOfDay := startOfDay.Add(24 * time.Hour)
 
 	err := r.db.Model(&entity.Assets{}).
 		Joins("LEFT JOIN notifications ON notifications.asset_id = assets.id AND notifications.type = ?", "Expired").
-		Where("assets.warrant_expiry < ?", today).
+		Where("assets.warrant_expiry < ?", endOfDay).
 		Where("notifications.id IS NULL").Preload("OnwerUser").
 		Find(&assets).Error
 

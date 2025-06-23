@@ -12,7 +12,6 @@ import (
 	"BE_Manage_device/pkg/utils"
 	"bytes"
 	"encoding/csv"
-	"encoding/json"
 	"net/http"
 	"strconv"
 	"time"
@@ -73,7 +72,6 @@ func (h *AssetsHandler) Create(c *gin.Context) {
 	url := c.PostForm("redirectUrl")
 
 	purchaseDate, err := time.Parse(time.RFC3339, purchaseDateStr)
-
 	if err != nil {
 		log.Info("Error: ", err.Error())
 		pkg.PanicExeption(constant.InvalidRequest, "Invalid purchase_date format")
@@ -218,6 +216,7 @@ func (h *AssetsHandler) Update(c *gin.Context) {
 
 	purchaseDate, err := time.Parse(time.RFC3339, purchaseDateStr)
 	if err != nil {
+		log.Info("Error: ", err.Error())
 		pkg.PanicExeption(constant.InvalidRequest, "Invalid purchase_date format")
 	}
 
@@ -431,9 +430,6 @@ func (h *AssetsHandler) GetAllAsset(c *gin.Context) {
 		}
 		assetsResponse = append(assetsResponse, assetResponse)
 	}
-	// ✅ Cache lại dữ liệu
-	bytes, _ := json.Marshal(assets)
-	config.Rdb.Set(config.Ctx, cacheKey, bytes, 10*time.Minute)
 	c.JSON(http.StatusOK, pkg.BuildReponseSuccess(http.StatusOK, constant.Success, assetsResponse))
 }
 
