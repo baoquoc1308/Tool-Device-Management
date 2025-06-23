@@ -7,7 +7,11 @@ import { Calendar } from 'lucide-react'
 import { UpdateMaintenanceSchedule } from '../../update-maintenance-schedule'
 import { useState } from 'react'
 import { useAppSelector } from '@/hooks'
-export const columnTableMaintenance: ColumnDef<MaintenanceSchedule>[] = [
+export const columnTableMaintenance = ({
+  onSuccessUpdate,
+}: {
+  onSuccessUpdate: () => void
+}): ColumnDef<MaintenanceSchedule>[] => [
   {
     accessorKey: 'asset.assetName',
     header: 'Asset Name',
@@ -66,6 +70,7 @@ export const columnTableMaintenance: ColumnDef<MaintenanceSchedule>[] = [
             id={id.toString()}
             isDialogOpen={isDialogOpen}
             setIsDialogOpen={setIsDialogOpen}
+            onSuccessUpdate={onSuccessUpdate}
           />
           <Button
             variant='outline'

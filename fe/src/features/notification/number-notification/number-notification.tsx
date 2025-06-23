@@ -14,6 +14,8 @@ import { toast } from 'sonner'
 import type { NotificationType } from './model'
 import { useNavigate } from 'react-router-dom'
 import { cn } from '@/lib/utils'
+import Cookies from 'js-cookie'
+import { EventSourcePolyfill } from 'event-source-polyfill'
 
 const NumberNotification = () => {
   const navigate = useNavigate()
@@ -42,13 +44,23 @@ const NumberNotification = () => {
       return
     }
 
-    setNotifications(
-      notifications.map((notification) =>
-        notification.id.toString() === id ? { ...notification, status: 'seen' } : notification
-      )
-    )
+    await getNotifications()
     navigate(`assets/${assetId}`)
   }
+
+  const token = Cookies.get('accessToken')
+
+  useEffect(() => {
+    const eventSource = new EventSourcePolyfill(`${import.meta.env.VITE_API_URL}sse`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    })
+    eventSource.onmessage = async () => {
+      await getNotifications()
+    }
+    return () => eventSource.close()
+  }, [])
 
   useEffect(() => {
     getNotifications()

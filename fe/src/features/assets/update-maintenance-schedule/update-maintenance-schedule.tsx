@@ -24,12 +24,14 @@ const UpdateMaintenanceSchedule = ({
   setIsDialogOpen,
   startDate,
   endDate,
+  onSuccessUpdate,
 }: {
   id: string
   isDialogOpen: boolean
   setIsDialogOpen: React.Dispatch<React.SetStateAction<boolean>>
   startDate: Date | undefined
   endDate: Date | undefined
+  onSuccessUpdate: () => void
 }) => {
   const [isProcessing, setIsProcessing] = useState<boolean>(false)
 
@@ -57,6 +59,7 @@ const UpdateMaintenanceSchedule = ({
       startDate: undefined,
       endDate: undefined,
     })
+    onSuccessUpdate()
     setIsDialogOpen(false)
     setIsProcessing(false)
   }

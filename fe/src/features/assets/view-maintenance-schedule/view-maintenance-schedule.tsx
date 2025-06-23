@@ -76,15 +76,18 @@ const ViewMaintenanceSchedule = () => {
         <TabAllSchedules
           isLoading={isLoading}
           schedules={schedules}
+          onSuccess={fetchMaintenanceSchedules}
         />
 
         <TabUpcomingSchedules
           isLoading={isLoading}
           upcoming={upcoming}
+          onSuccess={fetchMaintenanceSchedules}
         />
         <TabUnderMaintenance
           isLoading={isLoading}
           inProgress={inProgress}
+          onSuccess={fetchMaintenanceSchedules}
         />
       </Tabs>
     </div>
