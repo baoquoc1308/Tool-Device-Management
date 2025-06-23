@@ -9,7 +9,7 @@ import { logIn } from '../slice'
 import { useState } from 'react'
 import Cookies from 'js-cookie'
 import { LinkToSignUp, RememberMeField, LinkToForgetPassword } from './_components'
-import { Lock, Mail, Plus } from 'lucide-react'
+import { Lock, Mail } from 'lucide-react'
 
 const LoginForm = () => {
   const [isPending, setIsPending] = useState(false)
