@@ -1,7 +1,7 @@
 import { useParams, Link, useNavigate } from 'react-router-dom'
 import type { AssetsType } from '../view-all-assets/model'
 import { getData, tryCatch } from '@/utils'
-import { useEffect, useTransition } from 'react'
+import { useEffect } from 'react'
 import { deleteAsset, getAssetInformation } from '../api'
 import { useState } from 'react'
 import {
@@ -32,13 +32,11 @@ import {
 } from './_components'
 import { ViewAssetLog } from '../view-asset-log'
 import { toast } from 'sonner'
-import { UpdateMaintenanceSchedule } from '../update-maintenance-schedule'
 
 const GetAssetDetail = () => {
   const { id } = useParams()
-  const [isPending, startTransition] = useTransition()
-  const [isDeleting, startDeletingTransition] = useTransition()
-  const [isDialogOpen, setIsDialogOpen] = useState(false)
+  const [isPending, setIsPending] = useState(false)
+  const [isDeleting, setIsDeleting] = useState(false)
   const [asset, setAsset] = useState<AssetsType>()
 
   const navigate = useNavigate()
@@ -51,23 +49,23 @@ const GetAssetDetail = () => {
     }
     return false
   }
-  const getAssetData = () => {
-    startTransition(async () => {
-      if (!id) return
-      await getData(() => getAssetInformation(id), setAsset)
-    })
-  }
-  const deletingAsset = () => {
+  const getAssetData = async () => {
+    setIsPending(true)
     if (!id) return
-    startDeletingTransition(async () => {
-      const response = await tryCatch(deleteAsset(id))
-      if (response.error) {
-        toast.error(response.error.message || 'Failed to delete asset')
-        return
-      }
-      toast.success('Asset deleted successfully')
-      navigate('/assets')
-    })
+    await getData(() => getAssetInformation(id), setAsset)
+    setIsPending(false)
+  }
+  const deletingAsset = async () => {
+    setIsDeleting(true)
+    if (!id) return
+    const response = await tryCatch(deleteAsset(id))
+    if (response.error) {
+      toast.error(response.error.message || 'Failed to delete asset')
+      return
+    }
+    toast.success('Asset deleted successfully')
+    navigate('/assets')
+    setIsDeleting(false)
   }
 
   useEffect(() => {
@@ -81,18 +79,12 @@ const GetAssetDetail = () => {
       </div>
     )
   }
-
   if (!asset) {
     return <NoAsset id={id || ''} />
   }
 
   return (
     <div className='container mx-auto px-4 py-8'>
-      <UpdateMaintenanceSchedule
-        id={id || ''}
-        isDialogOpen={isDialogOpen}
-        setIsDialogOpen={setIsDialogOpen}
-      />
       <div className='mb-6 flex items-center justify-between'>
         <div className='flex items-center'>
           <Link to='/assets'>
@@ -164,16 +156,6 @@ const GetAssetDetail = () => {
                   <CardTitle>Maintenance Schedule</CardTitle>
                   <CardDescription>Upcoming and past maintenance schedules</CardDescription>
                 </CardHeader>
-                {role !== 'departmentHead' && (
-                  <div className='flex items-center space-x-2 p-4'>
-                    <Button
-                      variant={'outline'}
-                      onClick={() => setIsDialogOpen(true)}
-                    >
-                      Update schedules
-                    </Button>
-                  </div>
-                )}
               </div>
 
               <CardContent>

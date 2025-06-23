@@ -1,4 +1,4 @@
-import { useEffect, useState, useTransition } from 'react'
+import { useEffect, useState } from 'react'
 import { FormProvider, useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useNavigate } from 'react-router-dom'
@@ -25,18 +25,18 @@ import type { CategoryType, DepartmentType } from './model'
 
 const CreateNewAsset = () => {
   const navigate = useNavigate()
-  const [isPending, startTransition] = useTransition()
+  const [isPending, setIsPending] = useState(false)
   const [fileName, setFileName] = useState<string>('')
   const [departments, setDepartments] = useState<DepartmentType[]>([])
   const [categories, setCategories] = useState<CategoryType[]>([])
-  const [isPendingGetData, startTransitionGetData] = useTransition()
+  const [isPendingGetData, setIsPendingGetData] = useState(false)
   const [imageName, setImageName] = useState<string>('')
 
-  const getAllInformation = () => {
-    startTransitionGetData(async () => {
-      await getData(getAllDepartment, setDepartments)
-      await getData(getAllCategories, setCategories)
-    })
+  const getAllInformation = async () => {
+    setIsPendingGetData(true)
+    await getData(getAllDepartment, setDepartments)
+    await getData(getAllCategories, setCategories)
+    setIsPendingGetData(false)
   }
 
   useEffect(() => {
@@ -57,16 +57,18 @@ const CreateNewAsset = () => {
     },
     mode: 'onChange',
   })
-  const onSubmit = (data: CreateAssetFormType) => {
-    startTransition(async () => {
-      const response = await tryCatch(createNewAsset(data))
-      if (response.error) {
-        toast.error(response.error?.message || 'Failed to create asset')
-        return
-      }
-      toast.success('Asset created successfully')
-      navigate('/assets')
-    })
+  const onSubmit = async (data: CreateAssetFormType) => {
+    setIsPending(true)
+    const purchaseDate = new Date(data.purchaseDate.getTime() + 25200000)
+    const warrantExpiry = new Date(data.warrantExpiry.getTime() + 25200000)
+    const response = await tryCatch(createNewAsset({ ...data, purchaseDate, warrantExpiry }))
+    if (response.error) {
+      toast.error(response.error?.message || 'Failed to create asset')
+      return
+    }
+    toast.success('Asset created successfully')
+    navigate('/assets')
+    setIsPending(false)
   }
   const handlePurchaseDateChange = (value: Date) => {
     form.setValue('purchaseDate', value)

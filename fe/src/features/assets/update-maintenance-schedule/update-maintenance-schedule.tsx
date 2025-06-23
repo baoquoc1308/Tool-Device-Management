@@ -12,7 +12,7 @@ import {
 import { Check, Loader2 } from 'lucide-react'
 import { FormProvider, useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { type UpdateMaintenanceScheduleType, updateMaintenanceScheduleSchema } from './model/schema'
 import { updateMaintenanceSchedule } from '../api'
 import { toast } from 'sonner'
@@ -22,10 +22,14 @@ const UpdateMaintenanceSchedule = ({
   id,
   isDialogOpen,
   setIsDialogOpen,
+  startDate,
+  endDate,
 }: {
   id: string
   isDialogOpen: boolean
   setIsDialogOpen: React.Dispatch<React.SetStateAction<boolean>>
+  startDate: Date | undefined
+  endDate: Date | undefined
 }) => {
   const [isProcessing, setIsProcessing] = useState<boolean>(false)
 
@@ -40,7 +44,9 @@ const UpdateMaintenanceSchedule = ({
 
   const onSubmit = async (data: UpdateMaintenanceScheduleType) => {
     setIsProcessing(true)
-    const response = await tryCatch(updateMaintenanceSchedule(id, data))
+    const startDate = new Date(data.startDate.getTime() + 25200000)
+    const endDate = new Date(data.endDate?.getTime() + 25200000)
+    const response = await tryCatch(updateMaintenanceSchedule(id, { ...data, startDate, endDate }))
     if (response.error) {
       toast.error(response.error.message || 'Failed to update maintenance schedule')
       setIsProcessing(false)
@@ -55,7 +61,8 @@ const UpdateMaintenanceSchedule = ({
     setIsProcessing(false)
   }
   const handleStartDateChange = (value: Date) => {
-    form.setValue('startDate', value)
+    form.setValue('startDate', value, { shouldDirty: true })
+
     const endDate = form.getValues('endDate')
 
     if (endDate) {
@@ -64,6 +71,16 @@ const UpdateMaintenanceSchedule = ({
       form.clearErrors('endDate')
     }
   }
+  useEffect(() => {
+    if (startDate && endDate) {
+      const formattedStartDate = new Date(startDate)
+      const formattedEndDate = new Date(endDate)
+      form.reset({
+        startDate: formattedStartDate,
+        endDate: formattedEndDate,
+      })
+    }
+  }, [startDate, endDate])
 
   return (
     <Dialog

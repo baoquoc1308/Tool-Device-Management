@@ -6,13 +6,13 @@ import { useNavigate } from 'react-router-dom'
 import { toast } from 'sonner'
 import { useAppDispatch } from '@/hooks'
 import { logIn } from '../slice'
-import { useTransition } from 'react'
+import { useState } from 'react'
 import Cookies from 'js-cookie'
 import { LinkToSignUp, RememberMeField, LinkToForgetPassword } from './_components'
 import { Lock, Mail, Plus } from 'lucide-react'
 
 const LoginForm = () => {
-  const [isPending, startTransition] = useTransition()
+  const [isPending, setIsPending] = useState(false)
   const dispatch = useAppDispatch()
   const navigate = useNavigate()
   const form = useForm<DataLoginType>({
@@ -25,22 +25,22 @@ const LoginForm = () => {
   })
 
   const onSubmit = async (data: DataLoginType) => {
-    startTransition(async () => {
-      const result = await dispatch(logIn(data)).unwrap()
+    setIsPending(true)
+    const result = await dispatch(logIn(data)).unwrap()
 
-      if (!result.success) {
-        toast.error(result.error?.message || 'Login failed, please try again')
-        return
-      }
-      if (result.data.is_active === false) {
-        toast.error('User is inactive, please go to email and verify your account')
-        return
-      }
-      Cookies.set('accessToken', result.data.access_token)
-      Cookies.set('refreshToken', result.data.refresh_token)
-      toast.success('Login successfully')
-      navigate('/')
-    })
+    if (!result.success) {
+      toast.error(result.error?.message || 'Login failed, please try again')
+      return
+    }
+    if (result.data.is_active === false) {
+      toast.error('User is inactive, please go to email and verify your account')
+      return
+    }
+    Cookies.set('accessToken', result.data.access_token)
+    Cookies.set('refreshToken', result.data.refresh_token)
+    toast.success('Login successfully')
+    navigate('/')
+    setIsPending(false)
   }
   return (
     <div>
@@ -74,8 +74,7 @@ const LoginForm = () => {
             <FormButtonSubmit
               className='bg-primary hover:bg-primary/90 mt-5 flex h-9 w-full items-center justify-center gap-1.5 text-sm font-medium sm:mt-6 sm:h-10 sm:gap-2 sm:text-base'
               isPending={isPending}
-              Icon={Plus}
-              type='Create Account'
+              type='Log In'
               onSubmit={onSubmit}
             />
             <div className='flex flex-col items-center gap-2 sm:flex-row sm:justify-between'>

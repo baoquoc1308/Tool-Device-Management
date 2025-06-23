@@ -6,12 +6,12 @@ import { Form, FormButtonSubmit, FormInput } from '@/components/ui'
 import { Link, useNavigate } from 'react-router-dom'
 import { signUpNewUser } from '../api'
 import { toast } from 'sonner'
-import { useTransition } from 'react'
+import { useState } from 'react'
 import { tryCatch } from '@/utils'
 import { Lock, Mail, Plus, User } from 'lucide-react'
 
 const SignupForm = () => {
-  const [isPending, startTransition] = useTransition()
+  const [isPending, setIsPending] = useState(false)
   const navigate = useNavigate()
   const methods = useForm<DataSignupType>({
     resolver: zodResolver(signupSchema),
@@ -24,17 +24,17 @@ const SignupForm = () => {
     },
   })
 
-  const onSubmit = (data: DataSignupType) => {
-    startTransition(async () => {
-      const response = await tryCatch(signUpNewUser(data))
+  const onSubmit = async (data: DataSignupType) => {
+    setIsPending(true)
+    const response = await tryCatch(signUpNewUser(data))
 
-      if (response.error) {
-        toast.error(response.error.message || 'Failed to create account, please try again')
-        return
-      }
-      toast.success('Account created successfully')
-      navigate('/login')
-    })
+    if (response.error) {
+      toast.error(response.error.message || 'Failed to create account, please try again')
+      return
+    }
+    toast.success('Account created successfully')
+    navigate('/login')
+    setIsPending(false)
   }
 
   return (

@@ -53,11 +53,16 @@ export const columnTableMaintenance: ColumnDef<MaintenanceSchedule>[] = [
     header: '',
     cell: ({ row }) => {
       const id = row.original.id
+      const status = row.original.asset.status
       const [isDialogOpen, setIsDialogOpen] = useState(false)
       const role = useAppSelector((state) => state.auth.user?.role.slug)
+      const startDate = row.original.startDate
+      const endDate = row.original.endDate
       return (
         <div className='flex items-center gap-2'>
           <UpdateMaintenanceSchedule
+            startDate={startDate}
+            endDate={endDate}
             id={id.toString()}
             isDialogOpen={isDialogOpen}
             setIsDialogOpen={setIsDialogOpen}
@@ -69,7 +74,7 @@ export const columnTableMaintenance: ColumnDef<MaintenanceSchedule>[] = [
           >
             <Link to={`/assets/${row.original.asset.id}`}>View Asset</Link>
           </Button>
-          {role !== 'viewer' && role !== 'departmentHead' && (
+          {role !== 'viewer' && role !== 'departmentHead' && status !== 'Under Maintenance' && (
             <Button
               variant='outline'
               size='sm'

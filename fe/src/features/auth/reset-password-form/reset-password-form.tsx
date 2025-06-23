@@ -1,4 +1,4 @@
-import { useState, useTransition } from 'react'
+import { useState } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import { FormProvider, useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
@@ -22,7 +22,7 @@ import { Lock } from 'lucide-react'
 const ResetPasswordForm = () => {
   const [searchParams] = useSearchParams()
   const token = searchParams.get('token') || ''
-  const [isPending, startTransition] = useTransition()
+  const [isPending, setIsPending] = useState(false)
   const [isSuccess, setIsSuccess] = useState(false)
   const [error, setError] = useState<boolean>(false)
   const form = useForm<ResetPasswordFormType>({
@@ -33,21 +33,21 @@ const ResetPasswordForm = () => {
     },
   })
 
-  const onSubmit = (data: ResetPasswordFormType) => {
-    startTransition(async () => {
-      const response = await tryCatch(resetPassword(data.password, token))
-      if (response.error && response.error.message === 'Token was expired') {
-        toast.error(response.error.message)
-        setError(true)
-        return
-      }
-      if (response.error) {
-        toast.error(response.error.message || 'Failed to reset password, please try again')
-        setError(true)
-        return
-      }
-      setIsSuccess(true)
-    })
+  const onSubmit = async (data: ResetPasswordFormType) => {
+    setIsPending(true)
+    const response = await tryCatch(resetPassword(data.password, token))
+    if (response.error && response.error.message === 'Token was expired') {
+      toast.error(response.error.message)
+      setError(true)
+      return
+    }
+    if (response.error) {
+      toast.error(response.error.message || 'Failed to reset password, please try again')
+      setError(true)
+      return
+    }
+    setIsSuccess(true)
+    setIsPending(false)
   }
 
   if (isSuccess) {

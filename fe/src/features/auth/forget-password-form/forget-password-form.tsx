@@ -1,4 +1,4 @@
-import { useState, useTransition } from 'react'
+import { useState } from 'react'
 import { FormProvider, useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import {
@@ -23,7 +23,7 @@ import { SignUpSuccess } from './_components'
 import { Mail } from 'lucide-react'
 
 const ForgetPasswordForm = () => {
-  const [isPending, startTransition] = useTransition()
+  const [isPending, setIsPending] = useState(false)
   const [isSuccess, setIsSuccess] = useState(false)
 
   const form = useForm<ForgetPasswordFormType>({
@@ -34,16 +34,15 @@ const ForgetPasswordForm = () => {
   })
 
   const onSubmit = async (data: ForgetPasswordFormType) => {
-    startTransition(async () => {
-      const response = await tryCatch(sendResetPasswordEmail(data.email))
-      if (response.error) {
-        toast.error(response.error?.message || 'Failed to send reset password email')
-        return
-      }
-      toast.success('Check your email for reset password link')
-      setIsSuccess(true)
+    const response = await tryCatch(sendResetPasswordEmail(data.email))
+    if (response.error) {
+      toast.error(response.error?.message || 'Failed to send reset password email')
       return
-    })
+    }
+    toast.success('Check your email for reset password link')
+    setIsSuccess(true)
+    return
+    setIsPending(true)
   }
 
   if (isSuccess) {

@@ -15,7 +15,7 @@ import { format } from 'date-fns'
 import { useFormContext } from 'react-hook-form'
 
 export const FormDatePicker = ({ name, label, fn }: { name: string; label: string; fn?: Function }) => {
-  const { control } = useFormContext()
+  const { control, formState } = useFormContext()
   return (
     <FormField
       control={control}

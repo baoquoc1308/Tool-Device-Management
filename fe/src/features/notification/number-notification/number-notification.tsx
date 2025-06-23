@@ -20,7 +20,6 @@ const NumberNotification = () => {
   const [unreadCount, setUnreadCount] = useState(0)
   const [notifications, setNotifications] = useState<NotificationType[]>([])
   const [isPending, setIsPending] = useState(false)
-  console.log('notifications', notifications)
   const getNotifications = async () => {
     setIsPending(true)
     const response = await tryCatch(getAllNotifications())

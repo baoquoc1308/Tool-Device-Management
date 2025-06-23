@@ -6,7 +6,7 @@ export const useNotification = () => {
   const token = Cookies.get('accessToken')
 
   useEffect(() => {
-    const eventSource = new EventSourcePolyfill(`${import.meta.env.VITE_API_URL}/sse`, {
+    const eventSource = new EventSourcePolyfill(`${import.meta.env.VITE_API_URL}sse`, {
       headers: {
         Authorization: `Bearer ${token}`,
       },
@@ -14,8 +14,6 @@ export const useNotification = () => {
     eventSource.onmessage = (event) => {
       toast.success(event.data)
     }
-
-    // terminating the connection on component unmount
     return () => eventSource.close()
   }, [])
 }

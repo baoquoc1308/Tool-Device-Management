@@ -1,5 +1,5 @@
 import { useParams, Link, useNavigate } from 'react-router-dom'
-import { useState, useEffect, useTransition } from 'react'
+import { useState, useEffect } from 'react'
 import {
   Card,
   CardContent,
@@ -37,7 +37,7 @@ import { FieldFile, FieldImage, IsError, IsGettingData } from './_components'
 const UpdateAssetInformation = () => {
   const { id } = useParams()
   const navigate = useNavigate()
-  const [isPending, startTransition] = useTransition()
+  const [isPending, setIsPending] = useState(false)
   const [isGetDataPending, setIsGetDataPending] = useState<boolean>(false)
   const [asset, setAsset] = useState<AssetsType>()
   const [categories, setCategories] = useState<CategoryType[]>([])
@@ -96,25 +96,28 @@ const UpdateAssetInformation = () => {
     })
   }, [asset])
 
-  const onSubmit = (values: CreateAssetFormType) => {
-    startTransition(async () => {
-      if (typeof values.image === 'string') {
-        const image = await urlToFile(values.image)
-        values.image = image
-      }
-      if (typeof values.file === 'string') {
-        const file = await urlToFile(values.file)
-        values.file = file
-      }
-      const { error } = await tryCatch(updateAssetInformation(id || '', values))
+  const onSubmit = async (values: CreateAssetFormType) => {
+    setIsPending(true)
+    if (typeof values.image === 'string') {
+      const image = await urlToFile(values.image)
+      values.image = image
+    }
+    if (typeof values.file === 'string') {
+      const file = await urlToFile(values.file)
+      values.file = file
+    }
+    const purchaseDate = new Date(values.purchaseDate.getTime() + 25200000)
+    const warrantExpiry = new Date(values.warrantExpiry.getTime() + 25200000)
 
-      if (error) {
-        toast.error(error?.message || 'Failed to update asset')
-        return
-      }
-      toast.success('Asset updated successfully')
-      navigate(`/assets/${id}`)
-    })
+    const { error } = await tryCatch(updateAssetInformation(id || '', { ...values, purchaseDate, warrantExpiry }))
+
+    if (error) {
+      toast.error(error?.message || 'Failed to update asset')
+      return
+    }
+    toast.success('Asset updated successfully')
+    navigate(`/assets/${id}`)
+    setIsPending(false)
   }
 
   const handlePurchaseDateChange = (value: Date) => {
