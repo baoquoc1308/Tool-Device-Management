@@ -599,7 +599,7 @@ func (service *AssetsService) CheckPermissionForManager(userId int64, depId int6
 	if user.DepartmentId != nil && *user.DepartmentId == depId {
 		return nil
 	}
-	return errors.New("you can have permission for manager asset in the department")
+	return errors.New("you are not allowed to manage departmental assets.")
 }
 
 func (service *AssetsService) GetUserById(id int64) (entity.Users, error) {
