@@ -119,7 +119,7 @@ const UpdateAssetInformation = () => {
     navigate(`/assets/${id}`)
     setIsPending(false)
   }
-
+  console.log('asset', asset)
   const handlePurchaseDateChange = (value: Date) => {
     form.setValue('purchaseDate', value)
     const endDate = form.getValues('warrantExpiry')
