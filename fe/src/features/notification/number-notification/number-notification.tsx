@@ -35,21 +35,20 @@ const NumberNotification = () => {
     setIsPending(false)
   }
 
-  const clickNotification = async (id: string) => {
+  const clickNotification = async (assetId: string, id: string) => {
     const response = await tryCatch(updateReadNotification(id))
 
     if (response.error) {
       toast.error(response.error.message || 'Failed to seen notification')
       return
     }
-    setUnreadCount((prev) => prev - 1)
-    // Update the notification status locally
+
     setNotifications(
       notifications.map((notification) =>
         notification.id.toString() === id ? { ...notification, status: 'seen' } : notification
       )
     )
-    navigate(`assets/${id}`)
+    navigate(`assets/${assetId}`)
   }
 
   useEffect(() => {
@@ -90,7 +89,7 @@ const NumberNotification = () => {
                 notifications.map((notification, index) => (
                   <div
                     key={index}
-                    onClick={() => clickNotification(notification.id.toString())}
+                    onClick={() => clickNotification(notification.assetId.toString(), notification.id.toString())}
                     className={cn(
                       'hover:bg-accent p-3 transition-colors',
                       'border-b last:border-b-0',
