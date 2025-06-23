@@ -154,6 +154,7 @@ const ViewAssignmentDetail = () => {
                     <div>
                       {isUpdate ? (
                         <AssignmentUserAssignUpdate
+                          departmentId={departmentId}
                           users={users}
                           assignmentDetail={assignmentDetail}
                           isLoading={isLoadingUsers}
