@@ -11,12 +11,17 @@ interface DashboardStatsProps {
 }
 
 const COLORS = {
-  'In Use': '#22d3ee',
-  'Under Maintenance': '#fb7185',
-  'Retired / Disposed': '#a78bfa',
-  New: '#fb923c',
+  'In Use': '#3b82f6',
+  'Under Maintenance': '#f59e0b',
+  'Retired / Disposed': '#ef4444',
+  New: '#22c55e',
 }
-
+const STATUS_COLORS = {
+  'In Use': 'text-blue-600',
+  'Under Maintenance': 'text-amber-600',
+  'Retired / Disposed': 'text-red-600',
+  New: 'text-green-600',
+}
 const RADIAN = Math.PI / 180
 const renderCustomizedLabel = ({ cx, cy, midAngle, outerRadius, percent }: any) => {
   const radius = outerRadius * 0.7
@@ -43,9 +48,7 @@ const CustomTooltip = ({ active, payload }: any) => {
     return (
       <div className='rounded-lg border bg-white p-2 shadow-lg'>
         <p className='font-medium'>{data.name}</p>
-        <p className='text-sm text-gray-600'>
-          {`${data.value} (${(data.percent * 100).toFixed(1)}%)`}
-        </p>
+        <p className='text-sm text-gray-600'>{`${data.value} (${(data.percent * 100).toFixed(1)}%)`}</p>
       </div>
     )
   }
@@ -71,40 +74,40 @@ const CustomLegend = ({ payload }: any) => {
   )
 }
 
-const applyLargestRemainder = (data: Array<{ value: number, name: string }>) => {
-  if (!data.length) return [];
-  
-  const total = data.reduce((sum, item) => sum + item.value, 0);
-  if (total === 0) return data.map(item => ({ ...item, percent: 0 }));
+const applyLargestRemainder = (data: Array<{ value: number; name: string }>) => {
+  if (!data.length) return []
 
-  const withPercentages = data.map(item => ({
+  const total = data.reduce((sum, item) => sum + item.value, 0)
+  if (total === 0) return data.map((item) => ({ ...item, percent: 0 }))
+
+  const withPercentages = data.map((item) => ({
     ...item,
-    exactPercent: (item.value / total),
-    percent: Math.floor((item.value / total) * 1000) / 1000, 
-    remainder: ((item.value / total) * 1000) % 1 
-  }));
+    exactPercent: item.value / total,
+    percent: Math.floor((item.value / total) * 1000) / 1000,
+    remainder: ((item.value / total) * 1000) % 1,
+  }))
 
-  const totalPercent = withPercentages.reduce((sum, item) => sum + item.percent, 0);
-  
-  const remainingPercent = Math.max(0, 1 - totalPercent);
-  const extraPoints = Math.round(remainingPercent * 1000);
+  const totalPercent = withPercentages.reduce((sum, item) => sum + item.percent, 0)
 
-  const sorted = [...withPercentages].sort((a, b) => b.remainder - a.remainder);
-  
+  const remainingPercent = Math.max(0, 1 - totalPercent)
+  const extraPoints = Math.round(remainingPercent * 1000)
+
+  const sorted = [...withPercentages].sort((a, b) => b.remainder - a.remainder)
+
   for (let i = 0; i < extraPoints && sorted.length > 0; i++) {
-    sorted[i % sorted.length].percent += 0.001;
+    sorted[i % sorted.length].percent += 0.001
   }
 
   return sorted.map(({ name, value, percent }) => ({
     name,
     value,
-    percent
-  }));
-};
+    percent,
+  }))
+}
 
 export const DashboardStats = ({ stats, assets, isPending }: DashboardStatsProps) => {
   const getStatusCount = (status: string) => {
-    return assets?.filter((asset) => asset.status === status)?.length || 0;
+    return assets?.filter((asset) => asset.status === status)?.length || 0
   }
 
   const newCount = getStatusCount('New')
@@ -117,9 +120,9 @@ export const DashboardStats = ({ stats, assets, isPending }: DashboardStatsProps
     { name: 'Under Maintenance', value: underMaintenanceCount },
     { name: 'Retired / Disposed', value: retiredAndDisposedCount },
     { name: 'New', value: newCount },
-  ].filter(item => item.value > 0);
+  ].filter((item) => item.value > 0)
 
-  const pieChartData = applyLargestRemainder(rawData);
+  const pieChartData = applyLargestRemainder(rawData)
 
   return (
     <div className='space-y-6'>
@@ -137,7 +140,7 @@ export const DashboardStats = ({ stats, assets, isPending }: DashboardStatsProps
             <CardTitle className='text-sm font-medium'>New</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className='text-2xl font-bold'>{newCount}</div>
+            <div className={`text-2xl font-bold ${STATUS_COLORS['New']}`}>{newCount}</div>
           </CardContent>
         </Card>
         <Card>
@@ -145,7 +148,7 @@ export const DashboardStats = ({ stats, assets, isPending }: DashboardStatsProps
             <CardTitle className='text-sm font-medium'>In Use</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className='text-2xl font-bold'>{inUseCount}</div>
+            <div className={`text-2xl font-bold ${STATUS_COLORS['In Use']}`}>{inUseCount}</div>
           </CardContent>
         </Card>
         <Card>
@@ -153,7 +156,7 @@ export const DashboardStats = ({ stats, assets, isPending }: DashboardStatsProps
             <CardTitle className='text-sm font-medium'>Under Maintenance</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className='text-2xl font-bold'>{underMaintenanceCount}</div>
+            <div className={`text-2xl font-bold ${STATUS_COLORS['Under Maintenance']}`}>{underMaintenanceCount}</div>
           </CardContent>
         </Card>
         <Card>
@@ -161,7 +164,7 @@ export const DashboardStats = ({ stats, assets, isPending }: DashboardStatsProps
             <CardTitle className='text-sm font-medium'>Retired / Disposed</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className='text-2xl font-bold'>{retiredAndDisposedCount}</div>
+            <div className={`text-2xl font-bold ${STATUS_COLORS['Retired / Disposed']}`}>{retiredAndDisposedCount}</div>
           </CardContent>
         </Card>
       </div>
