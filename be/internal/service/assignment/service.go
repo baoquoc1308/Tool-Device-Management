@@ -97,15 +97,15 @@ func (service *AssignmentService) Update(userId, assignmentId int64, userIdAssig
 		return nil, err
 	}
 
-	assetLog := entity.AssetLog{
-		Timestamp: time.Now(),
-		Action:    "Transfer",
-		AssetId:   asset.Id,
-		ByUserId:  &byUser.Id,
-	}
 
 	// Chuyển phòng ban
 	if departmentId != nil && (*departmentId != asset.DepartmentId) {
+		assetLog := entity.AssetLog{
+			Timestamp: time.Now(),
+			Action:    "Transfer",
+			AssetId:   asset.Id,
+			ByUserId:  &byUser.Id,
+		}
 		department, err := service.departmentRepo.GetDepartmentById(*departmentId)
 		if err != nil {
 			return nil, err
@@ -122,6 +122,12 @@ func (service *AssignmentService) Update(userId, assignmentId int64, userIdAssig
 
 	// Chuyển người dùng
 	if userIdAssign != nil && (*userIdAssign != asset.OnwerUser.Id) {
+		assetLog := entity.AssetLog{
+			Timestamp: time.Now(),
+			Action:    "Transfer",
+			AssetId:   asset.Id,
+			ByUserId:  &byUser.Id,
+		}
 		assetLog.AssignUserId = &assignUser.Id
 		assetLog.ChangeSummary += fmt.Sprintf("Transfer from user: %v to user: %v\n",
 			byUser.Email, assignUser.Email)
@@ -152,8 +158,15 @@ func (service *AssignmentService) Update(userId, assignmentId int64, userIdAssig
 	if err := tx.Commit().Error; err != nil {
 		return nil, err
 	}
-	userHeadDepart, _ := service.userRepo.GetUserHeadDepartment(assetLog.Asset.DepartmentId)
-	userManagerAsset, _ := service.userRepo.GetUserAssetManageOfDepartment(assetLog.Asset.DepartmentId)
+	var userHeadDepart *entity.Users
+	var userManagerAsset *entity.Users
+	if departmentId != nil{
+		userHeadDepart, _ = service.userRepo.GetUserHeadDepartment(*departmentId)
+		userManagerAsset, _ = service.userRepo.GetUserAssetManageOfDepartment(*departmentId)
+	}else{
+		userHeadDepart, _ = service.userRepo.GetUserHeadDepartment(asset.DepartmentId)
+		userManagerAsset, _ = service.userRepo.GetUserAssetManageOfDepartment(asset.DepartmentId)
+	}
 	usersToNotifications := []*entity.Users{asset.OnwerUser, userHeadDepart, userManagerAsset}
 	message := fmt.Sprintf("The asset '%v' (ID: %v) has just been updated by %v", asset.AssetName, asset.Id, byUser.Email)
 	userNotificationUnique := utils.ConvertUsersToNotificationsToMap(userId, usersToNotifications)

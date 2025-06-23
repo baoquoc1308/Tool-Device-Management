@@ -15,6 +15,6 @@ func registerNotificationsRoutes(api *gin.RouterGroup, h *handler.NotificationHa
 
 	api.GET("/notifications", h.GetNotificationsByUserId)
 
-	api.GET("/notifications/:id", h.UpdateStatusToSeen) // đã check
+	api.PUT("/notifications/:id", h.UpdateStatusToSeen) // đã check
 
 }

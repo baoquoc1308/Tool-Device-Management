@@ -470,6 +470,20 @@ func (service *AssetsService) Filter(userId int64, assetName *string, status *st
 		DepartmentId: departmentId,
 		Status:       status,
 	}
+	user, err := service.userRepository.FindByUserId(userId)
+	if err != nil {
+		return nil, err
+	}
+	if user.Role.Slug == "departmentHead" {
+		var deptStr *string
+		if user.DepartmentId != nil {
+			s := strconv.FormatInt(*user.DepartmentId, 10)
+			deptStr = &s
+		} else {
+			deptStr = nil
+		}
+		filter.DepartmentId = deptStr
+	}
 	db := service.repo.GetDB()
 	dbFilter := filter.ApplyFilter(db.Model(&entity.Assets{}), userId)
 	var total int64
