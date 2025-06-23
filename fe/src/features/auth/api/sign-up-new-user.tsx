@@ -7,6 +7,6 @@ export const signUpNewUser = async (dataSignUp: DataSignupType) => {
     firstName: dataSignUp.firstName,
     lastName: dataSignUp.lastName,
     password: dataSignUp.password,
-    redirectUrl: 'http://localhost:5173/login',
+    redirectUrl: 'https://tool-device-management.vercel.app/login',
   })
 }
