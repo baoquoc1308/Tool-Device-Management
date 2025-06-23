@@ -56,7 +56,6 @@ const CreateTransferRequest = () => {
       return
     }
     toast.success('Transfer request created successfully')
-    navigate('/transfers')
   }
 
   return (
