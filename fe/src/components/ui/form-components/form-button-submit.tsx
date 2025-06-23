@@ -17,9 +17,10 @@ export const FormButtonSubmit = <FormType extends FieldValues>({
   onSubmit: (value: FormType) => void
 }) => {
   const { formState, handleSubmit } = useFormContext<FormType>()
+  const { isDirty, isValid } = formState
   return (
     <Button
-      disabled={!formState.isDirty || !formState.isValid || isPending}
+      disabled={!isDirty || !isValid || isPending}
       type='submit'
       className={className}
       onClick={handleSubmit(onSubmit)}
