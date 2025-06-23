@@ -10,7 +10,7 @@ import {
   FormDatePicker,
 } from '@/components/ui'
 import { Check, Loader2 } from 'lucide-react'
-import { FormProvider, useForm } from 'react-hook-form'
+import { FormProvider, useForm, useFormState } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import React, { useEffect, useState } from 'react'
 import { type UpdateMaintenanceScheduleType, updateMaintenanceScheduleSchema } from './model/schema'
@@ -84,7 +84,9 @@ const UpdateMaintenanceSchedule = ({
       })
     }
   }, [startDate, endDate])
-
+  const { isValid, isDirty } = useFormState({
+    control: form.control,
+  })
   return (
     <Dialog
       open={isDialogOpen}
@@ -130,7 +132,7 @@ const UpdateMaintenanceSchedule = ({
                 </Button>
                 <Button
                   type='submit'
-                  disabled={isProcessing || !form.formState.isValid || !form.formState.isDirty}
+                  disabled={isProcessing || !isValid || !isDirty}
                 >
                   {isProcessing ? (
                     <>

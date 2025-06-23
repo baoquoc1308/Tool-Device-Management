@@ -19,7 +19,7 @@ import {
 import { getAllUsersOfDepartment, type UserType } from '@/features/user'
 import { getAllDepartment } from '@/features/assets/api'
 import type { DepartmentType } from '@/features/assets'
-import { FormProvider, useForm } from 'react-hook-form'
+import { FormProvider, useForm, useFormState } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { type UpdateAssignmentForm, updateAssignmentSchema } from './model'
 import { toast } from 'sonner'
@@ -104,7 +104,9 @@ const ViewAssignmentDetail = () => {
   if (!assignmentDetail) {
     return <AssignmentError id={id || ''} />
   }
-
+  const { isDirty } = useFormState({
+    control: form.control,
+  })
   return (
     <div className='container mx-auto px-4 py-6 md:px-6'>
       <div className='flex flex-col gap-6'>
@@ -196,7 +198,7 @@ const ViewAssignmentDetail = () => {
               </Button>
               <Button
                 onClick={form.handleSubmit(onSubmit)}
-                disabled={isSubmitting || !form.formState.isDirty}
+                disabled={isSubmitting || !isDirty}
               >
                 {isSubmitting ? (
                   <>

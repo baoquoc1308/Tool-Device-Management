@@ -69,7 +69,6 @@ const UpdateAssetInformation = () => {
     if (data?.imageUpload) {
       setImagePreview(data.imageUpload)
     }
-
     if (data?.fileAttachment) {
       setFileAttachmentName(data.fileAttachment)
     }
