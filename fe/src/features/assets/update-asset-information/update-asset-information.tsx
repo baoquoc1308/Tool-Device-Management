@@ -65,8 +65,6 @@ const UpdateAssetInformation = () => {
   const getAssetData = async () => {
     setIsGetDataPending(true)
     if (!id) return
-    await getData(getAllCategories, setCategories)
-    await getData(getAllDepartment, setDepartments)
     const data = await getData(() => getAssetInformation(id), setAsset)
     if (data?.imageUpload) {
       setImagePreview(data.imageUpload)
@@ -75,12 +73,15 @@ const UpdateAssetInformation = () => {
     if (data?.fileAttachment) {
       setFileAttachmentName(data.fileAttachment)
     }
+    await getData(getAllCategories, setCategories)
+    await getData(getAllDepartment, setDepartments)
     setIsGetDataPending(false)
   }
   useEffect(() => {
     getAssetData()
   }, [id])
   useEffect(() => {
+    if (!asset) return
     form.reset({
       assetName: asset?.assetName,
       serialNumber: asset?.serialNumber,
