@@ -2,7 +2,6 @@ import { createAsyncThunk } from '@reduxjs/toolkit'
 import { tryCatch } from '@/utils'
 import { httpRequest } from '@/utils'
 import type { AxiosError } from 'axios'
-import { toast } from 'sonner'
 
 // create async thunk to handle when user log in
 type DataLogInType = {
