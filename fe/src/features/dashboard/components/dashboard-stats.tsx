@@ -4,6 +4,7 @@ import type { AssetsType } from '@/features/assets/view-all-assets/model'
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip, Legend } from 'recharts'
 import { Loader2 } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
+import { useState, useEffect } from 'react'
 
 interface DashboardStatsProps {
   stats: DashboardData
@@ -25,8 +26,8 @@ const STATUS_COLORS = {
   New: 'text-green-600',
 }
 
-const renderCustomizedLabel = ({ cx, cy, midAngle, outerRadius, percent, fill }: any) => {
-  if (percent < 0.02) return null
+const renderCustomizedLabel = ({ cx, cy, midAngle, outerRadius, percent, fill }: any, showLabels: boolean) => {
+  if (percent < 0.02 || !showLabels) return null
 
   const RADIAN = Math.PI / 180
   const isSmallScreen = window.innerWidth < 360
@@ -46,7 +47,12 @@ const renderCustomizedLabel = ({ cx, cy, midAngle, outerRadius, percent, fill }:
   const lineEndY = cy + lineEndRadius * Math.sin(-midAngle * RADIAN)
 
   return (
-    <g>
+    <g
+      style={{
+        opacity: showLabels ? 1 : 0,
+        transition: 'opacity 0.5s ease-in-out',
+      }}
+    >
       <line
         x1={lineStartX}
         y1={lineStartY}
@@ -133,6 +139,25 @@ const applyLargestRemainder = (data: Array<{ value: number; name: string }>) => 
 }
 
 export const DashboardStats = ({ stats, assets, isPending }: DashboardStatsProps) => {
+  const [showLabels, setShowLabels] = useState(false)
+  const navigate = useNavigate()
+
+  useEffect(() => {
+    if (!isPending && assets && assets.length > 0) {
+      const timer = setTimeout(() => {
+        setShowLabels(true)
+      }, 2000)
+
+      return () => clearTimeout(timer)
+    }
+  }, [isPending, assets])
+
+  useEffect(() => {
+    if (isPending || !assets || assets.length === 0) {
+      setShowLabels(false)
+    }
+  }, [isPending, assets])
+
   if (!isPending && (!assets || assets.length === 0)) {
     return (
       <div className='space-y-4 sm:space-y-6'>
@@ -161,7 +186,7 @@ export const DashboardStats = ({ stats, assets, isPending }: DashboardStatsProps
 
           <Card>
             <CardHeader className='pb-3 sm:pb-6'>
-              <CardTitle className='text-base sm:text-lg'>Recent Assets</CardTitle>
+              <CardTitle className='text-base sm:text-lg'>Recent Purchased Assets</CardTitle>
             </CardHeader>
             <CardContent>
               <div className='text-muted-foreground flex h-[250px] items-center justify-center sm:h-[300px]'>
@@ -194,7 +219,6 @@ export const DashboardStats = ({ stats, assets, isPending }: DashboardStatsProps
   ].filter((item) => item.value > 0)
 
   const pieChartData = applyLargestRemainder(rawData)
-  const navigate = useNavigate()
 
   return (
     <div className='space-y-4 sm:space-y-6'>
@@ -270,7 +294,7 @@ export const DashboardStats = ({ stats, assets, isPending }: DashboardStatsProps
                       dataKey='value'
                       startAngle={90}
                       endAngle={-270}
-                      label={renderCustomizedLabel}
+                      label={(props) => renderCustomizedLabel(props, showLabels)}
                       labelLine={false}
                       strokeWidth={0}
                     >
@@ -291,7 +315,7 @@ export const DashboardStats = ({ stats, assets, isPending }: DashboardStatsProps
         </Card>
 
         <Card className='transition-shadow duration-200 hover:shadow-lg'>
-          <CardHeader className='pb-3 sm:pb-6'>
+          <CardHeader className='pb-0 sm:pb-0'>
             <CardTitle className='text-base sm:text-lg'>Recent Purchased Assets</CardTitle>
           </CardHeader>
           <CardContent>
