@@ -24,11 +24,11 @@ import { AssignDepartmentForUserPage, AssignRoleForUserPage } from '@/pages/user
 export const router = createBrowserRouter([
   {
     path: '/',
-    element: <Layout />,
+    element: <ProtectedRoute />,
     children: [
       {
         path: '/',
-        element: <ProtectedRoute />,
+        element: <Layout />,
         children: [
           {
             path: 'dashboard',

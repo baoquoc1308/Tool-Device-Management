@@ -222,6 +222,7 @@ const ViewAssignmentDetail = () => {
                   setIsUpdate(true)
                   form.setValue('departmentId', '')
                   form.setValue('userId', '')
+                  setDepartmentId('')
                 }}
               >
                 Edit Assignment
