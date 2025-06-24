@@ -107,31 +107,38 @@ export const AssignDepartment = () => {
             className='space-y-6'
           >
             <CardContent className='space-y-4'>
-              {isLoadingUsers ? (
-                <div className='flex items-center gap-2 py-2'>
-                  <Loader2 className='h-4 w-4 animate-spin' />
-                  <span>Loading users...</span>
+              {!isLoadingUsers && users.length === 0 ? (
+                <div className='rounded-md bg-gray-100 p-4 text-center font-medium text-black'>
+                  All users already have a department assigned.
                 </div>
               ) : (
-                <FormSelect
-                  name='userId'
-                  label='User'
-                  placeholder='Select a user'
-                  data={users}
-                />
+                <>
+                  {isLoadingUsers ? (
+                    <div className='flex items-center gap-2 py-2'>
+                      <Loader2 className='h-4 w-4 animate-spin' />
+                      <span>Loading users...</span>
+                    </div>
+                  ) : (
+                    <FormSelect
+                      name='userId'
+                      label='User'
+                      placeholder='Select a user'
+                      data={users}
+                    />
+                  )}
+                  {selectedUser && (
+                    <div className='bg-muted mt-4 rounded-md p-4'>
+                      <h4 className='mb-1 text-sm font-semibold'>Selected User</h4>
+                      <div className='flex flex-col items-start gap-2'>
+                        <p className='font-medium'>
+                          {selectedUser.firstName} {selectedUser.lastName}
+                        </p>
+                        <p className='text-muted-foreground text-sm'>{selectedUser.email}</p>
+                      </div>
+                    </div>
+                  )}
+                </>
               )}
-              {selectedUser && (
-                <div className='bg-muted mt-4 rounded-md p-4'>
-                  <h4 className='mb-1 text-sm font-semibold'>Selected User</h4>
-                  <div className='flex flex-col items-start gap-2'>
-                    <p className='font-medium'>
-                      {selectedUser.firstName} {selectedUser.lastName}
-                    </p>
-                    <p className='text-muted-foreground text-sm'>{selectedUser.email}</p>
-                  </div>
-                </div>
-              )}
-
               {isLoadingDepartments ? (
                 <div className='flex items-center gap-2 py-2'>
                   <Loader2 className='h-4 w-4 animate-spin' />
