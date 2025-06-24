@@ -19,8 +19,7 @@ A modern web application for managing assets, users, departments, and maintenanc
 - [React] + [TypeScript]
 - [Vite] for fast development
 - [Redux Toolkit] [Redux Thunk] for state management
-- [Zod] for schema validation
-- [Lucide Icons] for modern icons
+- [Zod] [React Hook Form] for form and validation
 - [Tailwind CSS] for styling
 - [Shadcn] for UI components
 
@@ -74,3 +73,7 @@ fe/
 - Enable side-by-side comparison of multiple assets, including specs, costs, and performance
 - Admins can save bills after creating assets, and generate a monthly summary bill for printing at the end of the month.
 - Admins can view statistical reports filtered by month and year.
+- Admin assign asset -> Manager -> user
+- 3 roles: employee (see assets, assign asset, assign to manager then assign to another employee), admin (save records when buy,update,.. ), manager (assign asset to employee)
+- Admin doesn't have to approve
+- Improve UI/UX: Form create , update asset, button, font, size,....
