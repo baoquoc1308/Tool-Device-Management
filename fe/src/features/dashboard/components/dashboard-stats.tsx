@@ -169,6 +169,8 @@ export const DashboardStats = ({ stats, assets, isPending }: DashboardStatsProps
 
   const pieChartData = applyLargestRemainder(rawData)
   const navigate = useNavigate()
+
+  console.log(assets)
   return (
     <div className='space-y-6'>
       <div className='grid gap-4 md:grid-cols-2 lg:grid-cols-5'>
@@ -266,6 +268,7 @@ export const DashboardStats = ({ stats, assets, isPending }: DashboardStatsProps
           <CardContent>
             <div className='space-y-8'>
               {assets
+                .sort((a, b) => a.id - b.id)
                 .slice(assets.length - 5, assets.length)
                 .reverse()
                 .map((asset) => (
