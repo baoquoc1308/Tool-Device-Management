@@ -3,6 +3,7 @@ import type { DashboardData } from '../api/type'
 import type { AssetsType } from '@/features/assets/view-all-assets/model'
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip, Legend } from 'recharts'
 import { Loader2 } from 'lucide-react'
+import { useNavigate } from 'react-router-dom'
 
 interface DashboardStatsProps {
   stats: DashboardData
@@ -167,7 +168,7 @@ export const DashboardStats = ({ stats, assets, isPending }: DashboardStatsProps
   ].filter((item) => item.value > 0)
 
   const pieChartData = applyLargestRemainder(rawData)
-
+  const navigate = useNavigate()
   return (
     <div className='space-y-6'>
       <div className='grid gap-4 md:grid-cols-2 lg:grid-cols-5'>
@@ -260,24 +261,28 @@ export const DashboardStats = ({ stats, assets, isPending }: DashboardStatsProps
 
         <Card>
           <CardHeader>
-            <CardTitle>Recent Assets</CardTitle>
+            <CardTitle>Recent Purchased Assets</CardTitle>
           </CardHeader>
           <CardContent>
             <div className='space-y-8'>
-              {assets.slice(0, 5).map((asset) => (
-                <div
-                  className='flex items-center'
-                  key={asset.id}
-                >
-                  <div className='ml-4 space-y-1'>
-                    <p className='text-sm leading-none font-medium'>{asset.assetName}</p>
-                    <p className='text-muted-foreground text-sm'>
-                      {asset.category.categoryName} • {asset.status}
-                    </p>
+              {assets
+                .slice(assets.length - 5, assets.length)
+                .reverse()
+                .map((asset) => (
+                  <div
+                    className='flex items-center rounded-lg border border-transparent px-2 py-1 hover:cursor-pointer hover:bg-gray-50 hover:shadow-md'
+                    key={asset.id}
+                    onClick={() => navigate(`/assets/${asset.id}`)}
+                  >
+                    <div className='ml-4 space-y-1'>
+                      <p className='text-sm leading-none font-medium'>{asset.assetName}</p>
+                      <p className='text-muted-foreground text-sm'>
+                        {asset.category.categoryName} • {asset.status}
+                      </p>
+                    </div>
+                    <div className='mr-4 ml-auto font-medium'>{asset.department.departmentName || 'No Department'}</div>
                   </div>
-                  <div className='ml-auto font-medium'>{asset.department.departmentName || 'No Department'}</div>
-                </div>
-              ))}
+                ))}
             </div>
           </CardContent>
         </Card>
