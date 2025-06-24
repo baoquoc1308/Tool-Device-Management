@@ -18,7 +18,7 @@ A modern web application for managing assets, users, departments, and maintenanc
 
 - [React] + [TypeScript]
 - [Vite] for fast development
-- [Redux Toolkit]) for state management
+- [Redux Toolkit] [Redux Thunk] for state management
 - [Zod] for schema validation
 - [Lucide Icons] for modern icons
 - [Tailwind CSS] for styling
@@ -35,6 +35,12 @@ A modern web application for managing assets, users, departments, and maintenanc
    ```
 3. **Open your browser:**
    Visit [http://localhost:5173](http://localhost:5173) to view the app.
+
+## 🌐 Production
+
+You can access the live application here:
+
+[Production Website](https://tool-device-management.vercel.app/)
 
 ## 🧑‍💻 For Developers
 
