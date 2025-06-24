@@ -1,54 +1,68 @@
-# React + TypeScript + Vite
+# Tool Device Management - Frontend
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+A modern web application for managing assets, users, departments, and maintenance in your organization. Built with React, TypeScript, and Vite for a fast, scalable, and maintainable experience.
 
-Currently, two official plugins are available:
+## 🌟 Features
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+- **Dashboard**: Overview of asset statistics, recent purchased devices, and quick insights.
+- **Asset Management**: View, create, update, and filter assets with categories, departments, and statuses.
+- **Assignment Management**: Assign assets to users and track assignment history.
+- **Transfer Requests**: Create and manage asset transfer requests between departments.
+- **User Management**: Assign roles and departments to users.
+- **Department Management**: Organize users and assets by department.
+- **Maintenance Scheduling**: Plan and track maintenance schedules for assets.
+- **Notifications**: Receive realtime update notifications on assignments, transfers, and maintenance.
+- **Authentication & Authorization**: Secure login and role-based access control.
 
-## Expanding the ESLint configuration
+## 🚀 Tech Stack
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+- [React] + [TypeScript]
+- [Vite] for fast development
+- [Redux Toolkit]) for state management
+- [Zod] for schema validation
+- [Lucide Icons] for modern icons
+- [Tailwind CSS] for styling
 
-```js
-export default tseslint.config({
-  extends: [
-    // Remove ...tseslint.configs.recommended and replace with this
-    ...tseslint.configs.recommendedTypeChecked,
-    // Alternatively, use this for stricter rules
-    ...tseslint.configs.strictTypeChecked,
-    // Optionally, add this for stylistic rules
-    ...tseslint.configs.stylisticTypeChecked,
-  ],
-  languageOptions: {
-    // other options...
-    parserOptions: {
-      project: ['./tsconfig.node.json', './tsconfig.app.json'],
-      tsconfigRootDir: import.meta.dirname,
-    },
-  },
-})
+## 📦 Getting Started
+
+1. **Install dependencies:**
+   ```bash
+   npm install
+   ```
+2. **Start the development server:**
+   ```bash
+   npm run dev
+   ```
+3. **Open your browser:**
+   Visit [http://localhost:5173](http://localhost:5173) to view the app.
+
+## 🧑‍💻 For Developers
+
+- Code is organized by feature in `src/features/` for scalability.
+- Reusable UI components are located in `src/components/ui/`.
+- API calls and models are separated for clarity.
+- ESLint and Prettier are configured for code quality.
+
+## 📁 Project Structure
+
+```
+fe/
+  src/
+    features/        # Feature modules (assets, user, assignments, ...)
+    components/      # Reusable UI components
+    hooks/           # Custom React hooks
+    lib/             # Utilities and HTTP client
+    pages/           # Page components
+    redux-store/     # Redux store setup
+    router/          # App routing
+    utils/           # Helper functions
+  public/            # Static assets
+  ...
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+## 📜 Future Improvements
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
-
-export default tseslint.config({
-  plugins: {
-    // Add the react-x and react-dom plugins
-    'react-x': reactX,
-    'react-dom': reactDom,
-  },
-  rules: {
-    // other rules...
-    // Enable its recommended typescript rules
-    ...reactX.configs['recommended-typescript'].rules,
-    ...reactDom.configs.recommended.rules,
-  },
-})
-```
+- User can update their personal information like upload avatar, change information.
+- Dark mode and theme customization support.
+- Integration with external inventory or procurement systems.
+- Admins can save bills after creating assets, and generate a monthly summary bill for printing at the end of the month.
