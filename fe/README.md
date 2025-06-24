@@ -22,6 +22,7 @@ A modern web application for managing assets, users, departments, and maintenanc
 - [Zod] for schema validation
 - [Lucide Icons] for modern icons
 - [Tailwind CSS] for styling
+- [Shadcn] for UI components
 
 ## 📦 Getting Started
 

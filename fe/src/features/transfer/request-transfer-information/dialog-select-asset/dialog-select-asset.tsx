@@ -68,6 +68,10 @@ export const DialogSelectAsset = ({
             <Loader2 className='h-4 w-4 animate-spin' />
             <span>Loading available assets...</span>
           </div>
+        ) : assets.length === 0 ? (
+          <div className='rounded-md bg-gray-50 p-4 text-center font-medium text-black'>
+            No available assets to transfer in this category.
+          </div>
         ) : (
           <FormProvider {...form}>
             <Form {...form}>
