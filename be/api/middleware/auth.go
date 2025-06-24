@@ -2,9 +2,11 @@ package middleware
 
 import (
 	"BE_Manage_device/constant"
-	"BE_Manage_device/internal/domain/repository"
+	repository "BE_Manage_device/internal/repository/user_session"
+
 	"BE_Manage_device/pkg"
 	"BE_Manage_device/pkg/utils"
+	"context"
 	"fmt"
 	"net/http"
 	"strconv"
@@ -105,7 +107,7 @@ func RequirePermission(permSlug []string, accessLevel []string, db *gorm.DB) gin
 			logrus.Info("userID:", userID)
 		} else {
 			logrus.Error("Happened error when get userId from gin Context")
-			pkg.PanicExeption(constant.UnknownError)
+			pkg.PanicExeption(constant.UnknownError, "Happened error when get userId from gin Context")
 		}
 		str := fmt.Sprint(userID)
 
@@ -126,6 +128,16 @@ func RequirePermission(permSlug []string, accessLevel []string, db *gorm.DB) gin
 			c.Abort()
 			return
 		}
+		c.Next()
+	}
+}
+
+func TimeoutMiddleware(d time.Duration) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		ctx, cancel := context.WithTimeout(c.Request.Context(), d)
+		defer cancel()
+
+		c.Request = c.Request.WithContext(ctx)
 		c.Next()
 	}
 }

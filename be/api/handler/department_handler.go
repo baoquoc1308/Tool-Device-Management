@@ -1,15 +1,23 @@
 package handler
 
 import (
+	"BE_Manage_device/config"
 	"BE_Manage_device/constant"
 	"BE_Manage_device/internal/domain/dto"
-	"BE_Manage_device/internal/domain/service"
+	"BE_Manage_device/internal/domain/entity"
+	service "BE_Manage_device/internal/service/departments"
+
 	"BE_Manage_device/pkg"
+	"encoding/json"
 	"net/http"
 	"strconv"
 
 	"github.com/gin-gonic/gin"
 	log "github.com/sirupsen/logrus"
+)
+
+const (
+	cacheKeyDepartment = "department:all"
 )
 
 type DepartmentsHandler struct {
@@ -50,6 +58,7 @@ func (h *DepartmentsHandler) Create(c *gin.Context) {
 	departmentResponse.DepartmentName = department.DepartmentName
 	departmentResponse.Location.ID = department.Location.Id
 	departmentResponse.Location.LocationName = department.Location.LocationName
+	config.Rdb.Del(config.Ctx, cacheKeyDepartment)
 	c.JSON(http.StatusCreated, pkg.BuildReponseSuccess(http.StatusCreated, constant.Success, departmentResponse))
 }
 
@@ -67,10 +76,26 @@ func (h *DepartmentsHandler) Create(c *gin.Context) {
 // @Security JWT
 func (h *DepartmentsHandler) GetAll(c *gin.Context) {
 	defer pkg.PanicHandler(c)
-	departments, err := h.service.GetAll()
-	if err != nil {
-		log.Error("Happened error when get all departments. Error", err)
-		pkg.PanicExeption(constant.UnknownError, "Happened error when get all departments")
+	var departments []*entity.Departments
+	val, err := config.Rdb.Get(config.Ctx, cacheKeyDepartment).Result()
+	if err == nil {
+		// ✅ Dữ liệu có trong Redis, trả về
+		var cached []entity.Departments
+		if err := json.Unmarshal([]byte(val), &cached); err == nil {
+			for _, a := range cached {
+				copy := a
+				departments = append(departments, &copy)
+			}
+		} else {
+			log.Error("Happened error when get all departments. Error", err)
+			pkg.PanicExeption(constant.UnknownError, "Happened error when get all departments in redis")
+		}
+	} else {
+		departments, err = h.service.GetAll()
+		if err != nil {
+			log.Error("Happened error when get all departments. Error", err)
+			pkg.PanicExeption(constant.UnknownError, "Happened error when get all departments")
+		}
 	}
 	var departmentResponses []dto.DepartmentResponse
 	for _, department := range departments {
@@ -81,6 +106,9 @@ func (h *DepartmentsHandler) GetAll(c *gin.Context) {
 		departmentResponse.Location.LocationName = department.Location.LocationName
 		departmentResponses = append(departmentResponses, departmentResponse)
 	}
+	// ✅ Cache lại dữ liệu
+	bytes, _ := json.Marshal(departments)
+	config.Rdb.Set(config.Ctx, cacheKeyDepartment, bytes, initialTTL)
 	c.JSON(http.StatusOK, pkg.BuildReponseSuccess(http.StatusOK, constant.Success, departmentResponses))
 }
 
@@ -111,5 +139,6 @@ func (h *DepartmentsHandler) Delete(c *gin.Context) {
 		log.Error("Happened error when delete department. Error", err)
 		pkg.PanicExeption(constant.UnknownError, err.Error())
 	}
+	config.Rdb.Del(config.Ctx, cacheKeyDepartment)
 	c.JSON(http.StatusOK, pkg.BuildReponseSuccessNoData(http.StatusOK, constant.Success))
 }

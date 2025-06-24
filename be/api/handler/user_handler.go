@@ -4,7 +4,11 @@ import (
 	"BE_Manage_device/config"
 	"BE_Manage_device/constant"
 	"BE_Manage_device/internal/domain/dto"
-	"BE_Manage_device/internal/domain/service"
+	"BE_Manage_device/internal/domain/entity"
+	service "BE_Manage_device/internal/service/user"
+	"encoding/json"
+	"fmt"
+
 	"BE_Manage_device/pkg"
 	"BE_Manage_device/pkg/utils"
 	"net/http"
@@ -15,6 +19,10 @@ import (
 	log "github.com/sirupsen/logrus"
 
 	"github.com/gin-gonic/gin"
+)
+
+const (
+	cacheKeyUserSession = "UserSession:id"
 )
 
 type UserHandler struct {
@@ -226,6 +234,8 @@ func (h *UserHandler) ResetPassword(c *gin.Context) {
 				log.Error("Happened error when resert password. Error", err)
 				pkg.PanicExeption(constant.UnknownError, err.Error())
 			}
+			cacheKeyUserSessionStr := fmt.Sprintf("%s:%d", cacheKeyUserSession, user.Id)
+			config.Rdb.Del(config.Ctx, cacheKeyUserSessionStr)
 			c.JSON(http.StatusOK, pkg.BuildReponseSuccessNoData(http.StatusOK, constant.Success))
 		} else {
 			pkg.PanicExeption(constant.Unauthorized, "Invalid token")
@@ -252,11 +262,27 @@ func (h *UserHandler) ResetPassword(c *gin.Context) {
 func (h *UserHandler) Session(c *gin.Context) {
 	defer pkg.PanicHandler(c)
 	userId := utils.GetUserIdFromContext(c)
-	user, err := h.service.FindByUserId(userId)
-	if err != nil {
-		log.Error("Happened error when reset password. Error", err)
-		pkg.PanicExeption(constant.Unauthorized, err.Error())
+	var user *entity.Users
+	cacheKeyUserSessionStr := fmt.Sprintf("%s:%d", cacheKeyUserSession, userId)
+	val, err := config.Rdb.Get(config.Ctx, cacheKeyUserSessionStr).Result()
+	if err == nil {
+		var cached *entity.Users
+		if err := json.Unmarshal([]byte(val), &cached); err == nil {
+			user = cached
+		} else {
+			log.Error("Happened error when get session. Error", err)
+			pkg.PanicExeption(constant.UnknownError, "Happened error when get session in redis")
+		}
+	} else {
+		user, err = h.service.FindByUserId(userId)
+		if err != nil {
+			log.Error("Happened error when get session. Error", err)
+			pkg.PanicExeption(constant.Unauthorized, err.Error())
+		}
 	}
+	// ✅ Cache lại dữ liệu
+	bytes, _ := json.Marshal(user)
+	config.Rdb.Set(config.Ctx, cacheKeyUserSessionStr, bytes, initialTTL)
 	userResponse := utils.ConvertUserToUserResponse(user)
 	c.JSON(http.StatusOK, pkg.BuildReponseSuccess(http.StatusOK, constant.Success, userResponse))
 }
@@ -304,11 +330,18 @@ func (h *UserHandler) CheckPasswordReset(c *gin.Context) {
 func (h *UserHandler) DeleteUser(c *gin.Context) {
 	defer pkg.PanicHandler(c)
 	email := c.Param("email")
-	err := h.service.DeleteUser(email)
+	user, err := h.service.FindUserByEmail(email)
+	if err != nil {
+		log.Error("Happened error: Email is not registered. . Error", err)
+		pkg.PanicExeption(constant.UnknownError, err.Error())
+	}
+	err = h.service.DeleteUser(email)
 	if err != nil {
 		log.Error("Happened error when delete user. Error", err)
 		pkg.PanicExeption(constant.UnknownError, err.Error())
 	}
+	cacheKeyUserSessionStr := fmt.Sprintf("%s:%d", cacheKeyUserSession, user.Id)
+	config.Rdb.Del(config.Ctx, cacheKeyUserSessionStr)
 	c.JSON(http.StatusOK, pkg.BuildReponseSuccessNoData(http.StatusOK, constant.Success))
 }
 
@@ -339,6 +372,8 @@ func (h *UserHandler) Logout(c *gin.Context) {
 		log.Error("Happened error when logout user. Error", err)
 		pkg.PanicExeption(constant.UnknownError, err.Error())
 	}
+	cacheKeyUserSessionStr := fmt.Sprintf("%s:%d", cacheKeyUserSession, userId)
+	config.Rdb.Del(config.Ctx, cacheKeyUserSessionStr)
 	c.JSON(http.StatusOK, pkg.BuildReponseSuccessNoData(http.StatusOK, constant.Success))
 }
 
@@ -392,6 +427,8 @@ func (h *UserHandler) UpdateInformationUser(c *gin.Context) {
 		pkg.PanicExeption(constant.UnknownError, err.Error())
 	}
 	usersResponse := utils.ConvertUserToUserResponse(userUpdated)
+	cacheKeyUserSessionStr := fmt.Sprintf("%s:%d", cacheKeyUserSession, userId)
+	config.Rdb.Del(config.Ctx, cacheKeyUserSessionStr)
 	c.JSON(http.StatusOK, pkg.BuildReponseSuccess(http.StatusOK, constant.Success, usersResponse))
 }
 
@@ -424,6 +461,8 @@ func (h *UserHandler) UpdateRoleUser(c *gin.Context) {
 		pkg.PanicExeption(constant.UnknownError, err.Error())
 	}
 	usersResponse := utils.ConvertUserToUserResponse(userUpdated)
+	cacheKeyUserSessionStr := fmt.Sprintf("%s:%d", cacheKeyUserSession, request.Id)
+	config.Rdb.Del(config.Ctx, cacheKeyUserSessionStr)
 	c.JSON(http.StatusOK, pkg.BuildReponseSuccess(http.StatusOK, constant.Success, usersResponse))
 }
 
@@ -484,6 +523,8 @@ func (h *UserHandler) UpdateDepartment(c *gin.Context) {
 		log.Error("Happened error when get all user of department. Error", err)
 		pkg.PanicExeption(constant.UnknownError, "Happened error when get all user of department")
 	}
+	cacheKeyUserSessionStr := fmt.Sprintf("%s:%d", cacheKeyUserSession, request.UserId)
+	config.Rdb.Del(config.Ctx, cacheKeyUserSessionStr)
 	c.JSON(http.StatusOK, pkg.BuildReponseSuccessNoData(http.StatusOK, constant.Success))
 }
 
@@ -513,6 +554,8 @@ func (h *UserHandler) UpdateHeadDep(c *gin.Context) {
 		log.Error("Happened error when update user is head department. Error", err)
 		pkg.PanicExeption(constant.UnknownError, "Happened error when update user is head department")
 	}
+	cacheKeyUserSessionStr := fmt.Sprintf("%s:%d", cacheKeyUserSession, userId)
+	config.Rdb.Del(config.Ctx, cacheKeyUserSessionStr)
 	c.JSON(http.StatusOK, pkg.BuildReponseSuccessNoData(http.StatusOK, constant.Success))
 }
 
@@ -542,6 +585,8 @@ func (h *UserHandler) UpdateManagerDep(c *gin.Context) {
 		log.Error("Happened error when update user is manager department. Error", err)
 		pkg.PanicExeption(constant.UnknownError, "Happened error when update user is manager department")
 	}
+	cacheKeyUserSessionStr := fmt.Sprintf("%s:%d", cacheKeyUserSession, userId)
+	config.Rdb.Del(config.Ctx, cacheKeyUserSessionStr)
 	c.JSON(http.StatusOK, pkg.BuildReponseSuccessNoData(http.StatusOK, constant.Success))
 }
 
@@ -571,5 +616,31 @@ func (h *UserHandler) UpdateCanExport(c *gin.Context) {
 		log.Error("Happened error when update user can export. Error", err)
 		pkg.PanicExeption(constant.UnknownError, "Happened error when update user can export")
 	}
+	cacheKeyUserSessionStr := fmt.Sprintf("%s:%d", cacheKeyUserSession, userId)
+	config.Rdb.Del(config.Ctx, cacheKeyUserSessionStr)
 	c.JSON(http.StatusOK, pkg.BuildReponseSuccessNoData(http.StatusOK, constant.Success))
+}
+
+// User godoc
+// @Summary      Get user haven't dep
+// @Description Get user haven't dep
+// @Tags         Users
+// @Accept       json
+// @Produce      json
+// @param Authorization header string true "Authorization"
+// @Router       /api/users/not-dep [GET]
+// @Success      200   {object}  dto.ApiResponseSuccessStruct
+// @securityDefinitions.apiKey token
+// @in header
+// @name Authorization
+// @Security JWT
+func (h *UserHandler) GetUserNotHaveDep(c *gin.Context) {
+	defer pkg.PanicHandler(c)
+	users, err := h.service.GetUserNotHaveDep()
+	if err != nil {
+		log.Error("Happened error when get user haven't dep. Error", err)
+		pkg.PanicExeption(constant.UnknownError, "Happened error when get user haven't dep. Error")
+	}
+	usersResponses := utils.ConvertUsersToUserResponses(users)
+	c.JSON(http.StatusOK, pkg.BuildReponseSuccess(http.StatusOK, constant.Success, usersResponses))
 }

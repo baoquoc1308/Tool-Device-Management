@@ -2,7 +2,8 @@ package handler
 
 import (
 	"BE_Manage_device/constant"
-	"BE_Manage_device/internal/domain/service"
+	notificationS "BE_Manage_device/internal/service/notification"
+
 	"BE_Manage_device/pkg"
 	"BE_Manage_device/pkg/utils"
 	"net/http"
@@ -13,10 +14,10 @@ import (
 )
 
 type NotificationHandler struct {
-	service *service.NotificationService
+	service *notificationS.NotificationService
 }
 
-func NewNotificationHandler(service *service.NotificationService) *NotificationHandler {
+func NewNotificationHandler(service *notificationS.NotificationService) *NotificationHandler {
 	return &NotificationHandler{service: service}
 }
 

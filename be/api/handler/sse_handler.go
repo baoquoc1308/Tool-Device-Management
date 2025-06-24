@@ -1,7 +1,7 @@
 package handler
 
 import (
-	"BE_Manage_device/internal/domain/service"
+	service "BE_Manage_device/internal/service/notification"
 	"BE_Manage_device/pkg/utils"
 	"fmt"
 	"net/http"

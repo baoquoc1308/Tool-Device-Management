@@ -3,7 +3,8 @@ package handler
 import (
 	"BE_Manage_device/constant"
 	"BE_Manage_device/internal/domain/dto"
-	"BE_Manage_device/internal/domain/service"
+	service "BE_Manage_device/internal/service/location"
+
 	"BE_Manage_device/pkg"
 	"net/http"
 	"strconv"

@@ -1,11 +1,13 @@
 package handler
 
 import (
+	"BE_Manage_device/config"
 	"BE_Manage_device/constant"
 	"BE_Manage_device/internal/domain/dto"
 	"BE_Manage_device/internal/domain/entity"
 	"BE_Manage_device/internal/domain/filter"
-	"BE_Manage_device/internal/domain/service"
+	service "BE_Manage_device/internal/service/asset"
+
 	"BE_Manage_device/pkg"
 	"BE_Manage_device/pkg/utils"
 	"bytes"
@@ -17,6 +19,12 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/phpdave11/gofpdf"
 	log "github.com/sirupsen/logrus"
+)
+
+const (
+	cacheKey   = "assets:all"
+	initialTTL = 10 * time.Minute
+	maxTTL     = 1 * time.Hour
 )
 
 type AssetsHandler struct {
@@ -64,7 +72,6 @@ func (h *AssetsHandler) Create(c *gin.Context) {
 	url := c.PostForm("redirectUrl")
 
 	purchaseDate, err := time.Parse(time.RFC3339, purchaseDateStr)
-
 	if err != nil {
 		log.Info("Error: ", err.Error())
 		pkg.PanicExeption(constant.InvalidRequest, "Invalid purchase_date format")
@@ -164,6 +171,7 @@ func (h *AssetsHandler) Create(c *gin.Context) {
 			Email:     asset.OnwerUser.Email,
 		}
 	}
+	config.Rdb.Del(config.Ctx, "assets:all")
 	c.JSON(http.StatusCreated, pkg.BuildReponseSuccess(http.StatusCreated, constant.Success, assetResponse))
 }
 
@@ -208,6 +216,7 @@ func (h *AssetsHandler) Update(c *gin.Context) {
 
 	purchaseDate, err := time.Parse(time.RFC3339, purchaseDateStr)
 	if err != nil {
+		log.Info("Error: ", err.Error())
 		pkg.PanicExeption(constant.InvalidRequest, "Invalid purchase_date format")
 	}
 
@@ -377,11 +386,14 @@ func (h *AssetsHandler) GetAssetById(c *gin.Context) {
 // @Security JWT
 func (h *AssetsHandler) GetAllAsset(c *gin.Context) {
 	defer pkg.PanicHandler(c)
-	assets, err := h.service.GetAllAsset()
+	var assets []*entity.Assets
+	userID := utils.GetUserIdFromContext(c)
+	assets, err := h.service.GetAllAsset(userID)
 	if err != nil {
 		log.Error("Happened error when get all assets. Error", err)
 		pkg.PanicExeption(constant.UnknownError, "Happened error when get all assets")
 	}
+
 	assetsResponse := []dto.AssetResponse{}
 	for _, asset := range assets {
 		assetResponse := dto.AssetResponse{
