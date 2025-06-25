@@ -110,7 +110,13 @@ func (service *UserService) Activate(token string) error {
 
 func (service *UserService) SetRole(userId int64, roleId int64) {
 	tx := service.repo.GetDB().Begin()
-	assets, _ := service.assetRepo.GetAllAsset()
+	var err error
+	user, err := service.repo.FindByUserId(userId)
+	if err != nil {
+		return
+	}
+
+	assets, _ := service.assetRepo.GetAllAsset(user.CompanyId)
 	for _, asset := range assets {
 		userRbac := entity.UserRbac{
 			AssetId: asset.Id,
@@ -122,7 +128,6 @@ func (service *UserService) SetRole(userId int64, roleId int64) {
 			tx.Rollback()
 		}
 	}
-	var err error
 	if err = tx.Commit().Error; err != nil {
 		return
 	}

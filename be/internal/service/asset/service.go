@@ -7,6 +7,7 @@ import (
 	asset_log "BE_Manage_device/internal/repository/asset_log"
 	asset "BE_Manage_device/internal/repository/assets"
 	assignment "BE_Manage_device/internal/repository/assignments"
+	company "BE_Manage_device/internal/repository/company"
 	department "BE_Manage_device/internal/repository/departments"
 	role "BE_Manage_device/internal/repository/role"
 	user "BE_Manage_device/internal/repository/user"
@@ -33,10 +34,11 @@ type AssetsService struct {
 	assignRepository     assignment.AssignmentRepository
 	departmentRepository department.DepartmentsRepository
 	NotificationService  *notificationS.NotificationService
+	companyRepo          company.CompanyRepository
 }
 
-func NewAssetsService(repo asset.AssetsRepository, assertLogRepository asset_log.AssetsLogRepository, roleRepository role.RoleRepository, userRBACRepository userRBAC.UserRBACRepository, userRepository user.UserRepository, assignRepository assignment.AssignmentRepository, departmentRepository department.DepartmentsRepository, NotificationService *notificationS.NotificationService) *AssetsService {
-	return &AssetsService{repo: repo, assertLogRepository: assertLogRepository, roleRepository: roleRepository, userRBACRepository: userRBACRepository, userRepository: userRepository, assignRepository: assignRepository, departmentRepository: departmentRepository, NotificationService: NotificationService}
+func NewAssetsService(repo asset.AssetsRepository, assertLogRepository asset_log.AssetsLogRepository, roleRepository role.RoleRepository, userRBACRepository userRBAC.UserRBACRepository, userRepository user.UserRepository, assignRepository assignment.AssignmentRepository, departmentRepository department.DepartmentsRepository, NotificationService *notificationS.NotificationService, companyRepo company.CompanyRepository) *AssetsService {
+	return &AssetsService{repo: repo, assertLogRepository: assertLogRepository, roleRepository: roleRepository, userRBACRepository: userRBACRepository, userRepository: userRepository, assignRepository: assignRepository, departmentRepository: departmentRepository, NotificationService: NotificationService, companyRepo: companyRepo}
 }
 
 func (service *AssetsService) Create(userId int64, assetName string, purchaseDate time.Time, warrantExpiry time.Time, serialNumber string, image *multipart.FileHeader, fileAttachment *multipart.FileHeader, categoryId int64, departmentId int64, url string, cost float64) (*entity.Assets, error) {
@@ -67,6 +69,14 @@ func (service *AssetsService) Create(userId int64, assetName string, purchaseDat
 	if err != nil {
 		return nil, err
 	}
+	user, err := service.userRepository.FindByUserId(userId)
+	if err != nil {
+		return nil, err
+	}
+	company, err := service.companyRepo.GetCompanyBySuffixEmail(utils.GetSuffixEmail(user.Email))
+	if err != nil {
+		return nil, err
+	}
 	tx := service.repo.GetDB().Begin()
 	defer func() {
 		if r := recover(); r != nil {
@@ -88,6 +98,7 @@ func (service *AssetsService) Create(userId int64, assetName string, purchaseDat
 		CategoryId:     categoryId,
 		DepartmentId:   departmentId,
 		Owner:          &userAssetManager.Id,
+		CompanyId:      company.Id,
 	}
 	assetCreate, err := service.repo.Create(&asset, tx)
 	if err != nil {
@@ -148,7 +159,7 @@ func (service *AssetsService) GetAllAsset(userId int64) ([]*entity.Assets, error
 	if user.Role.Slug == "departmentHead" {
 		assets, err = service.repo.GetAllAssetOfDep(*user.DepartmentId)
 	} else {
-		assets, err = service.repo.GetAllAsset()
+		assets, err = service.repo.GetAllAsset(user.CompanyId)
 		if err != nil {
 			return nil, err
 		}
@@ -477,6 +488,7 @@ func (service *AssetsService) Filter(userId int64, assetName *string, status *st
 	if err != nil {
 		return nil, err
 	}
+	filter.CompanyId = user.CompanyId
 	if user.Role.Slug == "departmentHead" {
 		var deptStr *string
 		if user.DepartmentId != nil {

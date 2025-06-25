@@ -14,6 +14,7 @@ func NewCompanyService(repo company.CompanyRepository) *CompanyService {
 }
 
 func (service *CompanyService) Create(companyName, email string) (*entity.Company, error) {
+
 	var Company = &entity.Company{
 		CompanyName: companyName,
 		Email:       email,

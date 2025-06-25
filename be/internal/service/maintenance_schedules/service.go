@@ -41,6 +41,7 @@ func (service *MaintenanceSchedulesService) Create(userId int64, assetId int64, 
 		AssetId:   assetId,
 		StartDate: startDate,
 		EndDate:   endDate,
+		CompanyId: userUpdate.CompanyId,
 	}
 	timeRange, err := service.repo.GetDateMaintenanceSchedulesInFuture(assetId)
 	if err != nil {
@@ -171,8 +172,12 @@ func (service *MaintenanceSchedulesService) Delete(userId int64, id int64) error
 	return err
 }
 
-func (service *MaintenanceSchedulesService) GetAllMaintenanceSchedules() ([]*entity.MaintenanceSchedules, error) {
-	maintenances, err := service.repo.GetAllMaintenanceSchedules()
+func (service *MaintenanceSchedulesService) GetAllMaintenanceSchedules(userId int64) ([]*entity.MaintenanceSchedules, error) {
+	user, err := service.userRepository.FindByUserId(userId)
+	if err != nil {
+		return nil, err
+	}
+	maintenances, err := service.repo.GetAllMaintenanceSchedules(user.CompanyId)
 	if err != nil {
 		return nil, err
 	}

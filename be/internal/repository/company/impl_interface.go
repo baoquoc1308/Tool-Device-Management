@@ -24,3 +24,9 @@ func (r *PostgreSQLCompanyRepository) GetCompanyById(id int64) (*entity.Company,
 	result := r.db.Model(entity.Company{}).Where("id = ?", id).First(&Company)
 	return &Company, result.Error
 }
+
+func (r *PostgreSQLCompanyRepository) GetCompanyBySuffixEmail(email string) (*entity.Company, error) {
+	var Company entity.Company
+	result := r.db.Model(entity.Company{}).Where("email = ?", email).First(&Company)
+	return &Company, result.Error
+}

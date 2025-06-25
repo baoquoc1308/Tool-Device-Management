@@ -884,6 +884,30 @@ paths:
       summary: Create Company
       tags:
       - Company
+  /api/company/{id}:
+    post:
+      consumes:
+      - application/json
+      description: Create Company by id
+      parameters:
+      - description: id
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Authorization
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses: {}
+      security:
+      - JWT: []
+      summary: Get Company by id
+      tags:
+      - Company
   /api/departments:
     get:
       consumes:
