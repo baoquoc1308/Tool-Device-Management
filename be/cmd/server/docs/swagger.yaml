@@ -1528,7 +1528,6 @@ paths:
       - description: Image to upload
         in: formData
         name: image
-        required: true
         type: file
       - description: Authorization
         in: header

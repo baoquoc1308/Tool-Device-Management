@@ -2037,8 +2037,7 @@ const docTemplate = `{
                         "type": "file",
                         "description": "Image to upload",
                         "name": "image",
-                        "in": "formData",
-                        "required": true
+                        "in": "formData"
                     },
                     {
                         "type": "string",

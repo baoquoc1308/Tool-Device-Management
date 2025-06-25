@@ -214,17 +214,22 @@ func (service *UserService) GetAllUser() []*entity.Users {
 }
 
 func (service *UserService) UpdateInformation(id int64, firstName, lastName string, image *multipart.FileHeader) (*entity.Users, error) {
-	imgFile, err := image.Open()
-	if err != nil {
-		return nil, fmt.Errorf("cannot open image: %w", err)
-	}
-	defer imgFile.Close()
-	uniqueName := fmt.Sprintf("%d_%s", time.Now().UnixNano(), image.Filename)
-	imagePath := "avatar/" + uniqueName
-	uploader := utils.NewSupabaseUploader()
-	imageUrl, err := uploader.Upload(imagePath, imgFile, image.Header.Get("Content-Type"))
-	if err != nil {
-		return nil, err
+	var imageUrl string
+	if image != nil {
+		imgFile, err := image.Open()
+		if err != nil {
+			return nil, fmt.Errorf("cannot open image: %w", err)
+		}
+		defer imgFile.Close()
+		uniqueName := fmt.Sprintf("%d_%s", time.Now().UnixNano(), image.Filename)
+		imagePath := "avatar/" + uniqueName
+		uploader := utils.NewSupabaseUploader()
+		imageUrl, err = uploader.Upload(imagePath, imgFile, image.Header.Get("Content-Type"))
+		if err != nil {
+			return nil, err
+		}
+	} else {
+		imageUrl = ""
 	}
 	user := entity.Users{Id: id, FirstName: firstName, LastName: lastName, Avatar: imageUrl}
 	userUpdated, err := service.repo.UpdateUser(&user)

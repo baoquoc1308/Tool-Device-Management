@@ -406,7 +406,7 @@ func (h *UserHandler) GetAllUser(c *gin.Context) {
 // @Produce      json
 // @Param firstName formData string true "firstName"
 // @Param lastName formData string true "lastName"
-// @Param image formData file true "Image to upload"
+// @Param image formData file false "Image to upload"
 // @param Authorization header string true "Authorization"
 // @Router       /api/user/information [PATCH]
 // @Success      200   {object}  dto.ApiResponseSuccessStruct
@@ -421,11 +421,12 @@ func (h *UserHandler) UpdateInformationUser(c *gin.Context) {
 	firstName := c.PostForm("firstName")
 	lastName := c.PostForm("lastName")
 	image, err := c.FormFile("avatar")
+	var userUpdated *entity.Users
 	if err != nil {
-		pkg.PanicExeption(constant.InvalidRequest, "Image upload missing")
-		return
+		userUpdated, err = h.service.UpdateInformation(userId, firstName, lastName, nil)
+	} else {
+		userUpdated, err = h.service.UpdateInformation(userId, firstName, lastName, image)
 	}
-	userUpdated, err := h.service.UpdateInformation(userId, firstName, lastName, image)
 	if err != nil {
 		log.Error("Happened error when update information user. Error", err)
 		pkg.PanicExeption(constant.UnknownError, err.Error())
