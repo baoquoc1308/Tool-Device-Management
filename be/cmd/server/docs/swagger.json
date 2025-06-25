@@ -1080,7 +1080,7 @@
             }
         },
         "/api/company/{id}": {
-            "post": {
+            "get": {
                 "security": [
                     {
                         "JWT": []
@@ -2077,7 +2077,7 @@
                     {
                         "type": "file",
                         "description": "Image to upload",
-                        "name": "image",
+                        "name": "avatar",
                         "in": "formData",
                         "required": true
                     },

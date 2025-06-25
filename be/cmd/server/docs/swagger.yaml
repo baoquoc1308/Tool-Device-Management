@@ -891,7 +891,7 @@ paths:
       tags:
       - Company
   /api/company/{id}:
-    post:
+    get:
       consumes:
       - application/json
       description: Create Company by id
@@ -1560,7 +1560,7 @@ paths:
         type: string
       - description: Image to upload
         in: formData
-        name: image
+        name: avatar
         required: true
         type: file
       - description: Authorization

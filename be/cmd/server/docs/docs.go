@@ -1091,7 +1091,7 @@ const docTemplate = `{
             }
         },
         "/api/company/{id}": {
-            "post": {
+            "get": {
                 "security": [
                     {
                         "JWT": []
@@ -2088,7 +2088,7 @@ const docTemplate = `{
                     {
                         "type": "file",
                         "description": "Image to upload",
-                        "name": "image",
+                        "name": "avatar",
                         "in": "formData",
                         "required": true
                     },
