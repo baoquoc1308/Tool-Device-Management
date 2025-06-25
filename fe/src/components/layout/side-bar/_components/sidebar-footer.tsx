@@ -1,4 +1,5 @@
-import { ChevronsUpDown } from 'lucide-react'
+import { ChevronsUpDown, Pencil } from 'lucide-react'
+import { Link } from 'react-router-dom'
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -55,6 +56,15 @@ export function NavUser() {
               </div>
             </DropdownMenuLabel>
             <DropdownMenuSeparator />
+            <DropdownMenuItem asChild>
+              <Link
+                to='/user/edit-profile'
+                className='flex w-full cursor-pointer items-center gap-2'
+              >
+                <Pencil className='h-4 w-4' />
+                Edit Profile
+              </Link>
+            </DropdownMenuItem>
             <DropdownMenuItem>
               <SignOut />
             </DropdownMenuItem>

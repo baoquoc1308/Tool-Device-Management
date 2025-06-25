@@ -29,7 +29,10 @@ class HttpRequest {
     return await httpClient.delete(endpoint)
   }
 
-  async patch(endpoint: string, data?: unknown) {
+  async patch(endpoint: string, data?: unknown, headers?: unknown) {
+    if (headers) {
+      return await httpClient.patch(endpoint, data, { headers })
+    }
     return await httpClient.patch(endpoint, data)
   }
 }
