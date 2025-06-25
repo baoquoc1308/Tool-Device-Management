@@ -15,7 +15,7 @@ type AssignmentFilter struct {
 }
 
 func (f *AssignmentFilter) ApplyFilter(db *gorm.DB, userId int64) *gorm.DB {
-	db.Where("company_id = ?", f.CompanyId)
+	db.Where("assignments.company_id = ?", f.CompanyId)
 	db = db.Joins("join users as assigned_users  on assigned_users.id = assignments.user_id").
 		Joins("join users as assigner_users on assigner_users.id = assignments.assign_by").
 		Joins("join assets on assets.id = assignments.asset_id")

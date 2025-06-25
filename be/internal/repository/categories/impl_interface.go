@@ -19,9 +19,9 @@ func (r *PostgreSQLCategoriesRepository) Create(Category *entity.Categories) (*e
 	return Category, result.Error
 }
 
-func (r *PostgreSQLCategoriesRepository) GetAll() ([]*entity.Categories, error) {
+func (r *PostgreSQLCategoriesRepository) GetAll(companyId int64) ([]*entity.Categories, error) {
 	categories := []*entity.Categories{}
-	result := r.db.Model(entity.Categories{}).Find(&categories)
+	result := r.db.Model(entity.Categories{}).Where("company_id = ?", companyId).Find(&categories)
 	return categories, result.Error
 }
 

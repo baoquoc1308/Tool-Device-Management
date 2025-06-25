@@ -78,6 +78,7 @@ func (h *DepartmentsHandler) Create(c *gin.Context) {
 // @Security JWT
 func (h *DepartmentsHandler) GetAll(c *gin.Context) {
 	defer pkg.PanicHandler(c)
+	userId := utils.GetUserIdFromContext(c)
 	var departments []*entity.Departments
 	val, err := config.Rdb.Get(config.Ctx, cacheKeyDepartment).Result()
 	if err == nil {
@@ -93,7 +94,7 @@ func (h *DepartmentsHandler) GetAll(c *gin.Context) {
 			pkg.PanicExeption(constant.UnknownError, "Happened error when get all departments in redis")
 		}
 	} else {
-		departments, err = h.service.GetAll()
+		departments, err = h.service.GetAll(userId)
 		if err != nil {
 			log.Error("Happened error when get all departments. Error", err)
 			pkg.PanicExeption(constant.UnknownError, "Happened error when get all departments")

@@ -11,7 +11,7 @@ type RequestTransferFilter struct {
 }
 
 func (f *RequestTransferFilter) ApplyFilter(db *gorm.DB, userId int64) *gorm.DB {
-	db.Where("company_id = ?", f.CompanyId)
+	db.Where("request_transfers.company_id = ?", f.CompanyId)
 	if f.DepId != nil {
 		db.Joins("JOIN users ON users.id = request_transfers.user_id").Where("users.department_id != ?", *f.DepId)
 	}

@@ -39,8 +39,12 @@ func (service *DepartmentsService) Create(userId int64, departmentsName string, 
 	return departmentsCreate, nil
 }
 
-func (service *DepartmentsService) GetAll() ([]*entity.Departments, error) {
-	departments, err := service.repo.GetAll()
+func (service *DepartmentsService) GetAll(userId int64) ([]*entity.Departments, error) {
+	user, err := service.userRepo.FindByUserId(userId)
+	if err != nil {
+		return nil, err
+	}
+	departments, err := service.repo.GetAll(user.CompanyId)
 	if err != nil {
 		return nil, err
 	}

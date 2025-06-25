@@ -26,7 +26,7 @@ type AssetFilterDashboard struct {
 }
 
 func (f *AssetFilter) ApplyFilter(db *gorm.DB, userId int64) *gorm.DB {
-	db.Where("company_id  = ?", f.CompanyId)
+	db.Where("assets.company_id  = ?", f.CompanyId)
 	db = db.Joins("JOIN user_rbacs on user_rbacs.asset_id = assets.id").
 		Joins("JOIN roles on roles.id = user_rbacs.role_id").
 		Joins("JOIN role_permissions on role_permissions.role_id = roles.id").

@@ -406,7 +406,7 @@ func (h *UserHandler) GetAllUser(c *gin.Context) {
 // @Produce      json
 // @Param firstName formData string true "firstName"
 // @Param lastName formData string true "lastName"
-// @Param image formData file true "Image to upload"
+// @Param avatar formData file true "Image to upload"
 // @param Authorization header string true "Authorization"
 // @Router       /api/user/information [PATCH]
 // @Success      200   {object}  dto.ApiResponseSuccessStruct

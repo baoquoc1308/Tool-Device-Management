@@ -11,7 +11,7 @@ import (
 	"gorm.io/gorm"
 )
 
-func SetupRoutes(r *gin.Engine, userHandler *handler.UserHandler, LocationHandler *handler.LocationHandler, CategoriesHandler *handler.CategoriesHandler, DepartmentsHandler *handler.DepartmentsHandler, AssetsHandler *handler.AssetsHandler, RoleHandler *handler.RoleHandler, AssignmentHandler *handler.AssignmentHandler, AssetLogHandler *handler.AssetLogHandler, RequestTransferHandler *handler.RequestTransferHandler, MaintenanceSchedulesHandler *handler.MaintenanceSchedulesHandler, SSEHandler *handler.SSEHandler, NotificationHandler *handler.NotificationHandler, CronJobTestHandler *handler.CronJobTestHandler, session repository.UsersSessionRepository, db *gorm.DB) {
+func SetupRoutes(r *gin.Engine, userHandler *handler.UserHandler, LocationHandler *handler.LocationHandler, CategoriesHandler *handler.CategoriesHandler, DepartmentsHandler *handler.DepartmentsHandler, AssetsHandler *handler.AssetsHandler, RoleHandler *handler.RoleHandler, AssignmentHandler *handler.AssignmentHandler, AssetLogHandler *handler.AssetLogHandler, RequestTransferHandler *handler.RequestTransferHandler, MaintenanceSchedulesHandler *handler.MaintenanceSchedulesHandler, SSEHandler *handler.SSEHandler, NotificationHandler *handler.NotificationHandler, CronJobTestHandler *handler.CronJobTestHandler, CompanyHandler *handler.CompanyHandler, session repository.UsersSessionRepository, db *gorm.DB) {
 	//users
 	r.Use(middleware.CORSMiddleware())
 	r.Use(middleware.TimeoutMiddleware(5 * time.Second))
@@ -30,4 +30,5 @@ func SetupRoutes(r *gin.Engine, userHandler *handler.UserHandler, LocationHandle
 	registerMaintenanceSchedulesRoutes(api, MaintenanceSchedulesHandler, session, db)
 	registerNotificationsRoutes(api, NotificationHandler, session, db)
 	registerSSEHandlerRoutes(api, SSEHandler, session, db)
+	registerCompanyRoutes(api, CompanyHandler, session, db)
 }

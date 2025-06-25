@@ -56,7 +56,7 @@ func (h *CompanyHandler) Create(c *gin.Context) {
 // @Produce      json
 // @Param		id	path		string				true	"id"
 // @param Authorization header string true "Authorization"
-// @Router       /api/company/{id} [POST]
+// @Router       /api/company/{id} [GET]
 // @securityDefinitions.apiKey token
 // @in header
 // @name Authorization

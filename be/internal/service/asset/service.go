@@ -112,6 +112,7 @@ func (service *AssetsService) Create(userId int64, assetName string, purchaseDat
 		AssignUserId:  &userAssetManager.Id,
 		ChangeSummary: changeSummary,
 		AssetId:       assetCreate.Id,
+		CompanyId:     company.Id,
 	}
 	_, err = service.assertLogRepository.Create(&assetLog, tx)
 	if err != nil {
@@ -122,6 +123,7 @@ func (service *AssetsService) Create(userId int64, assetName string, purchaseDat
 		UserId:       &userAssetManager.Id,
 		AssignBy:     userId,
 		DepartmentId: &departmentId,
+		CompanyId:    company.Id,
 	}
 	_, err = service.assignRepository.Create(&assign, tx)
 	if err != nil {
@@ -305,6 +307,7 @@ func (service *AssetsService) UpdateAsset(userId int64, assetId int64, assetName
 		ByUserId:      &userId,
 		ChangeSummary: changeSummary,
 		AssetId:       assetId,
+		CompanyId:     userUpdate.CompanyId,
 	}
 	_, err = service.assertLogRepository.Create(&assetLog, tx)
 	if err != nil {
@@ -368,6 +371,7 @@ func (service *AssetsService) DeleteAsset(userId int64, id int64) error {
 		ByUserId:      &userId,
 		ChangeSummary: changeSummary,
 		AssetId:       asset.Id,
+		CompanyId:     userUpdate.CompanyId,
 	}
 	_, err = service.assertLogRepository.Create(&assetLog, tx)
 	if err != nil {
@@ -446,6 +450,7 @@ func (service *AssetsService) UpdateAssetRetired(userId int64, id int64, Residua
 		ByUserId:      &userId,
 		ChangeSummary: changeSummary,
 		AssetId:       asset.Id,
+		CompanyId:     userUpdate.CompanyId,
 	}
 	_, err = service.assertLogRepository.Create(&assetLog, tx)
 	if err != nil {

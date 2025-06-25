@@ -19,9 +19,9 @@ func (r *PostgreSQLDepartmentsRepository) Create(department *entity.Departments)
 	return department, result.Error
 }
 
-func (r *PostgreSQLDepartmentsRepository) GetAll() ([]*entity.Departments, error) {
+func (r *PostgreSQLDepartmentsRepository) GetAll(companyId int64) ([]*entity.Departments, error) {
 	departments := []*entity.Departments{}
-	result := r.db.Model(entity.Departments{}).Preload("Location").Find(&departments)
+	result := r.db.Model(entity.Departments{}).Where("company_id = ?").Preload("Location").Find(&departments)
 	return departments, result.Error
 }
 

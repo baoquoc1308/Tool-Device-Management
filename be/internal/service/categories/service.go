@@ -3,6 +3,8 @@ package service
 import (
 	"BE_Manage_device/internal/domain/entity"
 	"BE_Manage_device/pkg/utils"
+	"fmt"
+	"strings"
 
 	categories "BE_Manage_device/internal/repository/categories"
 	company "BE_Manage_device/internal/repository/company"
@@ -25,19 +27,31 @@ func (service *CategoriesService) Create(userId int64, categoryName string) (*en
 		return nil, err
 	}
 	company, err := service.companyRepo.GetCompanyBySuffixEmail(utils.GetSuffixEmail(user.Email))
+	if err != nil {
+		return nil, err
+	}
 	var category = &entity.Categories{
 		CategoryName: categoryName,
 		CompanyId:    company.Id,
 	}
 	categoryCreate, err := service.repo.Create(category)
 	if err != nil {
-		return nil, err
+		if strings.Contains(err.Error(), "idx_category_company") {
+			return nil, fmt.Errorf("This category already exists for this company")
+		}
+
+		return nil, err // lỗi khác
 	}
+
 	return categoryCreate, nil
 }
 
-func (service *CategoriesService) GetAll() ([]*entity.Categories, error) {
-	categories, err := service.repo.GetAll()
+func (service *CategoriesService) GetAll(userId int64) ([]*entity.Categories, error) {
+	user, err := service.userRepo.FindByUserId(userId)
+	if err != nil {
+		return nil, err
+	}
+	categories, err := service.repo.GetAll(user.CompanyId)
 	if err != nil {
 		return nil, err
 	}
