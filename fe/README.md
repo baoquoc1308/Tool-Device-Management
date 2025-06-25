@@ -69,7 +69,7 @@ fe/
 ## 📜 Future Improvements
 
 - User can update their personal information like upload avatar, change information.
-- Dark mode and theme customization support.
+- Dark mode and theme customization support. (Done)
 - Enable side-by-side comparison of multiple assets, including specs, costs, and performance
 - Admins can save bills after creating assets, and generate a monthly summary bill for printing at the end of the month.
 - Admins can view statistical reports filtered by month and year.

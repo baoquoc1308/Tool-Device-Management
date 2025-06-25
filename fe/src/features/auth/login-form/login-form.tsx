@@ -45,7 +45,7 @@ const LoginForm = () => {
   return (
     <div>
       <div className='mb-4 flex flex-col items-center sm:mb-6'>
-        <h1 className='mb-1 text-xl font-bold text-gray-800 sm:mb-2 sm:text-2xl'>Sign in to your account</h1>
+        <h1 className='text-foreground mb-1 text-xl font-bold sm:mb-2 sm:text-2xl'>Sign in to your account</h1>
         <p className='text-muted-foreground px-2 text-center text-sm'>Manage your devices and assets securely</p>
       </div>
 
