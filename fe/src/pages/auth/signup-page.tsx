@@ -1,11 +1,11 @@
-import { Signup } from "@/components/auth";
+import { Signup } from '@/components/auth'
 
 const SignupPage = () => {
   return (
-    <div className="flex items-center justify-center min-h-screen bg-gradient-to-r from-blue-50 to-gray-100 px-4 sm:px-6 md:px-8 py-6 md:py-10">
+    <div className='flex min-h-screen items-center justify-center bg-gradient-to-r from-blue-50 to-gray-100 px-4 py-6 sm:px-6 md:px-8 md:py-10 dark:from-gray-900 dark:to-gray-800'>
       <Signup />
     </div>
-  );
-};
+  )
+}
 
-export default SignupPage;
+export default SignupPage

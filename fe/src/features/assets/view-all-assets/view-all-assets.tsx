@@ -89,6 +89,8 @@ const ViewAllAssets = () => {
           <FilterAssets
             filteredAssets={filteredAssets}
             setFilteredAssets={setFilteredAssets}
+            assets={assets}
+            showExportButtons={true}
           />
           {isPending ? (
             <SkeletonForTable />

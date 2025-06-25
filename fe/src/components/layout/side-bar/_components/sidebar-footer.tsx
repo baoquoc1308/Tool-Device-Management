@@ -14,12 +14,16 @@ import {
 import { UserAvatar } from '@/features/user'
 import { useAppSelector } from '@/hooks'
 import { SignOut } from '@/features/auth'
+import { DarkModeToggle } from '@/features/theme'
 
 export function NavUser() {
   const { isMobile } = useSidebar()
   const user = useAppSelector((state) => state.auth.user)
   return (
     <SidebarMenu>
+      <SidebarMenuItem>
+        <DarkModeToggle />
+      </SidebarMenuItem>
       <SidebarMenuItem>
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
