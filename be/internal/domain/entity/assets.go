@@ -19,7 +19,6 @@ type Assets struct {
 	DepartmentId         int64      `json:"departmentId"`
 	QrUrl                *string    `json:"qrUrl"`
 	RetiredOrDisposeTime *time.Time `json:"-"`
-	CompanyId            int64      `json:"-"`
 
 	AnnualDepreciation *float64   `json:"annualDepreciation"` //Nguyên giá tài sản
 	ResidualValue      *float64   `json:"residualValue"`      //Giá trị thu hồi dự kiến

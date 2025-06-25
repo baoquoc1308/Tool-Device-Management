@@ -11,6 +11,6 @@ type MaintenanceSchedulesRepository interface {
 	Update(id int64, startDate time.Time, endDate time.Time) (*entity.MaintenanceSchedules, error)
 	Delete(id int64) error
 	GetMaintenanceSchedulesById(id int64) (*entity.MaintenanceSchedules, error)
-	GetAllMaintenanceSchedules(companyId int64) ([]*entity.MaintenanceSchedules, error)
+	GetAllMaintenanceSchedules() ([]*entity.MaintenanceSchedules, error)
 	GetDateMaintenanceSchedulesInFuture(assetId int64) ([]*entity.TimeRange, error)
 }

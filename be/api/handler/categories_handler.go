@@ -6,7 +6,6 @@ import (
 	"BE_Manage_device/internal/domain/dto"
 	"BE_Manage_device/internal/domain/entity"
 	service "BE_Manage_device/internal/service/categories"
-	"BE_Manage_device/pkg/utils"
 
 	"BE_Manage_device/pkg"
 	"encoding/json"
@@ -44,13 +43,12 @@ func NewCategoriesHandler(service *service.CategoriesService) *CategoriesHandler
 // @Security JWT
 func (h *CategoriesHandler) Create(c *gin.Context) {
 	defer pkg.PanicHandler(c)
-	userId := utils.GetUserIdFromContext(c)
 	var request dto.CreateCategoryRequest
 	if err := c.ShouldBindJSON(&request); err != nil {
 		log.Error("Happened error when mapping request from FE. Error", err)
 		pkg.PanicExeption(constant.InvalidRequest, "Happened error when mapping request from FE.")
 	}
-	location, err := h.service.Create(userId, request.CategoryName)
+	location, err := h.service.Create(request.CategoryName)
 	if err != nil {
 		log.Error("Happened error when create category. Error", err)
 		pkg.PanicExeption(constant.UnknownError, "Happened error when create category")

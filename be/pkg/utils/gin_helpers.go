@@ -477,11 +477,3 @@ func SendEmailsForWarrantyExpiry(db *gorm.DB, emailNotifier interfaces.EmailNoti
 func PtrInt64(i int64) *int64 {
 	return &i
 }
-
-func GetSuffixEmail(email string) string {
-	parts := strings.Split(email, "@")
-	if len(parts) != 2 {
-		return ""
-	}
-	return parts[1]
-}

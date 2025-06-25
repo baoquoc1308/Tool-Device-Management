@@ -182,8 +182,7 @@ func (h *MaintenanceSchedulesHandler) Delete(c *gin.Context) {
 // @Security JWT
 func (h *MaintenanceSchedulesHandler) GetAllMaintenanceSchedules(c *gin.Context) {
 	defer pkg.PanicHandler(c)
-	userId := utils.GetUserIdFromContext(c)
-	maintenances, err := h.service.GetAllMaintenanceSchedules(userId)
+	maintenances, err := h.service.GetAllMaintenanceSchedules()
 	if err != nil {
 		pkg.PanicExeption(constant.InvalidRequest, "Happened error when get maintenance.")
 	}

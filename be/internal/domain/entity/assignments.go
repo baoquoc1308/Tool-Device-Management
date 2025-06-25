@@ -6,7 +6,6 @@ type Assignments struct {
 	AssetId      int64  `gorm:"index:unique_AssetId,unique" json:"assetId"`
 	AssignBy     int64  `json:"assetBy"`
 	DepartmentId *int64 `json:"departmentID"`
-	CompanyId    int64  `json:"-"`
 
 	UserAssigned Users       `gorm:"foreignKey:UserId;references:Id"`
 	UserAssign   Users       `gorm:"foreignKey:AssignBy;references:Id"`

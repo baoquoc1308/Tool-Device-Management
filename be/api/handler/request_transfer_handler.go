@@ -84,7 +84,7 @@ func (h *RequestTransferHandler) Accept(c *gin.Context) {
 	requestTransfer, err := h.service.Accept(userId, id, request.AssetId)
 	if err != nil {
 		log.Error("Happened error when accept request transfer. Error", err)
-		pkg.PanicExeption(constant.UnknownError, "Happened error when accept request transfer"+err.Error())
+		pkg.PanicExeption(constant.UnknownError, "Happened error when accept request transfer")
 	}
 	requestTransferResponse := utils.ConvertRequestTransferToResponse(requestTransfer)
 	c.JSON(http.StatusOK, pkg.BuildReponseSuccess(http.StatusOK, constant.Success, requestTransferResponse))
@@ -115,7 +115,7 @@ func (h *RequestTransferHandler) Deny(c *gin.Context) {
 	requestTransfer, err := h.service.Deny(userId, id)
 	if err != nil {
 		log.Error("Happened error when deny request transfer. Error", err)
-		pkg.PanicExeption(constant.UnknownError, "Happened error when deny request transfer"+err.Error())
+		pkg.PanicExeption(constant.UnknownError, "Happened error when deny request transfer")
 	}
 	requestTransferResponse := utils.ConvertRequestTransferToResponse(requestTransfer)
 	c.JSON(http.StatusOK, pkg.BuildReponseSuccess(http.StatusOK, constant.Success, requestTransferResponse))
@@ -146,7 +146,7 @@ func (h *RequestTransferHandler) GetRequestTransferById(c *gin.Context) {
 	requestTransfer, err := h.service.GetRequestTransferById(userId, id)
 	if err != nil {
 		log.Error("Happened error when get request transfer. Error", err)
-		pkg.PanicExeption(constant.UnknownError, "Happened error when get request transfer"+err.Error())
+		pkg.PanicExeption(constant.UnknownError, "Happened error when get request transfer")
 	}
 	requestTransferResponse := utils.ConvertRequestTransferToResponse(requestTransfer)
 	c.JSON(http.StatusOK, pkg.BuildReponseSuccess(http.StatusOK, constant.Success, requestTransferResponse))

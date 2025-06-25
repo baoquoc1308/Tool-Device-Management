@@ -7,7 +7,6 @@ type MaintenanceSchedules struct {
 	AssetId   int64
 	StartDate time.Time
 	EndDate   time.Time
-	CompanyId int64 `json:"-"`
 
 	Asset Assets `gorm:"foreignKey:AssetId;references:Id"`
 }

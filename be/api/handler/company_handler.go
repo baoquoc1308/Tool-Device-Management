@@ -48,19 +48,6 @@ func (h *CompanyHandler) Create(c *gin.Context) {
 	c.JSON(http.StatusCreated, pkg.BuildReponseSuccess(http.StatusCreated, constant.Success, company))
 }
 
-// Company godoc
-// @Summary      Get Company by id
-// @Description  Create Company by id
-// @Tags         Company
-// @Accept       json
-// @Produce      json
-// @Param		id	path		string				true	"id"
-// @param Authorization header string true "Authorization"
-// @Router       /api/company/{id} [POST]
-// @securityDefinitions.apiKey token
-// @in header
-// @name Authorization
-// @Security JWT
 func (h *CompanyHandler) GetCompanyById(c *gin.Context) {
 	defer pkg.PanicHandler(c)
 	idStr := c.Param("id")

@@ -53,9 +53,9 @@ func (r *PostgreSQLAssetsRepository) UpdateAssetLifeCycleStage(id int64, status 
 	return &asset, nil
 }
 
-func (r *PostgreSQLAssetsRepository) GetAllAsset(companyId int64) ([]*entity.Assets, error) {
+func (r *PostgreSQLAssetsRepository) GetAllAsset() ([]*entity.Assets, error) {
 	assets := []*entity.Assets{}
-	result := r.db.Model(entity.Assets{}).Where("company_id = ?", companyId).Preload("Category").Preload("Department").Preload("OnwerUser").Preload("Department.Location").Find(&assets)
+	result := r.db.Model(entity.Assets{}).Preload("Category").Preload("Department").Preload("OnwerUser").Preload("Department.Location").Find(&assets)
 	if result.Error != nil {
 		return nil, result.Error
 	}

@@ -31,16 +31,11 @@ func NewAssignmentService(repo assignment.AssignmentRepository, assetLogRepo ass
 
 func (service *AssignmentService) Create(userIdAssign, departmentId *int64, userId, assetId int64) (*entity.Assignments, error) {
 	var err error
-	user, err := service.userRepo.FindByUserId(userId)
-	if err != nil {
-		return nil, err
-	}
 	assignment := entity.Assignments{
 		UserId:       userIdAssign,
 		AssetId:      assetId,
 		AssignBy:     userId,
 		DepartmentId: departmentId,
-		CompanyId:    user.CompanyId,
 	}
 	tx := service.Repo.GetDB().Begin()
 	defer func() {
@@ -193,11 +188,6 @@ func (service *AssignmentService) Filter(userId int64, emailAssigned *string, em
 		EmailAssign:   emailAssign,
 		AssetName:     assetName,
 	}
-	user, err := service.userRepo.FindByUserId(userId)
-	if err != nil {
-		return nil, err
-	}
-	filter.CompanyId = user.CompanyId
 	db := service.Repo.GetDB()
 	dbFilter := filter.ApplyFilter(db.Model(&entity.Assignments{}), userId)
 

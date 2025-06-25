@@ -6,7 +6,6 @@ type RequestTransfer struct {
 	CategoryId  int64  `json:"categoryId"`
 	Status      string `json:"status"`
 	Description string `json:"description"`
-	CompanyId   int64  `json:"-"`
 
 	User     Users      `gorm:"foreignKey:UserId;references:Id"`
 	Category Categories `gorm:"foreignKey:CategoryId;references:Id"`

@@ -49,9 +49,9 @@ func NewServices(repos *repository.Repository, emailPass string) *Services {
 	return &Services{
 		User:                 userS.NewUserService(repos.User, emailService, repos.UserSession, repos.Role, repos.Assets, repos.UserRBAC),
 		Location:             locationS.NewLocationService(repos.Location),
-		Categories:           categoriesS.NewCategoriesService(repos.Categories, repos.User, repos.Company),
-		Department:           departmentS.NewDepartmentsService(repos.Department, repos.User, repos.Company),
-		Assets:               assetS.NewAssetsService(repos.Assets, repos.AssetsLog, repos.Role, repos.UserRBAC, repos.User, repos.Assignment, repos.Department, notificationService, repos.Company),
+		Categories:           categoriesS.NewCategoriesService(repos.Categories),
+		Department:           departmentS.NewDepartmentsService(repos.Department),
+		Assets:               assetS.NewAssetsService(repos.Assets, repos.AssetsLog, repos.Role, repos.UserRBAC, repos.User, repos.Assignment, repos.Department, notificationService),
 		Role:                 roleS.NewRoleService(repos.Role),
 		Assignment:           assignmentService,
 		AssetLog:             assetLogS.NewAssetLogService(repos.AssetsLog, repos.User, repos.Role, repos.Assets),

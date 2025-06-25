@@ -2,35 +2,21 @@ package service
 
 import (
 	"BE_Manage_device/internal/domain/entity"
-	company "BE_Manage_device/internal/repository/company"
 	department "BE_Manage_device/internal/repository/departments"
-	user "BE_Manage_device/internal/repository/user"
-	"BE_Manage_device/pkg/utils"
 )
 
 type DepartmentsService struct {
-	repo        department.DepartmentsRepository
-	userRepo    user.UserRepository
-	companyRepo company.CompanyRepository
+	repo department.DepartmentsRepository
 }
 
-func NewDepartmentsService(repo department.DepartmentsRepository, userRepo user.UserRepository, companyRepo company.CompanyRepository) *DepartmentsService {
-	return &DepartmentsService{repo: repo, userRepo: userRepo, companyRepo: companyRepo}
+func NewDepartmentsService(repo department.DepartmentsRepository) *DepartmentsService {
+	return &DepartmentsService{repo: repo}
 }
 
-func (service *DepartmentsService) Create(userId int64, departmentsName string, locationId int64) (*entity.Departments, error) {
-	user, err := service.userRepo.FindByUserId(userId)
-	if err != nil {
-		return nil, err
-	}
-	company, err := service.companyRepo.GetCompanyBySuffixEmail(utils.GetSuffixEmail(user.Email))
-	if err != nil {
-		return nil, err
-	}
+func (service *DepartmentsService) Create(departmentsName string, locationId int64) (*entity.Departments, error) {
 	var departments = &entity.Departments{
 		DepartmentName: departmentsName,
 		LocationId:     locationId,
-		CompanyId:      company.Id,
 	}
 	departmentsCreate, err := service.repo.Create(departments)
 	if err != nil {

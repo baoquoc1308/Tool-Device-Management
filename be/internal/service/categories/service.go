@@ -2,32 +2,21 @@ package service
 
 import (
 	"BE_Manage_device/internal/domain/entity"
-	"BE_Manage_device/pkg/utils"
 
 	categories "BE_Manage_device/internal/repository/categories"
-	company "BE_Manage_device/internal/repository/company"
-	user "BE_Manage_device/internal/repository/user"
 )
 
 type CategoriesService struct {
-	repo        categories.CategoriesRepository
-	userRepo    user.UserRepository
-	companyRepo company.CompanyRepository
+	repo categories.CategoriesRepository
 }
 
-func NewCategoriesService(repo categories.CategoriesRepository, userRepo user.UserRepository, companyRepo company.CompanyRepository) *CategoriesService {
-	return &CategoriesService{repo: repo, userRepo: userRepo, companyRepo: companyRepo}
+func NewCategoriesService(repo categories.CategoriesRepository) *CategoriesService {
+	return &CategoriesService{repo: repo}
 }
 
-func (service *CategoriesService) Create(userId int64, categoryName string) (*entity.Categories, error) {
-	user, err := service.userRepo.FindByUserId(userId)
-	if err != nil {
-		return nil, err
-	}
-	company, err := service.companyRepo.GetCompanyBySuffixEmail(utils.GetSuffixEmail(user.Email))
+func (service *CategoriesService) Create(categoryName string) (*entity.Categories, error) {
 	var category = &entity.Categories{
 		CategoryName: categoryName,
-		CompanyId:    company.Id,
 	}
 	categoryCreate, err := service.repo.Create(category)
 	if err != nil {
