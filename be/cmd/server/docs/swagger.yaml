@@ -495,9 +495,6 @@ paths:
         name: categoryId
         type: string
       - in: query
-        name: companyId
-        type: integer
-      - in: query
         name: cost
         type: string
       - in: query
@@ -663,9 +660,6 @@ paths:
       - in: query
         name: assetName
         type: string
-      - in: query
-        name: companyId
-        type: integer
       - in: query
         name: emailAssign
         type: string
@@ -1320,9 +1314,6 @@ paths:
       description: Get all request transfer have permission
       parameters:
       - in: query
-        name: companyId
-        type: integer
-      - in: query
         name: depId
         type: integer
       - in: query
@@ -1550,12 +1541,12 @@ paths:
       parameters:
       - description: firstName
         in: formData
-        name: firstName
+        name: image
         required: true
         type: string
       - description: lastName
         in: formData
-        name: lastName
+        name: image
         required: true
         type: string
       - description: Image to upload
