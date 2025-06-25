@@ -28,7 +28,7 @@ func NewDepartmentsHandler(service *service.DepartmentsService) *DepartmentsHand
 	return &DepartmentsHandler{service: service}
 }
 
-// User godoc
+// Department godoc
 // @Summary      Create departments
 // @Description  Create departments
 // @Tags         Departments

@@ -1041,6 +1041,45 @@ const docTemplate = `{
                 "responses": {}
             }
         },
+        "/api/company": {
+            "post": {
+                "security": [
+                    {
+                        "JWT": []
+                    }
+                ],
+                "description": "Create Company",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Company"
+                ],
+                "summary": "Create Company",
+                "parameters": [
+                    {
+                        "description": "Data",
+                        "name": "department",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/dto.CreateCompanyRequest"
+                        }
+                    },
+                    {
+                        "type": "string",
+                        "description": "Authorization",
+                        "name": "Authorization",
+                        "in": "header",
+                        "required": true
+                    }
+                ],
+                "responses": {}
+            }
+        },
         "/api/departments": {
             "get": {
                 "security": [
@@ -1981,13 +2020,25 @@ const docTemplate = `{
                 "summary": "Update Information",
                 "parameters": [
                     {
-                        "description": "Data",
-                        "name": "Information",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/dto.UpdateInformationUserRequest"
-                        }
+                        "type": "string",
+                        "description": "firstName",
+                        "name": "image",
+                        "in": "formData",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "lastName",
+                        "name": "image",
+                        "in": "formData",
+                        "required": true
+                    },
+                    {
+                        "type": "file",
+                        "description": "Image to upload",
+                        "name": "image",
+                        "in": "formData",
+                        "required": true
                     },
                     {
                         "type": "string",
@@ -2404,6 +2455,17 @@ const docTemplate = `{
                 }
             }
         },
+        "dto.CreateCompanyRequest": {
+            "type": "object",
+            "properties": {
+                "companyName": {
+                    "type": "string"
+                },
+                "email": {
+                    "type": "string"
+                }
+            }
+        },
         "dto.CreateDepartmentRequest": {
             "type": "object",
             "required": [
@@ -2483,25 +2545,6 @@ const docTemplate = `{
             "properties": {
                 "residualValue": {
                     "type": "number"
-                }
-            }
-        },
-        "dto.UpdateInformationUserRequest": {
-            "type": "object",
-            "required": [
-                "firstName",
-                "lastName"
-            ],
-            "properties": {
-                "firstName": {
-                    "type": "string",
-                    "maxLength": 30,
-                    "minLength": 2
-                },
-                "lastName": {
-                    "type": "string",
-                    "maxLength": 30,
-                    "minLength": 2
                 }
             }
         },

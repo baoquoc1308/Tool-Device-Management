@@ -56,6 +56,7 @@ type UserResponse struct {
 	Email      string                  `json:"email"`
 	IsActive   bool                    `json:"isActivate"`
 	Role       UserRoleResponse        `json:"role"`
+	Avatar     string                  `json:"avatar"`
 	Department *UserDepartmentResponse `json:"department,omitempty"`
 }
 

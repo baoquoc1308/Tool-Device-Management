@@ -11,6 +11,8 @@ import (
 	emailS "BE_Manage_device/internal/service/email"
 	"BE_Manage_device/pkg/utils"
 	"errors"
+	"fmt"
+	"mime/multipart"
 	"time"
 
 	"github.com/golang-jwt/jwt"
@@ -211,8 +213,20 @@ func (service *UserService) GetAllUser() []*entity.Users {
 	return users
 }
 
-func (service *UserService) UpdateInformation(id int64, firstName, lastName string) (*entity.Users, error) {
-	user := entity.Users{Id: id, FirstName: firstName, LastName: lastName}
+func (service *UserService) UpdateInformation(id int64, firstName, lastName string, image *multipart.FileHeader) (*entity.Users, error) {
+	imgFile, err := image.Open()
+	if err != nil {
+		return nil, fmt.Errorf("cannot open image: %w", err)
+	}
+	defer imgFile.Close()
+	uniqueName := fmt.Sprintf("%d_%s", time.Now().UnixNano(), image.Filename)
+	imagePath := "avatar/" + uniqueName
+	uploader := utils.NewSupabaseUploader()
+	imageUrl, err := uploader.Upload(imagePath, imgFile, image.Header.Get("Content-Type"))
+	if err != nil {
+		return nil, err
+	}
+	user := entity.Users{Id: id, FirstName: firstName, LastName: lastName, Avatar: imageUrl}
 	userUpdated, err := service.repo.UpdateUser(&user)
 	if err != nil {
 		return nil, err
@@ -319,7 +333,7 @@ func (service *UserService) UpdateCanExport(id int64) error {
 
 func (service *UserService) GetUserNotHaveDep() ([]*entity.Users, error) {
 	users, err := service.repo.GetUserNotHaveDep()
-	
+
 	if err != nil {
 		return nil, err
 	}

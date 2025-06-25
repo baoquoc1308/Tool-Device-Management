@@ -12,6 +12,7 @@ func ConvertUserToUserResponse(user *entity.Users) dto.UserResponse {
 		LastName:  user.LastName,
 		Email:     user.Email,
 		IsActive:  user.IsActive,
+		Avatar:    user.Avatar,
 		Role: dto.UserRoleResponse{
 			Id:   user.RoleId,
 			Slug: user.Role.Slug,

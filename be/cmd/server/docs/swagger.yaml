@@ -56,6 +56,13 @@ definitions:
     required:
     - categoryName
     type: object
+  dto.CreateCompanyRequest:
+    properties:
+      companyName:
+        type: string
+      email:
+        type: string
+    type: object
   dto.CreateDepartmentRequest:
     properties:
       departmentName:
@@ -109,20 +116,6 @@ definitions:
         type: number
     required:
     - residualValue
-    type: object
-  dto.UpdateInformationUserRequest:
-    properties:
-      firstName:
-        maxLength: 30
-        minLength: 2
-        type: string
-      lastName:
-        maxLength: 30
-        minLength: 2
-        type: string
-    required:
-    - firstName
-    - lastName
     type: object
   dto.UpdateMaintenanceSchedulesRequest:
     properties:
@@ -866,6 +859,31 @@ paths:
       summary: Delete category
       tags:
       - Categories
+  /api/company:
+    post:
+      consumes:
+      - application/json
+      description: Create Company
+      parameters:
+      - description: Data
+        in: body
+        name: department
+        required: true
+        schema:
+          $ref: '#/definitions/dto.CreateCompanyRequest'
+      - description: Authorization
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses: {}
+      security:
+      - JWT: []
+      summary: Create Company
+      tags:
+      - Company
   /api/departments:
     get:
       consumes:
@@ -1497,12 +1515,21 @@ paths:
       - application/json
       description: Update Information
       parameters:
-      - description: Data
-        in: body
-        name: Information
+      - description: firstName
+        in: formData
+        name: image
         required: true
-        schema:
-          $ref: '#/definitions/dto.UpdateInformationUserRequest'
+        type: string
+      - description: lastName
+        in: formData
+        name: image
+        required: true
+        type: string
+      - description: Image to upload
+        in: formData
+        name: image
+        required: true
+        type: file
       - description: Authorization
         in: header
         name: Authorization
