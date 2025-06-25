@@ -160,14 +160,14 @@ const CreateNewAsset = () => {
             </Form>
           </CardContent>
           <CardFooter className='flex justify-between'>
-            <ButtonCancel isPending={isPending} />
             <FormButtonSubmit
               className='w-fit sm:w-auto'
               isPending={isPending}
               Icon={Laptop}
-              type='Create Asset'
+              type='Save'
               onSubmit={onSubmit}
             />
+            <ButtonCancel isPending={isPending} />
           </CardFooter>
         </FormProvider>
       </Card>

@@ -1,17 +1,15 @@
 import { Button } from '@/components/ui'
 import { Download } from 'lucide-react'
-import type { DashboardData } from '../api/type'
-import type { AssetsType } from '@/features/assets/view-all-assets/model'
 import jsPDF from 'jspdf'
 import autoTable from 'jspdf-autotable'
+import type { AssetsType } from '@/features/assets/view-all-assets/model'
 
 interface ExportButtonProps {
-  stats: DashboardData
   format: 'csv' | 'pdf'
   assets: AssetsType[]
 }
 
-export const ExportButton = ({ stats, format, assets }: ExportButtonProps) => {
+export const ExportButton = ({ format, assets }: ExportButtonProps) => {
   const getStatusCount = (status: string) => {
     return assets.filter((asset) => asset.status === status).length
   }
@@ -20,57 +18,55 @@ export const ExportButton = ({ stats, format, assets }: ExportButtonProps) => {
     const newCount = getStatusCount('New')
     const inUseCount = getStatusCount('In Use')
     const underMaintenanceCount = getStatusCount('Under Maintenance')
-    const retiredAndDisposedCount = getStatusCount('Retired') + getStatusCount('Disposed')
+    const retiredCount = getStatusCount('Retired')
+    const disposedCount = getStatusCount('Disposed')
 
     return [
-      { label: 'Total Assets', value: stats.total_assets },
-      { label: 'Assigned Assets', value: inUseCount },
-      { label: 'Under Maintenance', value: underMaintenanceCount },
-      { label: 'Retired Assets', value: retiredAndDisposedCount },
+      { label: 'Total Assets', value: assets.length },
       { label: 'New', value: newCount },
+      { label: 'In Use', value: inUseCount },
+      { label: 'Under Maintenance', value: underMaintenanceCount },
+      { label: 'Retired', value: retiredCount },
+      { label: 'Disposed', value: disposedCount },
     ]
   }
 
-  const getStatusDistribution = () => {
-    const total = stats.total_assets
-    if (total === 0) return []
-
-    const newCount = getStatusCount('New')
-    const inUseCount = getStatusCount('In Use')
-    const underMaintenanceCount = getStatusCount('Under Maintenance')
-    const retiredAndDisposedCount = getStatusCount('Retired') + getStatusCount('Disposed')
-
-    return [
-      {
-        status: 'In Use',
-        count: inUseCount,
-        percentage: ((inUseCount / total) * 100).toFixed(1),
-      },
-      {
-        status: 'Under Maintenance',
-        count: underMaintenanceCount,
-        percentage: ((underMaintenanceCount / total) * 100).toFixed(1),
-      },
-      {
-        status: 'Retired / Disposed',
-        count: retiredAndDisposedCount,
-        percentage: ((retiredAndDisposedCount / total) * 100).toFixed(1),
-      },
-      {
-        status: 'New',
-        count: newCount,
-        percentage: ((newCount / total) * 100).toFixed(1),
-      },
-    ]
+  const getAssetDetails = () => {
+    return assets.map((asset) => ({
+      id: asset.id,
+      name: asset.assetName,
+      category: asset.category?.categoryName || 'N/A',
+      department: asset.department?.departmentName || 'N/A',
+      status: asset.status,
+      cost: asset.cost,
+      serialNumber: asset.serialNumber,
+      location: asset.department?.location?.locationAddress || 'N/A',
+    }))
   }
 
   const handleExportCSV = () => {
-    const data = getStatsData()
-    const csvContent = data.map((row) => `${row.label},${row.value}`).join('\n')
-    const blob = new Blob([`Status,Count\n${csvContent}`], { type: 'text/csv;charset=utf-8;' })
+    const assetDetails = getAssetDetails()
+    const headers = ['ID', 'Asset Name', 'Category', 'Department', 'Status', 'Cost', 'Serial Number', 'Location']
+    const csvContent = [
+      headers.join(','),
+      ...assetDetails.map((asset) =>
+        [
+          asset.id,
+          `"${asset.name}"`,
+          `"${asset.category}"`,
+          `"${asset.department}"`,
+          asset.status,
+          asset.cost,
+          `"${asset.serialNumber}"`,
+          `"${asset.location}"`,
+        ].join(',')
+      ),
+    ].join('\n')
+
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' })
     const link = document.createElement('a')
     link.href = URL.createObjectURL(blob)
-    link.download = 'assets-dashboard-report.csv'
+    link.download = 'assets-report.csv'
     link.click()
   }
 
@@ -79,14 +75,14 @@ export const ExportButton = ({ stats, format, assets }: ExportButtonProps) => {
 
     // Title
     doc.setFontSize(20)
-    doc.text('Assets Dashboard Report', 20, 20)
+    doc.text('Assets Report', 20, 20)
 
     // Date
     doc.setFontSize(12)
     const now = new Date()
     doc.text(`Generated on: ${now.toLocaleDateString()} ${now.toLocaleTimeString()}`, 20, 30)
 
-    // First Table - Asset Counts
+    // Statistics Table
     autoTable(doc, {
       head: [['Status', 'Count']],
       body: getStatsData().map((row) => [row.label, row.value]),
@@ -102,10 +98,19 @@ export const ExportButton = ({ stats, format, assets }: ExportButtonProps) => {
       },
     })
 
-    // Second Table - Status Distribution
+    // Assets Details Table
+    const assetDetails = getAssetDetails()
     autoTable(doc, {
-      head: [['Status', 'Count', 'Percentage']],
-      body: getStatusDistribution().map((row) => [row.status, row.count, row.percentage + '%']),
+      head: [['ID', 'Asset Name', 'Category', 'Department', 'Status', 'Cost', 'Serial Number']],
+      body: assetDetails.map((asset) => [
+        asset.id,
+        asset.name,
+        asset.category,
+        asset.department,
+        asset.status,
+        asset.cost,
+        asset.serialNumber,
+      ]),
       startY: (doc as any).lastAutoTable.finalY + 15,
       theme: 'grid',
       headStyles: {
@@ -113,13 +118,22 @@ export const ExportButton = ({ stats, format, assets }: ExportButtonProps) => {
         textColor: [255, 255, 255],
       },
       styles: {
-        fontSize: 12,
-        cellPadding: 5,
+        fontSize: 10,
+        cellPadding: 3,
+      },
+      columnStyles: {
+        0: { cellWidth: 10 },
+        1: { cellWidth: 35 },
+        2: { cellWidth: 25 },
+        3: { cellWidth: 30 },
+        4: { cellWidth: 25 },
+        5: { cellWidth: 20 },
+        6: { cellWidth: 30 },
       },
     })
 
     // Save PDF
-    doc.save('assets-dashboard-report.pdf')
+    doc.save('assets-report.pdf')
   }
 
   const handleExport = () => {

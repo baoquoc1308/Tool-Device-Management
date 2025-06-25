@@ -3,7 +3,6 @@ import { useDebounce } from '@/hooks'
 import type { FilterType, AssetsType } from '../assets/view-all-assets'
 import { DashboardFilter } from './components/dashboard-filter'
 import { DashboardStats } from './components/dashboard-stats'
-import { ExportButton } from './components/export-button'
 import { getAllAssets, getDataAssetsFilter } from '../assets/api'
 import { tryCatch } from '@/utils'
 import type { DashboardData } from './api/type'
@@ -91,28 +90,15 @@ export const Dashboard = () => {
 
   return (
     <div className='space-y-4 p-4 sm:space-y-6 sm:p-6'>
-      <div className='flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between'>
-        <h1 className='flex items-center gap-2 text-2xl font-bold sm:text-3xl'>
-          <AreaChart className='h-6 w-6 sm:h-8 sm:w-8' />
-          Dashboard
-        </h1>
-        <div className='flex flex-col gap-2 sm:flex-row'>
-          <ExportButton
-            stats={stats}
-            format='csv'
-            assets={assets}
-          />
-          <ExportButton
-            stats={stats}
-            format='pdf'
-            assets={assets}
-          />
-        </div>
-      </div>
+      <h1 className='flex items-center gap-2 text-2xl font-bold sm:text-3xl'>
+        <AreaChart className='h-6 w-6 sm:h-8 sm:w-8' />
+        Dashboard
+      </h1>
 
       <DashboardFilter
         filteredAssets={filteredAssets}
         setFilteredAssets={setFilteredAssets}
+        assets={assets}
       />
 
       <DashboardStats

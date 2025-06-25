@@ -15,7 +15,7 @@ export const RememberMeField = ({ form }: { form: UseFormReturn<DataLoginType> }
                 checked={field.value}
                 onCheckedChange={field.onChange}
               />
-              <Label className='ml-2 block text-xs text-gray-700 sm:text-sm'>Remember me</Label>
+              <Label className='text-muted-foreground ml-2 block text-xs sm:text-sm'>Remember me</Label>
             </div>
           </FormControl>
           <FormMessage className='text-xs sm:text-sm' />

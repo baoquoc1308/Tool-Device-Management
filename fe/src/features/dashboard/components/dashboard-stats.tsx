@@ -19,13 +19,6 @@ const COLORS = {
   New: '#22c55e',
 }
 
-const STATUS_COLORS = {
-  'In Use': 'text-blue-600',
-  'Under Maintenance': 'text-amber-600',
-  'Retired / Disposed': 'text-red-600',
-  New: 'text-green-600',
-}
-
 const renderCustomizedLabel = ({ cx, cy, midAngle, outerRadius, percent, fill }: any, showLabels: boolean) => {
   if (percent < 0.02 || !showLabels) return null
 
@@ -64,10 +57,10 @@ const renderCustomizedLabel = ({ cx, cy, midAngle, outerRadius, percent, fill }:
       <text
         x={x}
         y={y}
-        fill='#374151'
+        fill='currentColor'
         textAnchor={x > cx ? 'start' : 'end'}
         dominantBaseline='central'
-        className='text-xs font-semibold sm:text-sm'
+        className='text-foreground text-xs font-semibold sm:text-sm'
       >
         {`${(percent * 100).toFixed(1)}%`}
       </text>
@@ -79,9 +72,9 @@ const CustomTooltip = ({ active, payload }: any) => {
   if (active && payload && payload.length) {
     const data = payload[0].payload
     return (
-      <div className='max-w-[200px] rounded-lg border bg-white p-2 shadow-lg'>
-        <p className='text-sm font-medium'>{data.name}</p>
-        <p className='text-xs text-gray-600'>{`${data.value} (${(data.percent * 100).toFixed(1)}%)`}</p>
+      <div className='bg-background max-w-[200px] rounded-lg border p-2 shadow-lg'>
+        <p className='text-foreground text-sm font-medium'>{data.name}</p>
+        <p className='text-muted-foreground text-xs'>{`${data.value} (${(data.percent * 100).toFixed(1)}%)`}</p>
       </div>
     )
   }
@@ -100,7 +93,7 @@ const CustomLegend = ({ payload }: any) => {
             className='h-2 w-2 rounded-full sm:h-2.5 sm:w-2.5'
             style={{ backgroundColor: entry.color }}
           />
-          <span className='text-xs text-gray-600 sm:text-sm'>{entry.value}</span>
+          <span className='text-muted-foreground text-xs sm:text-sm'>{entry.value}</span>
         </div>
       ))}
     </div>
@@ -224,47 +217,37 @@ export const DashboardStats = ({ stats, assets, isPending }: DashboardStatsProps
     <div className='space-y-4 sm:space-y-6'>
       <div className='grid grid-cols-1 gap-3 sm:grid-cols-2 sm:gap-4 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5'>
         <Card className='transition-shadow duration-200 hover:shadow-md'>
-          <CardHeader className='flex flex-row items-center justify-between space-y-0 pb-1 sm:pb-2'>
-            <CardTitle className='text-xs font-medium sm:text-sm'>Total Assets</CardTitle>
-          </CardHeader>
-          <CardContent className='pt-0'>
+          <CardContent className='p-4'>
+            <div className='text-muted-foreground text-sm font-medium'>Total Assets</div>
             <div className='text-2xl font-bold'>{stats.total_assets}</div>
           </CardContent>
         </Card>
 
         <Card className='transition-shadow duration-200 hover:shadow-md'>
-          <CardHeader className='flex flex-row items-center justify-between space-y-0 pb-1 sm:pb-2'>
-            <CardTitle className='text-xs font-medium sm:text-sm'>New</CardTitle>
-          </CardHeader>
-          <CardContent className='pt-0'>
-            <div className={`text-2xl font-bold ${STATUS_COLORS['New']}`}>{newCount}</div>
+          <CardContent className='p-4'>
+            <div className='text-muted-foreground text-sm font-medium'>New</div>
+            <div className='text-2xl font-bold text-green-600'>{newCount}</div>
           </CardContent>
         </Card>
 
         <Card className='transition-shadow duration-200 hover:shadow-md'>
-          <CardHeader className='flex flex-row items-center justify-between space-y-0 pb-1 sm:pb-2'>
-            <CardTitle className='text-xs font-medium sm:text-sm'>In Use</CardTitle>
-          </CardHeader>
-          <CardContent className='pt-0'>
-            <div className={`text-2xl font-bold ${STATUS_COLORS['In Use']}`}>{inUseCount}</div>
+          <CardContent className='p-4'>
+            <div className='text-muted-foreground text-sm font-medium'>In Use</div>
+            <div className='text-2xl font-bold text-blue-600'>{inUseCount}</div>
           </CardContent>
         </Card>
 
         <Card className='transition-shadow duration-200 hover:shadow-md'>
-          <CardHeader className='flex flex-row items-center justify-between space-y-0 pb-1 sm:pb-2'>
-            <CardTitle className='text-xs font-medium sm:text-sm'>Under Maintenance</CardTitle>
-          </CardHeader>
-          <CardContent className='pt-0'>
-            <div className={`text-2xl font-bold ${STATUS_COLORS['Under Maintenance']}`}>{underMaintenanceCount}</div>
+          <CardContent className='p-4'>
+            <div className='text-muted-foreground text-sm font-medium'>Under Maintenance</div>
+            <div className='text-2xl font-bold text-amber-600'>{underMaintenanceCount}</div>
           </CardContent>
         </Card>
 
         <Card className='transition-shadow duration-200 hover:shadow-md'>
-          <CardHeader className='flex flex-row items-center justify-between space-y-0 pb-1 sm:pb-2'>
-            <CardTitle className='text-xs font-medium sm:text-sm'>Retired / Disposed</CardTitle>
-          </CardHeader>
-          <CardContent className='pt-0'>
-            <div className={`text-2xl font-bold ${STATUS_COLORS['Retired / Disposed']}`}>{retiredAndDisposedCount}</div>
+          <CardContent className='p-4'>
+            <div className='text-muted-foreground text-sm font-medium'>Retired / Disposed</div>
+            <div className='text-2xl font-bold text-red-600'>{retiredAndDisposedCount}</div>
           </CardContent>
         </Card>
       </div>
@@ -319,29 +302,35 @@ export const DashboardStats = ({ stats, assets, isPending }: DashboardStatsProps
             <CardTitle className='text-base sm:text-lg'>Recent Purchased Assets</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className='space-y-3 sm:space-y-4'>
-              {assets
-                .sort((a, b) => a.id - b.id)
-                .slice(assets.length - 5, assets.length)
-                .reverse()
-                .map((asset) => (
-                  <div
-                    className='flex items-center rounded-lg border border-transparent p-2 transition-all duration-200 hover:cursor-pointer hover:bg-gray-50 hover:shadow-md sm:p-3'
-                    key={asset.id}
-                    onClick={() => navigate(`/assets/${asset.id}`)}
-                  >
-                    <div className='min-w-0 flex-1 space-y-1'>
-                      <p className='truncate text-xs leading-none font-medium sm:text-sm'>{asset.assetName}</p>
-                      <p className='text-muted-foreground truncate text-xs sm:text-sm'>
-                        {asset.category.categoryName} • {asset.status}
-                      </p>
+            {isPending ? (
+              <div className='flex h-[250px] items-center justify-center sm:h-[300px] lg:h-[350px]'>
+                <Loader2 className='h-6 w-6 animate-spin sm:h-8 sm:w-8' />
+              </div>
+            ) : (
+              <div className='space-y-3 sm:space-y-4'>
+                {assets
+                  .sort((a, b) => a.id - b.id)
+                  .slice(assets.length - 5, assets.length)
+                  .reverse()
+                  .map((asset) => (
+                    <div
+                      className='hover:bg-muted/50 flex items-center rounded-lg border border-transparent p-2 transition-all duration-200 hover:cursor-pointer hover:shadow-md sm:p-3'
+                      key={asset.id}
+                      onClick={() => navigate(`/assets/${asset.id}`)}
+                    >
+                      <div className='min-w-0 flex-1 space-y-1'>
+                        <p className='truncate text-xs leading-none font-medium sm:text-sm'>{asset.assetName}</p>
+                        <p className='text-muted-foreground truncate text-xs sm:text-sm'>
+                          {asset.category.categoryName} • {asset.status}
+                        </p>
+                      </div>
+                      <div className='ml-2 min-w-0 flex-shrink-0 text-right text-xs font-medium sm:ml-4 sm:text-sm'>
+                        <span className='truncate'>{asset.department.departmentName || 'No Department'}</span>
+                      </div>
                     </div>
-                    <div className='ml-2 min-w-0 flex-shrink-0 text-right text-xs font-medium sm:ml-4 sm:text-sm'>
-                      <span className='truncate'>{asset.department.departmentName || 'No Department'}</span>
-                    </div>
-                  </div>
-                ))}
-            </div>
+                  ))}
+              </div>
+            )}
           </CardContent>
         </Card>
       </div>
