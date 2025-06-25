@@ -317,6 +317,11 @@ const docTemplate = `{
                         "in": "query"
                     },
                     {
+                        "type": "integer",
+                        "name": "companyId",
+                        "in": "query"
+                    },
+                    {
                         "type": "string",
                         "name": "cost",
                         "in": "query"
@@ -658,6 +663,11 @@ const docTemplate = `{
                     {
                         "type": "string",
                         "name": "assetName",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "name": "companyId",
                         "in": "query"
                     },
                     {
@@ -1718,6 +1728,11 @@ const docTemplate = `{
                 "parameters": [
                     {
                         "type": "integer",
+                        "name": "companyId",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
                         "name": "depId",
                         "in": "query"
                     },
@@ -2059,14 +2074,14 @@ const docTemplate = `{
                     {
                         "type": "string",
                         "description": "firstName",
-                        "name": "image",
+                        "name": "firstName",
                         "in": "formData",
                         "required": true
                     },
                     {
                         "type": "string",
                         "description": "lastName",
-                        "name": "image",
+                        "name": "lastName",
                         "in": "formData",
                         "required": true
                     },
