@@ -268,7 +268,7 @@ func (h *AssetsHandler) Update(c *gin.Context) {
 		cost,
 	)
 	if err != nil {
-		pkg.PanicExeption(constant.InvalidRequest, "Failed to update asset")
+		pkg.PanicExeption(constant.InvalidRequest, err.Error())
 	}
 	asset, err := h.service.GetAssetById(userId, assetUpdate.Id)
 	if err != nil {
