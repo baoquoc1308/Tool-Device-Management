@@ -2022,14 +2022,14 @@ const docTemplate = `{
                     {
                         "type": "string",
                         "description": "firstName",
-                        "name": "image",
+                        "name": "firstName",
                         "in": "formData",
                         "required": true
                     },
                     {
                         "type": "string",
                         "description": "lastName",
-                        "name": "image",
+                        "name": "lastName",
                         "in": "formData",
                         "required": true
                     },

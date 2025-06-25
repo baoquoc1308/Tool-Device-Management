@@ -1517,12 +1517,12 @@ paths:
       parameters:
       - description: firstName
         in: formData
-        name: image
+        name: firstName
         required: true
         type: string
       - description: lastName
         in: formData
-        name: image
+        name: lastName
         required: true
         type: string
       - description: Image to upload
