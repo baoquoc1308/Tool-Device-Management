@@ -14,19 +14,13 @@ import {
   CardTitle,
   CardContent,
 } from '@/components/ui'
-import { X } from 'lucide-react'
+import { X, Pencil, User, Mail, Shield, Building2 } from 'lucide-react'
 import { AvatarUpload } from './avatar-upload'
 import { profileFormSchema, type ProfileFormType } from '../../model/profile-form'
+import type { UserProfile } from '../../model/profile-form'
 
 interface ProfileFormProps {
-  user: {
-    firstName: string
-    lastName: string
-    email: string
-    avatar?: string
-    role: { slug: string }
-    department?: { departmentName: string } | null
-  }
+  user: UserProfile
   onSubmit: (data: ProfileFormType) => void
   onClose: () => void
   isLoading?: boolean
@@ -39,9 +33,11 @@ export const ProfileForm = ({ user, onSubmit, onClose, isLoading }: ProfileFormP
       firstName: user.firstName,
       lastName: user.lastName,
       email: user.email,
+      avatar: undefined,
     },
   })
-
+  const { isDirty, isValid } = form.formState
+  const isSubmitDisabled = !isDirty || !isValid || isLoading
   const userInitials = ((user.lastName?.[0] || '') + (user.firstName?.[0] || '')).toUpperCase()
 
   return (
@@ -57,7 +53,10 @@ export const ProfileForm = ({ user, onSubmit, onClose, isLoading }: ProfileFormP
       </Button>
 
       <CardHeader>
-        <CardTitle>Edit Profile</CardTitle>
+        <CardTitle className='flex items-center gap-2'>
+          <Pencil className='h-5 w-5' />
+          Edit Profile
+        </CardTitle>
       </CardHeader>
       <CardContent>
         <Form {...form}>
@@ -71,15 +70,21 @@ export const ProfileForm = ({ user, onSubmit, onClose, isLoading }: ProfileFormP
               userInitials={userInitials}
             />
 
-            <div className='grid grid-cols-1 gap-4 md:grid-cols-2'>
+            <div className='grid grid-cols-1 gap-6 md:grid-cols-2'>
               <FormField
                 control={form.control}
                 name='firstName'
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>First Name</FormLabel>
+                    <FormLabel className='flex items-center gap-2'>
+                      <User className='h-4 w-4' />
+                      First Name
+                    </FormLabel>
                     <FormControl>
-                      <Input {...field} />
+                      <Input
+                        {...field}
+                        placeholder='Enter your first name'
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -91,9 +96,15 @@ export const ProfileForm = ({ user, onSubmit, onClose, isLoading }: ProfileFormP
                 name='lastName'
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Last Name</FormLabel>
+                    <FormLabel className='flex items-center gap-2'>
+                      <User className='h-4 w-4' />
+                      Last Name
+                    </FormLabel>
                     <FormControl>
-                      <Input {...field} />
+                      <Input
+                        {...field}
+                        placeholder='Enter your last name'
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -106,22 +117,30 @@ export const ProfileForm = ({ user, onSubmit, onClose, isLoading }: ProfileFormP
               name='email'
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Email</FormLabel>
+                  <FormLabel className='flex items-center gap-2'>
+                    <Mail className='h-4 w-4' />
+                    Email
+                  </FormLabel>
                   <FormControl>
                     <Input
                       {...field}
                       disabled
+                      placeholder='Email address'
+                      className='text-foreground font-medium'
                     />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
               )}
             />
-
-            <div className='grid grid-cols-1 gap-4 md:grid-cols-2'>
+            <div className='grid grid-cols-1 gap-6 md:grid-cols-2'>
               <div>
-                <FormLabel>Role</FormLabel>
+                <FormLabel className='flex items-center gap-2'>
+                  <Shield className='h-4 w-4' />
+                  Role
+                </FormLabel>
                 <Input
+                  className='text-foreground mt-2 font-medium'
                   value={user.role.slug}
                   disabled
                 />
@@ -129,8 +148,12 @@ export const ProfileForm = ({ user, onSubmit, onClose, isLoading }: ProfileFormP
 
               {user.department && (
                 <div>
-                  <FormLabel>Department</FormLabel>
+                  <FormLabel className='flex items-center gap-2'>
+                    <Building2 className='h-4 w-4' />
+                    Department
+                  </FormLabel>
                   <Input
+                    className='text-foreground mt-2 font-medium'
                     value={user.department.departmentName}
                     disabled
                   />
@@ -138,23 +161,23 @@ export const ProfileForm = ({ user, onSubmit, onClose, isLoading }: ProfileFormP
               )}
             </div>
 
-            <div className='flex gap-4'>
+            <div className='mt-4 flex justify-between'>
+              <Button
+                type='submit'
+                disabled={isSubmitDisabled}
+                size='sm'
+                className='w-fit'
+              >
+                {isLoading ? 'Updating...' : 'Update Profile'}
+              </Button>
               <Button
                 type='button'
                 variant='outline'
-                className='flex-1'
+                className='w-auto'
                 onClick={onClose}
                 disabled={isLoading}
               >
                 Cancel
-              </Button>
-              <Button
-                type='submit'
-                variant='outline'
-                className='bg-primary hover:bg-primary/90 flex-1'
-                disabled={isLoading}
-              >
-                {isLoading ? 'Updating...' : 'Update Profile'}
               </Button>
             </div>
           </form>

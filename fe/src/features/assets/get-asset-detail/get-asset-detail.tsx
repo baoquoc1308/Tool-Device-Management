@@ -91,6 +91,7 @@ const GetAssetDetail = () => {
             <Button
               variant='ghost'
               className='mr-4'
+              onClick={() => navigate(-1)}
             >
               <ArrowLeft className='h-5 w-5' />
             </Button>

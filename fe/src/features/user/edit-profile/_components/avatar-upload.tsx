@@ -17,17 +17,22 @@ export const AvatarUpload = ({ form, currentAvatar, userInitials }: AvatarUpload
     const file = e.target.files?.[0]
     if (file) {
       if (!file.type.startsWith('image/')) {
-        form.setError('image', { message: 'Please select an image file' })
+        form.setError('avatar', { message: 'Please select an image file' })
         return
       }
 
       if (file.size > 5 * 1024 * 1024) {
-        form.setError('image', { message: 'File size must be less than 5MB' })
+        form.setError('avatar', { message: 'File size must be less than 5MB' })
+
         return
       }
 
-      form.setValue('image', file)
-      form.clearErrors('image')
+      form.setValue('avatar', file, {
+        shouldDirty: true,
+        shouldTouch: true,
+        shouldValidate: true,
+      })
+      form.clearErrors('avatar')
       setPreviewUrl(URL.createObjectURL(file))
     }
   }
@@ -41,6 +46,7 @@ export const AvatarUpload = ({ form, currentAvatar, userInitials }: AvatarUpload
           <AvatarImage
             src={avatarSrc}
             alt='User avatar'
+            className='h-full w-full rounded-full object-cover'
           />
           <AvatarFallback className='text-lg'>{userInitials}</AvatarFallback>
         </Avatar>

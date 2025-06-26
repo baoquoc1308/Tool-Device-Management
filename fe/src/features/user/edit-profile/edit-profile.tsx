@@ -7,10 +7,11 @@ import { updateInformation } from '../api'
 import { toast } from 'sonner'
 import { getSession } from '@/features/auth/slice'
 import { useNavigate } from 'react-router-dom'
+import type { UserProfile } from '../model/profile-form'
 
 export const EditProfile = () => {
   const [isLoading, setIsLoading] = useState(false)
-  const user = useAppSelector((state) => state.auth.user)
+  const user = useAppSelector((state) => state.auth.user) as unknown as UserProfile
   const dispatch = useAppDispatch()
   const navigate = useNavigate()
 
@@ -27,7 +28,7 @@ export const EditProfile = () => {
       toast.success('Profile updated successfully')
 
       dispatch(getSession())
-      navigate('/dashboard')
+      navigate(-1)
     } catch (error) {
       toast.error('An error occurred while updating profile')
     } finally {
@@ -36,7 +37,7 @@ export const EditProfile = () => {
   }
 
   const handleClose = () => {
-    navigate('/dashboard')
+    navigate(-1)
   }
 
   return (

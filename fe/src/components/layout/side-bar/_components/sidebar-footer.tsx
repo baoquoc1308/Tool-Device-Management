@@ -1,5 +1,4 @@
-import { ChevronsUpDown, Pencil } from 'lucide-react'
-import { Link } from 'react-router-dom'
+import { ChevronsUpDown } from 'lucide-react'
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -15,11 +14,13 @@ import {
 import { UserAvatar } from '@/features/user'
 import { useAppSelector } from '@/hooks'
 import { SignOut } from '@/features/auth'
+import { EditProfileMenuItem } from '@/features/user/edit-profile'
 import { DarkModeToggle } from '@/features/theme'
 
 export function NavUser() {
   const { isMobile } = useSidebar()
   const user = useAppSelector((state) => state.auth.user)
+
   return (
     <SidebarMenu>
       <SidebarMenuItem>
@@ -56,14 +57,8 @@ export function NavUser() {
               </div>
             </DropdownMenuLabel>
             <DropdownMenuSeparator />
-            <DropdownMenuItem asChild>
-              <Link
-                to='/user/edit-profile'
-                className='flex w-full cursor-pointer items-center gap-2'
-              >
-                <Pencil className='h-4 w-4' />
-                Edit Profile
-              </Link>
+            <DropdownMenuItem>
+              <EditProfileMenuItem />
             </DropdownMenuItem>
             <DropdownMenuItem>
               <SignOut />
