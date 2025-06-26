@@ -110,7 +110,13 @@ func (service *UserService) Activate(token string) error {
 
 func (service *UserService) SetRole(userId int64, roleId int64) {
 	tx := service.repo.GetDB().Begin()
-	assets, _ := service.assetRepo.GetAllAsset()
+	var err error
+	user, err := service.repo.FindByUserId(userId)
+	if err != nil {
+		return
+	}
+
+	assets, _ := service.assetRepo.GetAllAsset(user.CompanyId)
 	for _, asset := range assets {
 		userRbac := entity.UserRbac{
 			AssetId: asset.Id,
@@ -122,7 +128,6 @@ func (service *UserService) SetRole(userId int64, roleId int64) {
 			tx.Rollback()
 		}
 	}
-	var err error
 	if err = tx.Commit().Error; err != nil {
 		return
 	}
@@ -214,22 +219,17 @@ func (service *UserService) GetAllUser() []*entity.Users {
 }
 
 func (service *UserService) UpdateInformation(id int64, firstName, lastName string, image *multipart.FileHeader) (*entity.Users, error) {
-	var imageUrl string
-	if image != nil {
-		imgFile, err := image.Open()
-		if err != nil {
-			return nil, fmt.Errorf("cannot open image: %w", err)
-		}
-		defer imgFile.Close()
-		uniqueName := fmt.Sprintf("%d_%s", time.Now().UnixNano(), image.Filename)
-		imagePath := "avatar/" + uniqueName
-		uploader := utils.NewSupabaseUploader()
-		imageUrl, err = uploader.Upload(imagePath, imgFile, image.Header.Get("Content-Type"))
-		if err != nil {
-			return nil, err
-		}
-	} else {
-		imageUrl = ""
+	imgFile, err := image.Open()
+	if err != nil {
+		return nil, fmt.Errorf("cannot open image: %w", err)
+	}
+	defer imgFile.Close()
+	uniqueName := fmt.Sprintf("%d_%s", time.Now().UnixNano(), image.Filename)
+	imagePath := "avatar/" + uniqueName
+	uploader := utils.NewSupabaseUploader()
+	imageUrl, err := uploader.Upload(imagePath, imgFile, image.Header.Get("Content-Type"))
+	if err != nil {
+		return nil, err
 	}
 	user := entity.Users{Id: id, FirstName: firstName, LastName: lastName, Avatar: imageUrl}
 	userUpdated, err := service.repo.UpdateUser(&user)

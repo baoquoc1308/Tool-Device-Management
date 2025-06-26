@@ -224,6 +224,11 @@ const docTemplate = `{
                     },
                     {
                         "type": "integer",
+                        "name": "companyId",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
                         "name": "depId",
                         "in": "query"
                     },
@@ -314,6 +319,11 @@ const docTemplate = `{
                     {
                         "type": "string",
                         "name": "categoryId",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "name": "companyId",
                         "in": "query"
                     },
                     {
@@ -658,6 +668,11 @@ const docTemplate = `{
                     {
                         "type": "string",
                         "name": "assetName",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "name": "companyId",
                         "in": "query"
                     },
                     {
@@ -1068,6 +1083,43 @@ const docTemplate = `{
                         "schema": {
                             "$ref": "#/definitions/dto.CreateCompanyRequest"
                         }
+                    },
+                    {
+                        "type": "string",
+                        "description": "Authorization",
+                        "name": "Authorization",
+                        "in": "header",
+                        "required": true
+                    }
+                ],
+                "responses": {}
+            }
+        },
+        "/api/company/{id}": {
+            "get": {
+                "security": [
+                    {
+                        "JWT": []
+                    }
+                ],
+                "description": "Create Company by id",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Company"
+                ],
+                "summary": "Get Company by id",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "id",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
                     },
                     {
                         "type": "string",
@@ -1681,6 +1733,11 @@ const docTemplate = `{
                 "parameters": [
                     {
                         "type": "integer",
+                        "name": "companyId",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
                         "name": "depId",
                         "in": "query"
                     },
@@ -2035,8 +2092,8 @@ const docTemplate = `{
                     },
                     {
                         "type": "file",
-                        "description": "Image to upload",
-                        "name": "image",
+                        "description": "avatar to upload",
+                        "name": "avatar",
                         "in": "formData"
                     },
                     {

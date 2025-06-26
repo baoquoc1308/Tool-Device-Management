@@ -326,6 +326,9 @@ paths:
         name: action
         type: string
       - in: query
+        name: companyId
+        type: integer
+      - in: query
         name: depId
         type: integer
       - in: query
@@ -495,6 +498,9 @@ paths:
         name: categoryId
         type: string
       - in: query
+        name: companyId
+        type: integer
+      - in: query
         name: cost
         type: string
       - in: query
@@ -660,6 +666,9 @@ paths:
       - in: query
         name: assetName
         type: string
+      - in: query
+        name: companyId
+        type: integer
       - in: query
         name: emailAssign
         type: string
@@ -882,6 +891,30 @@ paths:
       security:
       - JWT: []
       summary: Create Company
+      tags:
+      - Company
+  /api/company/{id}:
+    get:
+      consumes:
+      - application/json
+      description: Create Company by id
+      parameters:
+      - description: id
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Authorization
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses: {}
+      security:
+      - JWT: []
+      summary: Get Company by id
       tags:
       - Company
   /api/departments:
@@ -1290,6 +1323,9 @@ paths:
       description: Get all request transfer have permission
       parameters:
       - in: query
+        name: companyId
+        type: integer
+      - in: query
         name: depId
         type: integer
       - in: query
@@ -1525,9 +1561,9 @@ paths:
         name: lastName
         required: true
         type: string
-      - description: Image to upload
+      - description: avatar to upload
         in: formData
-        name: image
+        name: avatar
         type: file
       - description: Authorization
         in: header

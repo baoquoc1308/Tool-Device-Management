@@ -12,7 +12,7 @@ type AssetsRepository interface {
 	GetAssetById(id int64) (*entity.Assets, error)
 	Delete(id int64) error
 	UpdateAssetLifeCycleStage(id int64, status string, tx *gorm.DB) (*entity.Assets, error)
-	GetAllAsset() ([]*entity.Assets, error)
+	GetAllAsset(companyId int64) ([]*entity.Assets, error)
 	GetDB() *gorm.DB
 	UpdateAsset(asset *entity.Assets, tx *gorm.DB) (*entity.Assets, error)
 	DeleteAsset(id int64, tx *gorm.DB) error

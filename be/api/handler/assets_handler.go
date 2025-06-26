@@ -132,11 +132,12 @@ func (h *AssetsHandler) Create(c *gin.Context) {
 	)
 
 	if err != nil {
+		log.Error("Failed to create asset. Error", err.Error())
 		pkg.PanicExeption(constant.InvalidRequest, "Failed to create asset")
 	}
 	asset, err := h.service.GetAssetById(userId, assetCreate.Id)
 	if err != nil {
-		log.Error("Happened error when get asset by id. Error", err)
+		log.Error("Happened error when get asset by id. Error", err.Error())
 		pkg.PanicExeption(constant.UnknownError, "Happened error when get asset by id")
 	}
 	assetResponse := dto.AssetResponse{

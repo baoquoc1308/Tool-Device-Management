@@ -6,6 +6,7 @@ import (
 	"BE_Manage_device/internal/domain/dto"
 	"BE_Manage_device/internal/domain/entity"
 	service "BE_Manage_device/internal/service/categories"
+	"BE_Manage_device/pkg/utils"
 
 	"BE_Manage_device/pkg"
 	"encoding/json"
@@ -44,14 +45,15 @@ func NewCategoriesHandler(service *service.CategoriesService) *CategoriesHandler
 func (h *CategoriesHandler) Create(c *gin.Context) {
 	defer pkg.PanicHandler(c)
 	var request dto.CreateCategoryRequest
+	userId := utils.GetUserIdFromContext(c)
 	if err := c.ShouldBindJSON(&request); err != nil {
 		log.Error("Happened error when mapping request from FE. Error", err)
 		pkg.PanicExeption(constant.InvalidRequest, "Happened error when mapping request from FE.")
 	}
-	location, err := h.service.Create(request.CategoryName)
+	location, err := h.service.Create(userId, request.CategoryName)
 	if err != nil {
 		log.Error("Happened error when create category. Error", err)
-		pkg.PanicExeption(constant.UnknownError, "Happened error when create category")
+		pkg.PanicExeption(constant.UnknownError, "Happened error when create category. Error: "+err.Error())
 	}
 	config.Rdb.Del(config.Ctx, cacheKeyCategories)
 	c.JSON(http.StatusCreated, pkg.BuildReponseSuccess(http.StatusCreated, constant.Success, location))
@@ -71,6 +73,7 @@ func (h *CategoriesHandler) Create(c *gin.Context) {
 // @Security JWT
 func (h *CategoriesHandler) GetAll(c *gin.Context) {
 	defer pkg.PanicHandler(c)
+	userId := utils.GetUserIdFromContext(c)
 	var categories []*entity.Categories
 	val, err := config.Rdb.Get(config.Ctx, cacheKeyCategories).Result()
 	if err == nil {
@@ -86,7 +89,7 @@ func (h *CategoriesHandler) GetAll(c *gin.Context) {
 			pkg.PanicExeption(constant.UnknownError, "Happened error when get all categories in redis")
 		}
 	} else {
-		categories, err = h.service.GetAll()
+		categories, err = h.service.GetAll(userId)
 		if err != nil {
 			log.Error("Happened error when get all categories. Error", err)
 			pkg.PanicExeption(constant.UnknownError, "Happened error when get all categories")

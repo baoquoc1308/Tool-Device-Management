@@ -106,6 +106,7 @@ func (service *AssignmentService) Update(userId, assignmentId int64, userIdAssig
 			Action:    "Transfer",
 			AssetId:   asset.Id,
 			ByUserId:  &byUser.Id,
+			CompanyId: assignUser.CompanyId,
 		}
 		department, err := service.departmentRepo.GetDepartmentById(*departmentId)
 		if err != nil {
@@ -128,6 +129,7 @@ func (service *AssignmentService) Update(userId, assignmentId int64, userIdAssig
 			Action:    "Transfer",
 			AssetId:   asset.Id,
 			ByUserId:  &byUser.Id,
+			CompanyId: assignUser.CompanyId,
 		}
 		assetLog.AssignUserId = &assignUser.Id
 		assetLog.ChangeSummary += fmt.Sprintf("Transfer from user: %v to user: %v\n",
