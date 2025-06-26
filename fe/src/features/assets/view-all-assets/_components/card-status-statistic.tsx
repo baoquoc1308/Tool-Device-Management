@@ -51,7 +51,7 @@ export const CardStatusStatistic = ({ isPending, assets }: { isPending: boolean;
       <Card>
         <CardContent className='p-4'>
           <div className='text-muted-foreground text-sm font-medium'>Retired / Disposed</div>
-          <div className='text-2xl font-bold text-slate-600'>
+          <div className='text-2xl font-bold text-red-600'>
             {isPending ? (
               <Skeleton className='h-8 w-16' />
             ) : (

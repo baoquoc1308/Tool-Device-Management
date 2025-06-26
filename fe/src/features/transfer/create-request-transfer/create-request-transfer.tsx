@@ -56,7 +56,11 @@ const CreateTransferRequest = () => {
       return
     }
     toast.success('Transfer request created successfully')
-    navigate('/transfers')
+    form.reset({
+      categoryId: '',
+      description: '',
+    })
+    setIsSubmitting(false)
   }
 
   return (

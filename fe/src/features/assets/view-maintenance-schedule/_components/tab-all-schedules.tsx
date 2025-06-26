@@ -11,7 +11,15 @@ import {
 import { Calendar } from 'lucide-react'
 import { columnTableMaintenance } from '../column-table'
 import type { MaintenanceSchedule } from '../model'
-export const TabAllSchedules = ({ isLoading, schedules }: { isLoading: boolean; schedules: MaintenanceSchedule[] }) => {
+export const TabAllSchedules = ({
+  isLoading,
+  schedules,
+  onSuccess,
+}: {
+  isLoading: boolean
+  schedules: MaintenanceSchedule[]
+  onSuccess: () => void
+}) => {
   return (
     <TabsContent
       value='all'
@@ -27,7 +35,7 @@ export const TabAllSchedules = ({ isLoading, schedules }: { isLoading: boolean; 
             <SkeletonForTable />
           ) : schedules.length > 0 ? (
             <DataTable
-              columns={columnTableMaintenance}
+              columns={columnTableMaintenance({ onSuccessUpdate: onSuccess })}
               data={schedules}
             />
           ) : (

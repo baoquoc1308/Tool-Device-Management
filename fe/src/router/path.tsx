@@ -1,4 +1,4 @@
-import { createBrowserRouter } from 'react-router-dom'
+import { createBrowserRouter, Navigate } from 'react-router-dom'
 import {
   DashboardPage,
   LoginPage,
@@ -16,23 +16,27 @@ import {
   CreateNewRequestTransferPage,
   ViewAllMaintenanceSchedulePage,
   CreateAssetMaintenanceSchedulePage,
-} from '@/pages'
+} from '@/pages/dashboard'
 import { ProtectedRoute, AuthRoute } from './auth-guard'
 import Layout from '@/layout/layout'
-import { AssignRoleForUserPage } from '@/pages/user'
+import { AssignDepartmentForUserPage, AssignRoleForUserPage } from '@/pages/user'
 
 export const router = createBrowserRouter([
   {
     path: '/',
-    element: <Layout />,
+    element: <ProtectedRoute />,
     children: [
       {
         path: '/',
-        element: <ProtectedRoute />,
+        element: <Layout />,
         children: [
           {
-            path: '',
+            path: 'dashboard',
             element: <DashboardPage />,
+          },
+          {
+            path: '',
+            element: <Navigate to='/dashboard' />,
           },
           {
             path: 'assets',
@@ -104,6 +108,10 @@ export const router = createBrowserRouter([
               {
                 path: 'assign-role',
                 element: <AssignRoleForUserPage />,
+              },
+              {
+                path: 'assign-department',
+                element: <AssignDepartmentForUserPage />,
               },
             ],
           },

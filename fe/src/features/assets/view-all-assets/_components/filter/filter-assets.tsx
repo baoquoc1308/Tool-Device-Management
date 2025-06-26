@@ -2,15 +2,21 @@ import React from 'react'
 import { Button } from '@/components/ui'
 import { FilterX } from 'lucide-react'
 import type { FilterType } from '../../model'
+import type { AssetsType } from '../../model'
+import { ExportButton } from '../../../../dashboard/components/export-button'
 
 import { AssetNameInputFilter, CategoriesFilter, DepartmentsFilter, StatusFilter } from './_components'
 
 export const FilterAssets = ({
   filteredAssets,
   setFilteredAssets,
+  assets,
+  showExportButtons = false,
 }: {
   filteredAssets: FilterType
   setFilteredAssets: React.Dispatch<React.SetStateAction<FilterType>>
+  assets: AssetsType[]
+  showExportButtons?: boolean
 }) => {
   const resetFilters = () => {
     setFilteredAssets({
@@ -44,20 +50,35 @@ export const FilterAssets = ({
           setFilteredAssets={setFilteredAssets}
         />
 
-        <Button
-          disabled={
-            !filteredAssets.assetName &&
-            !filteredAssets.categoryId &&
-            !filteredAssets.departmentId &&
-            !filteredAssets.status
-          }
-          variant='outline'
-          onClick={resetFilters}
-          className='gap-2'
-        >
-          <FilterX className='h-4 w-4' />
-          Clear filters
-        </Button>
+        <div className='flex gap-2'>
+          <Button
+            disabled={
+              !filteredAssets.assetName &&
+              !filteredAssets.categoryId &&
+              !filteredAssets.departmentId &&
+              !filteredAssets.status
+            }
+            variant='outline'
+            onClick={resetFilters}
+            className='gap-2'
+          >
+            <FilterX className='h-4 w-4' />
+            Clear filters
+          </Button>
+          {showExportButtons && (
+            <>
+              <ExportButton
+                format='csv'
+                assets={assets}
+              />
+
+              <ExportButton
+                format='pdf'
+                assets={assets}
+              />
+            </>
+          )}
+        </div>
       </div>
     </div>
   )

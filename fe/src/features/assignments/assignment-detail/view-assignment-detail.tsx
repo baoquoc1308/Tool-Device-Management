@@ -1,4 +1,4 @@
-import { useEffect, useState, useTransition } from 'react'
+import { useEffect, useState } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { Card, CardHeader, CardTitle, CardContent, CardFooter, Button, Separator, Form } from '@/components/ui'
 import { ArrowLeft, MapPin, User, Package, Loader2 } from 'lucide-react'
@@ -31,7 +31,7 @@ const ViewAssignmentDetail = () => {
   const [isUpdate, setIsUpdate] = useState(false)
   const [users, setUsers] = useState<UserType[]>([])
   const [isLoadingUsers, setIsLoadingUsers] = useState(false)
-  const [isSubmitting, startTransition] = useTransition()
+  const [isSubmitting, setIsSubmitting] = useState(false)
   const [departments, setDepartments] = useState<DepartmentType[]>([])
   const [departmentId, setDepartmentId] = useState<string>('')
   const [assignmentDetail, setAssignmentDetail] = useState<AssignmentData>()
@@ -76,17 +76,17 @@ const ViewAssignmentDetail = () => {
     }
   }, [departmentId])
 
-  const onSubmit = (data: UpdateAssignmentForm) => {
-    startTransition(async () => {
-      const response = await tryCatch(UpdateAssignment(id || '', data))
-      if (response.error) {
-        toast.error(response.error.message || 'Failed to update assignment, please try again')
-        return
-      }
-      toast.success('Assignment updated successfully')
-      await getAssignmentsDetailData()
-      setIsUpdate(false)
-    })
+  const onSubmit = async (data: UpdateAssignmentForm) => {
+    setIsSubmitting(true)
+    const response = await tryCatch(UpdateAssignment(id || '', data))
+    if (response.error) {
+      toast.error(response.error.message || 'Failed to update assignment, please try again')
+      return
+    }
+    toast.success('Assignment updated successfully')
+    await getAssignmentsDetailData()
+    setIsUpdate(false)
+    setIsSubmitting(false)
   }
 
   const handleDepartmentChange = (newDepartmentId: string) => {
@@ -154,6 +154,7 @@ const ViewAssignmentDetail = () => {
                     <div>
                       {isUpdate ? (
                         <AssignmentUserAssignUpdate
+                          departmentId={departmentId}
                           users={users}
                           assignmentDetail={assignmentDetail}
                           isLoading={isLoadingUsers}
@@ -221,6 +222,7 @@ const ViewAssignmentDetail = () => {
                   setIsUpdate(true)
                   form.setValue('departmentId', '')
                   form.setValue('userId', '')
+                  setDepartmentId('')
                 }}
               >
                 Edit Assignment

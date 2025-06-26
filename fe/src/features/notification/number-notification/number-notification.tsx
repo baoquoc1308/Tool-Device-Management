@@ -14,13 +14,14 @@ import { toast } from 'sonner'
 import type { NotificationType } from './model'
 import { useNavigate } from 'react-router-dom'
 import { cn } from '@/lib/utils'
+import Cookies from 'js-cookie'
+import { EventSourcePolyfill } from 'event-source-polyfill'
 
 const NumberNotification = () => {
   const navigate = useNavigate()
   const [unreadCount, setUnreadCount] = useState(0)
   const [notifications, setNotifications] = useState<NotificationType[]>([])
   const [isPending, setIsPending] = useState(false)
-
   const getNotifications = async () => {
     setIsPending(true)
     const response = await tryCatch(getAllNotifications())
@@ -35,21 +36,31 @@ const NumberNotification = () => {
     setIsPending(false)
   }
 
-  const clickNotification = async (id: string) => {
+  const clickNotification = async (assetId: string, id: string) => {
     const response = await tryCatch(updateReadNotification(id))
+
     if (response.error) {
       toast.error(response.error.message || 'Failed to seen notification')
       return
     }
-    setUnreadCount((prev) => prev - 1)
-    // Update the notification status locally
-    setNotifications(
-      notifications.map((notification) =>
-        notification.id.toString() === id ? { ...notification, status: 'seen' } : notification
-      )
-    )
-    navigate(`assets/${id}`)
+
+    await getNotifications()
+    navigate(`assets/${assetId}`)
   }
+
+  const token = Cookies.get('accessToken')
+
+  useEffect(() => {
+    const eventSource = new EventSourcePolyfill(`${import.meta.env.VITE_API_URL}sse`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    })
+    eventSource.onmessage = async () => {
+      await getNotifications()
+    }
+    return () => eventSource.close()
+  }, [])
 
   useEffect(() => {
     getNotifications()
@@ -89,7 +100,7 @@ const NumberNotification = () => {
                 notifications.map((notification, index) => (
                   <div
                     key={index}
-                    onClick={() => clickNotification(notification.id.toString())}
+                    onClick={() => clickNotification(notification.assetId.toString(), notification.id.toString())}
                     className={cn(
                       'hover:bg-accent p-3 transition-colors',
                       'border-b last:border-b-0',

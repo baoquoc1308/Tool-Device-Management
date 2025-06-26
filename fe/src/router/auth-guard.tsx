@@ -4,9 +4,9 @@ import { useGetSession } from '@/hooks/use-get-session'
 import { Skeleton } from '@/components'
 
 export const ProtectedRoute = () => {
+  const token = Cookies.get('accessToken')
   const { loading } = useGetSession()
   if (loading) return <Skeleton className='size-full' />
-  const token = Cookies.get('accessToken')
   return token ? <Outlet /> : <Navigate to={'/login'} />
 }
 

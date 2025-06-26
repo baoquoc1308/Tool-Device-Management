@@ -28,7 +28,7 @@ export const AssignmentDepartmentUpdate = ({
           name='departmentId'
           label='Department'
           placeholder='Select a new department'
-          data={departments.filter((dept) => dept.id !== assignmentDetail.department.id)}
+          data={departments}
           onChange={setDepartmentId}
         />
       </div>

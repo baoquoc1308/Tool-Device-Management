@@ -15,7 +15,7 @@ export const updateMaintenanceScheduleSchema = z
       },
       ctx
     ) => {
-      if (endDate.getTime() < startDate.getTime()) {
+      if (endDate.getTime < startDate.getTime) {
         ctx.addIssue({
           code: z.ZodIssueCode.custom,
           message: 'End date must be after start date',

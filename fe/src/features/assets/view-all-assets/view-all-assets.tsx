@@ -1,6 +1,6 @@
-import { useEffect, useState, useTransition } from 'react'
-import { getAllAssets, getDataAssetsFilter } from '../api'
-import { toast } from 'sonner'
+import { useEffect, useState } from 'react'
+import { getDataAssetsFilter } from '../api'
+
 import type { AssetsType, FilterType } from './model'
 import { columnsAssetsTable } from './column-table'
 import { DataTable, Card, CardHeader, CardTitle, CardDescription, CardContent, SkeletonForTable } from '@/components/ui'
@@ -12,7 +12,7 @@ import {
   FilterAssets,
   ViewCardsDataAssets,
 } from './_components'
-import { getData, tryCatch } from '@/utils'
+import { getData } from '@/utils'
 import { useDebounce } from '@/hooks'
 import { useSearchParams } from 'react-router-dom'
 
@@ -89,6 +89,8 @@ const ViewAllAssets = () => {
           <FilterAssets
             filteredAssets={filteredAssets}
             setFilteredAssets={setFilteredAssets}
+            assets={assets}
+            showExportButtons={true}
           />
           {isPending ? (
             <SkeletonForTable />

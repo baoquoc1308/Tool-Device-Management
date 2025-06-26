@@ -15,9 +15,11 @@ import { Wrench } from 'lucide-react'
 export const TabUnderMaintenance = ({
   isLoading,
   inProgress,
+  onSuccess,
 }: {
   isLoading: boolean
   inProgress: MaintenanceSchedule[]
+  onSuccess: () => void
 }) => {
   return (
     <TabsContent
@@ -34,7 +36,7 @@ export const TabUnderMaintenance = ({
             <SkeletonForTable />
           ) : inProgress.length > 0 ? (
             <DataTable
-              columns={columnTableMaintenance}
+              columns={columnTableMaintenance({ onSuccessUpdate: onSuccess })}
               data={inProgress}
             />
           ) : (

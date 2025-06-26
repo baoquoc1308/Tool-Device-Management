@@ -15,9 +15,11 @@ import type { MaintenanceSchedule } from '../model'
 export const TabUpcomingSchedules = ({
   isLoading,
   upcoming,
+  onSuccess,
 }: {
   isLoading: boolean
   upcoming: MaintenanceSchedule[]
+  onSuccess: () => void
 }) => {
   return (
     <TabsContent
@@ -34,7 +36,7 @@ export const TabUpcomingSchedules = ({
             <SkeletonForTable />
           ) : upcoming.length > 0 ? (
             <DataTable
-              columns={columnTableMaintenance}
+              columns={columnTableMaintenance({ onSuccessUpdate: onSuccess })}
               data={upcoming}
             />
           ) : (

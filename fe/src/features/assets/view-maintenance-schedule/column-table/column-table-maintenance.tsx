@@ -6,7 +6,12 @@ import type { MaintenanceSchedule } from '../model'
 import { Calendar } from 'lucide-react'
 import { UpdateMaintenanceSchedule } from '../../update-maintenance-schedule'
 import { useState } from 'react'
-export const columnTableMaintenance: ColumnDef<MaintenanceSchedule>[] = [
+import { useAppSelector } from '@/hooks'
+export const columnTableMaintenance = ({
+  onSuccessUpdate,
+}: {
+  onSuccessUpdate: () => void
+}): ColumnDef<MaintenanceSchedule>[] => [
   {
     accessorKey: 'asset.assetName',
     header: 'Asset Name',
@@ -52,13 +57,20 @@ export const columnTableMaintenance: ColumnDef<MaintenanceSchedule>[] = [
     header: '',
     cell: ({ row }) => {
       const id = row.original.id
+      const status = row.original.asset.status
       const [isDialogOpen, setIsDialogOpen] = useState(false)
+      const role = useAppSelector((state) => state.auth.user?.role.slug)
+      const startDate = row.original.startDate
+      const endDate = row.original.endDate
       return (
         <div className='flex items-center gap-2'>
           <UpdateMaintenanceSchedule
+            startDate={startDate}
+            endDate={endDate}
             id={id.toString()}
             isDialogOpen={isDialogOpen}
             setIsDialogOpen={setIsDialogOpen}
+            onSuccessUpdate={onSuccessUpdate}
           />
           <Button
             variant='outline'
@@ -67,16 +79,18 @@ export const columnTableMaintenance: ColumnDef<MaintenanceSchedule>[] = [
           >
             <Link to={`/assets/${row.original.asset.id}`}>View Asset</Link>
           </Button>
-          <Button
-            variant='outline'
-            size='sm'
-            onClick={() => {
-              setIsDialogOpen(true)
-            }}
-          >
-            <Calendar className='mr-2 h-4 w-4' />
-            Update Schedule
-          </Button>
+          {role !== 'viewer' && role !== 'departmentHead' && status !== 'Under Maintenance' && (
+            <Button
+              variant='outline'
+              size='sm'
+              onClick={() => {
+                setIsDialogOpen(true)
+              }}
+            >
+              <Calendar className='mr-2 h-4 w-4' />
+              Update Schedule
+            </Button>
+          )}
         </div>
       )
     },

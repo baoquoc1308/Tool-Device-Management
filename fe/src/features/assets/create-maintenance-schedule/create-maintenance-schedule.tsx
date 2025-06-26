@@ -16,9 +16,10 @@ import { useEffect, useState } from 'react'
 import { toast } from 'sonner'
 import { useNavigate } from 'react-router-dom'
 import type { AssetsType } from '../view-all-assets'
-import { createMaintenanceSchedule, getAllAssets, getAssetNoSchedule } from '../api'
+import { createMaintenanceSchedule, getAssetNoSchedule } from '../api'
 import { getData, tryCatch } from '@/utils'
 import { type CreateMaintenanceScheduleType, createMaintenanceScheduleSchema } from './model/schema'
+import { useFormState } from 'react-hook-form'
 
 const CreateMaintenanceSchedule = () => {
   const [isSubmitting, setIsSubmitting] = useState(false)
@@ -44,10 +45,14 @@ const CreateMaintenanceSchedule = () => {
     },
     mode: 'onChange',
   })
-
+  const { isValid, isDirty } = useFormState({
+    control: form.control,
+  })
   const onSubmit = async (data: CreateMaintenanceScheduleType) => {
     setIsSubmitting(true)
-    const response = await tryCatch(createMaintenanceSchedule(data))
+    const startDate = new Date(data.startDate.getTime() + 25200000)
+    const endDate = new Date(data.endDate?.getTime() + 25200000)
+    const response = await tryCatch(createMaintenanceSchedule({ ...data, startDate, endDate }))
     if (response.error) {
       toast.error(response.error.message || 'Failed to create maintenance schedule')
       setIsSubmitting(false)
@@ -60,10 +65,9 @@ const CreateMaintenanceSchedule = () => {
       endDate: undefined,
     })
     setIsSubmitting(false)
-    navigate('/assets/maintenance-schedule')
   }
   const handleStartDateChange = (value: Date) => {
-    form.setValue('startDate', value)
+    form.setValue('startDate', value, { shouldDirty: true })
     const endDate = form.getValues('endDate')
 
     if (endDate) {
@@ -72,6 +76,7 @@ const CreateMaintenanceSchedule = () => {
       form.clearErrors('endDate')
     }
   }
+
   return (
     <div className='container mx-auto py-10'>
       <Card className='mx-auto max-w-2xl'>
@@ -122,7 +127,7 @@ const CreateMaintenanceSchedule = () => {
                   </Button>
                   <Button
                     type='submit'
-                    disabled={isSubmitting || !form.formState.isValid || !form.formState.isDirty}
+                    disabled={isSubmitting || !isValid || !isDirty}
                   >
                     {isSubmitting ? (
                       <>

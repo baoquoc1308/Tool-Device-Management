@@ -1,7 +1,7 @@
 import { useParams, Link, useNavigate } from 'react-router-dom'
 import type { AssetsType } from '../view-all-assets/model'
 import { getData, tryCatch } from '@/utils'
-import { useEffect, useTransition } from 'react'
+import { useEffect } from 'react'
 import { deleteAsset, getAssetInformation } from '../api'
 import { useState } from 'react'
 import {
@@ -19,6 +19,7 @@ import {
 } from '@/components/ui'
 
 import { ArrowLeft, Pencil, Loader2, Trash2 } from 'lucide-react'
+import { useAppSelector } from '@/hooks'
 
 import {
   AssetBadge,
@@ -31,33 +32,40 @@ import {
 } from './_components'
 import { ViewAssetLog } from '../view-asset-log'
 import { toast } from 'sonner'
-import { UpdateMaintenanceSchedule } from '../update-maintenance-schedule'
 
 const GetAssetDetail = () => {
   const { id } = useParams()
-  const [isPending, startTransition] = useTransition()
-  const [isDeleting, startDeletingTransition] = useTransition()
-  const [isDialogOpen, setIsDialogOpen] = useState(false)
+  const [isPending, setIsPending] = useState(false)
+  const [isDeleting, setIsDeleting] = useState(false)
   const [asset, setAsset] = useState<AssetsType>()
-  const navigate = useNavigate()
 
-  const getAssetData = () => {
-    startTransition(async () => {
-      if (!id) return
-      await getData(() => getAssetInformation(id), setAsset)
-    })
+  const navigate = useNavigate()
+  const user = useAppSelector((state) => state.auth.user)
+  const role = user.role.slug
+  const canEditAsset = () => {
+    if (role === 'admin') return true
+    if (role === 'assetManager') {
+      return user.department && asset?.department?.id === user.department.id
+    }
+    return false
   }
-  const deletingAsset = () => {
+  const getAssetData = async () => {
+    setIsPending(true)
     if (!id) return
-    startDeletingTransition(async () => {
-      const response = await tryCatch(deleteAsset(id))
-      if (response.error) {
-        toast.error(response.error.message || 'Failed to delete asset')
-        return
-      }
-      toast.success('Asset deleted successfully')
-      navigate('/assets')
-    })
+    await getData(() => getAssetInformation(id), setAsset)
+    setIsPending(false)
+  }
+  const deletingAsset = async () => {
+    setIsDeleting(true)
+    if (!id) return
+    const response = await tryCatch(deleteAsset(id))
+    if (response.error) {
+      toast.error(response.error.message || 'Failed to delete asset')
+      return
+    }
+    toast.success('Asset deleted successfully')
+    navigate('/assets')
+    setIsDeleting(false)
   }
 
   useEffect(() => {
@@ -71,18 +79,12 @@ const GetAssetDetail = () => {
       </div>
     )
   }
-
   if (!asset) {
     return <NoAsset id={id || ''} />
   }
 
   return (
     <div className='container mx-auto px-4 py-8'>
-      <UpdateMaintenanceSchedule
-        id={id || ''}
-        isDialogOpen={isDialogOpen}
-        setIsDialogOpen={setIsDialogOpen}
-      />
       <div className='mb-6 flex items-center justify-between'>
         <div className='flex items-center'>
           <Link to='/assets'>
@@ -96,7 +98,7 @@ const GetAssetDetail = () => {
           <h1 className='text-3xl font-semibold'>{asset.assetName}</h1>
           <AssetBadge asset={asset} />
         </div>
-        {asset.status !== 'Disposed' && (
+        {asset.status !== 'Disposed' && canEditAsset() && (
           <div className='flex items-center space-x-2'>
             <Link to={`/assets/update/${id}`}>
               <Button variant='outline'>
@@ -141,27 +143,26 @@ const GetAssetDetail = () => {
           </Card>
 
           {/* Asset History Log */}
-          <ViewAssetLog id={id || ''} />
-          <Card className='w-full'>
-            <div className='flex items-center justify-between'>
-              <CardHeader className='flex-1'>
-                <CardTitle>Maintenance Schedule</CardTitle>
-                <CardDescription>Upcoming and past maintenance schedules</CardDescription>
-              </CardHeader>
-              <div className='flex items-center space-x-2 p-4'>
-                <Button
-                  variant={'outline'}
-                  onClick={() => setIsDialogOpen(true)}
-                >
-                  Update schedules
-                </Button>
+          {role !== 'viewer' &&
+            role !== 'departmentHead' &&
+            (role === 'admin' ||
+              (role === 'assetManager' && (user as any).department?.id === asset?.department?.id)) && (
+              <ViewAssetLog id={id || ''} />
+            )}
+          {role !== 'viewer' && (
+            <Card className='w-full'>
+              <div className='flex items-center justify-between'>
+                <CardHeader className='flex-1'>
+                  <CardTitle>Maintenance Schedule</CardTitle>
+                  <CardDescription>Upcoming and past maintenance schedules</CardDescription>
+                </CardHeader>
               </div>
-            </div>
 
-            <CardContent>
-              <AssetMaintenanceSchedule id={id || ''} />
-            </CardContent>
-          </Card>
+              <CardContent>
+                <AssetMaintenanceSchedule id={id || ''} />
+              </CardContent>
+            </Card>
+          )}
         </div>
 
         {/* Second column - Tabs Container */}
@@ -194,7 +195,7 @@ const GetAssetDetail = () => {
             {/* Tab content with flex-grow to fill available space */}
             <TabsContent
               value='image'
-              className='mt-4 flex flex-grow'
+              className='flex flex-grow'
             >
               <Card className='w-full'>
                 <CardContent className='flex h-full items-center justify-center py-4'>

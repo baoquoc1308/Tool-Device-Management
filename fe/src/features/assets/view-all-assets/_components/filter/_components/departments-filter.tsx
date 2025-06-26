@@ -1,6 +1,6 @@
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectGroup, SelectItem } from '@/components'
 import type { FilterType } from '../../../model'
-import { useEffect, useState, useTransition } from 'react'
+import { useEffect, useState } from 'react'
 import { tryCatch } from '@/utils'
 import { getAllDepartment } from '@/features/assets/api'
 import type { DepartmentType } from '@/features/assets/create-new-asset'
@@ -12,16 +12,16 @@ export const DepartmentsFilter = ({
   filteredAssets: FilterType
   setFilteredAssets: React.Dispatch<React.SetStateAction<FilterType>>
 }) => {
-  const [isPending, startTransition] = useTransition()
+  const [isPending, setIsPending] = useState(false)
   const [departments, setDepartments] = useState<DepartmentType[]>([])
-  const getDepartments = () => {
-    startTransition(async () => {
-      const response = await tryCatch(getAllDepartment())
-      if (response.error) {
-        return
-      }
-      setDepartments(response.data.data)
-    })
+  const getDepartments = async () => {
+    setIsPending(true)
+    const response = await tryCatch(getAllDepartment())
+    if (response.error) {
+      return
+    }
+    setDepartments(response.data.data)
+    setIsPending(false)
   }
   useEffect(() => {
     getDepartments()

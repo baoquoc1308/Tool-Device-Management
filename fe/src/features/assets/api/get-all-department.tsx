@@ -1,5 +1,5 @@
-import { httpRequest, type ApiResponse } from '@/utils'
-import type { DepartmentType } from '../create-new-asset'
-export const getAllDepartment = async (): Promise<ApiResponse<DepartmentType[]>> => {
+import { httpRequest } from '@/utils'
+
+export const getAllDepartment = async () => {
   return await httpRequest.get('/departments')
 }

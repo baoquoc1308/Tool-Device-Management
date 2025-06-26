@@ -1,6 +1,6 @@
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectGroup, SelectItem } from '@/components'
 import type { FilterType } from '../../../model'
-import { useEffect, useState, useTransition } from 'react'
+import { useEffect, useState } from 'react'
 import { tryCatch } from '@/utils'
 import { getAllCategories } from '@/features/assets/api'
 import type { CategoryType } from '@/features/assets/create-new-asset'
@@ -11,16 +11,16 @@ export const CategoriesFilter = ({
   filteredAssets: FilterType
   setFilteredAssets: React.Dispatch<React.SetStateAction<FilterType>>
 }) => {
-  const [isPending, startTransition] = useTransition()
+  const [isPending, setIsPending] = useState(false)
   const [categories, setCategories] = useState<CategoryType[]>([])
-  const getCategories = () => {
-    startTransition(async () => {
-      const response = await tryCatch(getAllCategories())
-      if (response.error) {
-        return
-      }
-      setCategories(response.data.data)
-    })
+  const getCategories = async () => {
+    setIsPending(true)
+    const response = await tryCatch(getAllCategories())
+    if (response.error) {
+      return
+    }
+    setCategories(response.data.data)
+    setIsPending(false)
   }
   useEffect(() => {
     getCategories()

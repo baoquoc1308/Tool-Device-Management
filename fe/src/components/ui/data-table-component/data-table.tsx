@@ -21,7 +21,7 @@ export function DataTable<TData, TValue>({ columns, data }: DataTableProps<TData
     getPaginationRowModel: getPaginationRowModel(),
   })
   return (
-    <div className='flex flex-col gap-4 rounded-md border p-2'>
+    <div className='border-border bg-card flex flex-col gap-4 rounded-md p-2'>
       <Table>
         <TableHeader>
           {table.getHeaderGroups().map((headerGroup) => (
