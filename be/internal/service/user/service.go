@@ -4,6 +4,7 @@ import (
 	"BE_Manage_device/config"
 	"BE_Manage_device/internal/domain/entity"
 	asset "BE_Manage_device/internal/repository/assets"
+	company "BE_Manage_device/internal/repository/company"
 	role "BE_Manage_device/internal/repository/role"
 	user "BE_Manage_device/internal/repository/user"
 	userRBAC "BE_Manage_device/internal/repository/user_rbac"
@@ -28,10 +29,11 @@ type UserService struct {
 	roleRepository     role.RoleRepository
 	assetRepo          asset.AssetsRepository
 	userRBACRepository userRBAC.UserRBACRepository
+	CompanyRepo        company.CompanyRepository
 }
 
-func NewUserService(repo user.UserRepository, emailService *emailS.EmailService, userSessionRepo userSession.UsersSessionRepository, roleRepository role.RoleRepository, assetRepo asset.AssetsRepository, userRBACRepository userRBAC.UserRBACRepository) *UserService {
-	return &UserService{repo: repo, emailService: emailService, userSessionRepo: userSessionRepo, roleRepository: roleRepository, assetRepo: assetRepo, userRBACRepository: userRBACRepository}
+func NewUserService(repo user.UserRepository, emailService *emailS.EmailService, userSessionRepo userSession.UsersSessionRepository, roleRepository role.RoleRepository, assetRepo asset.AssetsRepository, userRBACRepository userRBAC.UserRBACRepository, CompanyRepo company.CompanyRepository) *UserService {
+	return &UserService{repo: repo, emailService: emailService, userSessionRepo: userSessionRepo, roleRepository: roleRepository, assetRepo: assetRepo, userRBACRepository: userRBACRepository, CompanyRepo: CompanyRepo}
 }
 
 func (service *UserService) Register(firstName, lastName, password, email, redirectUrl string) (*entity.Users, error) {
@@ -41,6 +43,10 @@ func (service *UserService) Register(firstName, lastName, password, email, redir
 	}
 	role := service.roleRepository.GetRoleBySlug("viewer")
 	token := uuid.New().String()
+	company, err := service.CompanyRepo.GetCompanyBySuffixEmail(utils.GetSuffixEmail(email))
+	if err != nil {
+		return nil, errors.New("this email company don't register")
+	}
 	users := &entity.Users{
 		FirstName: firstName,
 		LastName:  lastName,
@@ -49,6 +55,7 @@ func (service *UserService) Register(firstName, lastName, password, email, redir
 		RoleId:    role.Id,
 		IsActive:  false,
 		Token:     token,
+		CompanyId: company.Id,
 	}
 	err = service.repo.Create(users)
 	if err != nil {
