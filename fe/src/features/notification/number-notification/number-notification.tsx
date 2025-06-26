@@ -97,40 +97,35 @@ const NumberNotification = () => {
           </div>
 
           {notifications.length > 0 ? (
-            notifications.map(
-              (notification, index) => (
-                console.log('🚀 ~ NumberNotification ~ index:', index),
-                (
-                  <DropdownMenuItem
-                    key={notification.id}
-                    className={cn('focus:bg-accent p-0', 'cursor-pointer')}
-                    onClick={() => clickNotification(notification.assetId.toString(), notification.id.toString())}
-                  >
-                    <div
-                      className={cn(
-                        'w-full p-3 transition-colors',
-                        'border-b last:border-b-0',
-                        notification.status === 'pending' && 'bg-accent/30'
-                      )}
-                    >
-                      <div className='flex items-start gap-2'>
-                        <div className='flex-1'>
-                          <p className={cn('text-sm', notification.status === 'pending' && 'font-medium')}>
-                            {notification.content}
-                          </p>
-                          <span className='text-muted-foreground text-xs'>
-                            {new Date(notification.notifyDate).toLocaleDateString()}
-                          </span>
-                        </div>
-                        {notification.status === 'pending' && (
-                          <div className='mt-1 h-2 w-2 flex-shrink-0 rounded-full bg-blue-500' />
-                        )}
-                      </div>
+            notifications.map((notification, _index) => (
+              <DropdownMenuItem
+                key={notification.id}
+                className={cn('focus:bg-accent p-0', 'cursor-pointer')}
+                onClick={() => clickNotification(notification.assetId.toString(), notification.id.toString())}
+              >
+                <div
+                  className={cn(
+                    'w-full p-3 transition-colors',
+                    'border-b last:border-b-0',
+                    notification.status === 'pending' && 'bg-accent/30'
+                  )}
+                >
+                  <div className='flex items-start gap-2'>
+                    <div className='flex-1'>
+                      <p className={cn('text-sm', notification.status === 'pending' && 'font-medium')}>
+                        {notification.content}
+                      </p>
+                      <span className='text-muted-foreground text-xs'>
+                        {new Date(notification.notifyDate).toLocaleDateString()}
+                      </span>
                     </div>
-                  </DropdownMenuItem>
-                )
-              )
-            )
+                    {notification.status === 'pending' && (
+                      <div className='mt-1 h-2 w-2 flex-shrink-0 rounded-full bg-blue-500' />
+                    )}
+                  </div>
+                </div>
+              </DropdownMenuItem>
+            ))
           ) : (
             <div className='text-muted-foreground p-4 text-center text-sm'>No notifications</div>
           )}
