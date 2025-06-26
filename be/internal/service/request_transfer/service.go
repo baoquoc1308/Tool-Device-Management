@@ -141,6 +141,7 @@ func (service *RequestTransferService) Filter(userId int64, status *string) ([]d
 	if users.Role.Slug != "admin" {
 		filter.DepId = users.DepartmentId
 	}
+	filter.CompanyId = users.CompanyId
 	db := service.repo.GetDB()
 	dbFilter := filter.ApplyFilter(db.Model(&entity.RequestTransfer{}), userId)
 	var requests []entity.RequestTransfer

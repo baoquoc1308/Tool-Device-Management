@@ -392,8 +392,8 @@ func (h *UserHandler) Logout(c *gin.Context) {
 // @Security JWT
 func (h *UserHandler) GetAllUser(c *gin.Context) {
 	defer pkg.PanicHandler(c)
-	// userId := utils.GetUserIdFromContext(c)
-	users := h.service.GetAllUser()
+	userId := utils.GetUserIdFromContext(c)
+	users := h.service.GetAllUser(userId)
 	usersResponses := utils.ConvertUsersToUserResponses(users)
 	c.JSON(http.StatusOK, pkg.BuildReponseSuccess(http.StatusOK, constant.Success, usersResponses))
 }

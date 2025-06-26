@@ -174,11 +174,11 @@ func (service *AssetsService) GetAllAsset(userId int64) ([]*entity.Assets, error
 
 func (service *AssetsService) SetRole(assetId int64) error {
 	db := service.repo.GetDB()
-	users := service.userRepository.GetAllUser()
 	assets, err := service.repo.GetAssetById(assetId)
 	if err != nil {
 		return err
 	}
+	users := service.userRepository.GetAllUser(assets.CompanyId)
 	for _, user := range users {
 		if service.roleRepository.GetSlugByRoleId(user.RoleId) == "department-head" && user.IsHeadDepartment {
 			if assets.DepartmentId == *user.DepartmentId {
