@@ -77,7 +77,9 @@ func (service *AssignmentService) Update(userId, assignmentId int64, userIdAssig
 	if err != nil {
 		return nil, err
 	}
-
+	if asset.Status == "Under Maintenance" {
+		return nil, fmt.Errorf("The asset is under maintenance.")
+	}
 	tx := service.Repo.GetDB().Begin()
 	defer func() {
 		if r := recover(); r != nil {
@@ -104,6 +106,7 @@ func (service *AssignmentService) Update(userId, assignmentId int64, userIdAssig
 			Action:    "Transfer",
 			AssetId:   asset.Id,
 			ByUserId:  &byUser.Id,
+			CompanyId: assignUser.CompanyId,
 		}
 		department, err := service.departmentRepo.GetDepartmentById(*departmentId)
 		if err != nil {
@@ -126,6 +129,7 @@ func (service *AssignmentService) Update(userId, assignmentId int64, userIdAssig
 			Action:    "Transfer",
 			AssetId:   asset.Id,
 			ByUserId:  &byUser.Id,
+			CompanyId: assignUser.CompanyId,
 		}
 		assetLog.AssignUserId = &assignUser.Id
 		assetLog.ChangeSummary += fmt.Sprintf("Transfer from user: %v to user: %v\n",

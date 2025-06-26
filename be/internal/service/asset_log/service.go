@@ -45,6 +45,7 @@ func (service *AssetLogService) Filter(userId int64, assetId int64, action, star
 			filter.DepId = userCheck.DepartmentId
 		}
 	}
+	filter.CompanyId = userCheck.CompanyId
 
 	db := service.repo.GetDB()
 	dbFilter := filter.ApplyFilter(db.Model(&entity.AssetLog{}), assetId)

@@ -115,7 +115,6 @@
     @apply border-border outline-ring/50;
   }
 
-  /* Disable all transitions khi switch theme */
   html.theme-switching * {
     transition: none !important;
     animation: none !important;

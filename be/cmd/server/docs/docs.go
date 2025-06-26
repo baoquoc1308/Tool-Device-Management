@@ -224,6 +224,11 @@ const docTemplate = `{
                     },
                     {
                         "type": "integer",
+                        "name": "companyId",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
                         "name": "depId",
                         "in": "query"
                     },
@@ -314,6 +319,11 @@ const docTemplate = `{
                     {
                         "type": "string",
                         "name": "categoryId",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "name": "companyId",
                         "in": "query"
                     },
                     {
@@ -658,6 +668,11 @@ const docTemplate = `{
                     {
                         "type": "string",
                         "name": "assetName",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "name": "companyId",
                         "in": "query"
                     },
                     {
@@ -1022,6 +1037,82 @@ const docTemplate = `{
                     "Categories"
                 ],
                 "summary": "Delete category",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "id",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Authorization",
+                        "name": "Authorization",
+                        "in": "header",
+                        "required": true
+                    }
+                ],
+                "responses": {}
+            }
+        },
+        "/api/company": {
+            "post": {
+                "security": [
+                    {
+                        "JWT": []
+                    }
+                ],
+                "description": "Create Company",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Company"
+                ],
+                "summary": "Create Company",
+                "parameters": [
+                    {
+                        "description": "Data",
+                        "name": "department",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/dto.CreateCompanyRequest"
+                        }
+                    },
+                    {
+                        "type": "string",
+                        "description": "Authorization",
+                        "name": "Authorization",
+                        "in": "header",
+                        "required": true
+                    }
+                ],
+                "responses": {}
+            }
+        },
+        "/api/company/{id}": {
+            "get": {
+                "security": [
+                    {
+                        "JWT": []
+                    }
+                ],
+                "description": "Create Company by id",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Company"
+                ],
+                "summary": "Get Company by id",
                 "parameters": [
                     {
                         "type": "string",
@@ -1642,6 +1733,11 @@ const docTemplate = `{
                 "parameters": [
                     {
                         "type": "integer",
+                        "name": "companyId",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
                         "name": "depId",
                         "in": "query"
                     },
@@ -1981,13 +2077,24 @@ const docTemplate = `{
                 "summary": "Update Information",
                 "parameters": [
                     {
-                        "description": "Data",
-                        "name": "Information",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/dto.UpdateInformationUserRequest"
-                        }
+                        "type": "string",
+                        "description": "firstName",
+                        "name": "firstName",
+                        "in": "formData",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "lastName",
+                        "name": "lastName",
+                        "in": "formData",
+                        "required": true
+                    },
+                    {
+                        "type": "file",
+                        "description": "avatar to upload",
+                        "name": "avatar",
+                        "in": "formData"
                     },
                     {
                         "type": "string",
@@ -2404,6 +2511,17 @@ const docTemplate = `{
                 }
             }
         },
+        "dto.CreateCompanyRequest": {
+            "type": "object",
+            "properties": {
+                "companyName": {
+                    "type": "string"
+                },
+                "email": {
+                    "type": "string"
+                }
+            }
+        },
         "dto.CreateDepartmentRequest": {
             "type": "object",
             "required": [
@@ -2483,25 +2601,6 @@ const docTemplate = `{
             "properties": {
                 "residualValue": {
                     "type": "number"
-                }
-            }
-        },
-        "dto.UpdateInformationUserRequest": {
-            "type": "object",
-            "required": [
-                "firstName",
-                "lastName"
-            ],
-            "properties": {
-                "firstName": {
-                    "type": "string",
-                    "maxLength": 30,
-                    "minLength": 2
-                },
-                "lastName": {
-                    "type": "string",
-                    "maxLength": 30,
-                    "minLength": 2
                 }
             }
         },

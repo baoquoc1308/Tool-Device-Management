@@ -1,8 +1,9 @@
 import { Card, CardContent, CardFooter, CardHeader, CardTitle, Button } from '@/components/ui'
 import { ArrowLeft } from 'lucide-react'
-import { Link } from 'react-router-dom'
+import { useNavigate } from 'react-router-dom'
 
 export const NoAsset = ({ id }: { id: string }) => {
+  const navigate = useNavigate()
   return (
     <div className='container mx-auto px-4 py-8'>
       <Card className='border-destructive'>
@@ -13,12 +14,10 @@ export const NoAsset = ({ id }: { id: string }) => {
           <p>We couldn't find the asset with ID: {id}</p>
         </CardContent>
         <CardFooter>
-          <Link to='/assets'>
-            <Button>
-              <ArrowLeft className='mr-2 h-4 w-4' />
-              Back to Assets
-            </Button>
-          </Link>
+          <Button onClick={() => navigate(-1)}>
+            <ArrowLeft className='mr-2 h-4 w-4' />
+            Back to Assets
+          </Button>
         </CardFooter>
       </Card>
     </div>

@@ -6,6 +6,7 @@ import (
 	"BE_Manage_device/internal/domain/dto"
 	"BE_Manage_device/internal/domain/entity"
 	service "BE_Manage_device/internal/service/departments"
+	"BE_Manage_device/pkg/utils"
 
 	"BE_Manage_device/pkg"
 	"encoding/json"
@@ -28,7 +29,7 @@ func NewDepartmentsHandler(service *service.DepartmentsService) *DepartmentsHand
 	return &DepartmentsHandler{service: service}
 }
 
-// User godoc
+// Department godoc
 // @Summary      Create departments
 // @Description  Create departments
 // @Tags         Departments
@@ -43,12 +44,13 @@ func NewDepartmentsHandler(service *service.DepartmentsService) *DepartmentsHand
 // @Security JWT
 func (h *DepartmentsHandler) Create(c *gin.Context) {
 	defer pkg.PanicHandler(c)
+	userId := utils.GetUserIdFromContext(c)
 	var request dto.CreateDepartmentRequest
 	if err := c.ShouldBindJSON(&request); err != nil {
 		log.Error("Happened error when mapping request from FE. Error", err)
 		pkg.PanicExeption(constant.InvalidRequest, "Happened error when mapping request from FE.")
 	}
-	department, err := h.service.Create(request.DepartmentName, request.LocationId)
+	department, err := h.service.Create(userId, request.DepartmentName, request.LocationId)
 	if err != nil {
 		log.Error("Happened error when create department. Error", err)
 		pkg.PanicExeption(constant.UnknownError, "Happened error when create department")
@@ -76,6 +78,7 @@ func (h *DepartmentsHandler) Create(c *gin.Context) {
 // @Security JWT
 func (h *DepartmentsHandler) GetAll(c *gin.Context) {
 	defer pkg.PanicHandler(c)
+	userId := utils.GetUserIdFromContext(c)
 	var departments []*entity.Departments
 	val, err := config.Rdb.Get(config.Ctx, cacheKeyDepartment).Result()
 	if err == nil {
@@ -91,7 +94,7 @@ func (h *DepartmentsHandler) GetAll(c *gin.Context) {
 			pkg.PanicExeption(constant.UnknownError, "Happened error when get all departments in redis")
 		}
 	} else {
-		departments, err = h.service.GetAll()
+		departments, err = h.service.GetAll(userId)
 		if err != nil {
 			log.Error("Happened error when get all departments. Error", err)
 			pkg.PanicExeption(constant.UnknownError, "Happened error when get all departments")

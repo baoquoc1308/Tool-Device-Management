@@ -21,22 +21,18 @@ const initialState: ThemeState = {
   mode: getInitialTheme(),
 }
 
-// Enhanced DOM manipulation để tránh flash hoàn toàn
 const updateDOMTheme = (mode: ThemeMode) => {
   if (typeof window !== 'undefined') {
     const html = document.documentElement
 
-    // Add class để disable all transitions
     html.classList.add('theme-switching')
 
-    // Update theme immediately
     if (mode === 'dark') {
       html.classList.add('dark')
     } else {
       html.classList.remove('dark')
     }
 
-    // Remove class để re-enable transitions sau 150ms
     setTimeout(() => {
       html.classList.remove('theme-switching')
     }, 150)

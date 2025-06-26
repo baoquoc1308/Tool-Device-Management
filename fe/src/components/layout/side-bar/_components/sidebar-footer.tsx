@@ -14,11 +14,13 @@ import {
 import { UserAvatar } from '@/features/user'
 import { useAppSelector } from '@/hooks'
 import { SignOut } from '@/features/auth'
+import { EditProfileMenuItem } from '@/features/user/edit-profile'
 import { DarkModeToggle } from '@/features/theme'
 
 export function NavUser() {
   const { isMobile } = useSidebar()
   const user = useAppSelector((state) => state.auth.user)
+
   return (
     <SidebarMenu>
       <SidebarMenuItem>
@@ -55,6 +57,9 @@ export function NavUser() {
               </div>
             </DropdownMenuLabel>
             <DropdownMenuSeparator />
+            <DropdownMenuItem>
+              <EditProfileMenuItem />
+            </DropdownMenuItem>
             <DropdownMenuItem>
               <SignOut />
             </DropdownMenuItem>

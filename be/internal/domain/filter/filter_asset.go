@@ -15,6 +15,7 @@ type AssetFilter struct {
 	SerialNumber *string `form:"serialNumber" json:"serialNumber"`
 	Email        *string `form:"email" json:"email"`
 	DepartmentId *string `form:"departmentId" json:"departmentId"`
+	CompanyId    int64
 }
 
 type AssetFilterDashboard struct {
@@ -25,6 +26,7 @@ type AssetFilterDashboard struct {
 }
 
 func (f *AssetFilter) ApplyFilter(db *gorm.DB, userId int64) *gorm.DB {
+	db.Where("assets.company_id  = ?", f.CompanyId)
 	db = db.Joins("JOIN user_rbacs on user_rbacs.asset_id = assets.id").
 		Joins("JOIN roles on roles.id = user_rbacs.role_id").
 		Joins("JOIN role_permissions on role_permissions.role_id = roles.id").

@@ -6,6 +6,7 @@ import (
 	assetLogS "BE_Manage_device/internal/service/asset_log"
 	assignmentS "BE_Manage_device/internal/service/assignment"
 	categoriesS "BE_Manage_device/internal/service/categories"
+	company "BE_Manage_device/internal/service/company"
 	departmentS "BE_Manage_device/internal/service/departments"
 	emailS "BE_Manage_device/internal/service/email"
 	locationS "BE_Manage_device/internal/service/location"
@@ -29,6 +30,7 @@ type Services struct {
 	MaintenanceSchedules *maintenanceSchedulesS.MaintenanceSchedulesService
 	Notification         *notificationS.NotificationService
 	Email                *emailS.EmailService
+	Company              *company.CompanyService
 }
 
 func NewServices(repos *repository.Repository, emailPass string) *Services {
@@ -47,9 +49,9 @@ func NewServices(repos *repository.Repository, emailPass string) *Services {
 	return &Services{
 		User:                 userS.NewUserService(repos.User, emailService, repos.UserSession, repos.Role, repos.Assets, repos.UserRBAC),
 		Location:             locationS.NewLocationService(repos.Location),
-		Categories:           categoriesS.NewCategoriesService(repos.Categories),
-		Department:           departmentS.NewDepartmentsService(repos.Department),
-		Assets:               assetS.NewAssetsService(repos.Assets, repos.AssetsLog, repos.Role, repos.UserRBAC, repos.User, repos.Assignment, repos.Department, notificationService),
+		Categories:           categoriesS.NewCategoriesService(repos.Categories, repos.User, repos.Company),
+		Department:           departmentS.NewDepartmentsService(repos.Department, repos.User, repos.Company),
+		Assets:               assetS.NewAssetsService(repos.Assets, repos.AssetsLog, repos.Role, repos.UserRBAC, repos.User, repos.Assignment, repos.Department, notificationService, repos.Company),
 		Role:                 roleS.NewRoleService(repos.Role),
 		Assignment:           assignmentService,
 		AssetLog:             assetLogS.NewAssetLogService(repos.AssetsLog, repos.User, repos.Role, repos.Assets),
@@ -57,5 +59,6 @@ func NewServices(repos *repository.Repository, emailPass string) *Services {
 		MaintenanceSchedules: maintenanceSchedulesS.NewMaintenanceSchedulesService(repos.MaintenanceSchedules, repos.Assets, repos.User, notificationService),
 		Notification:         notificationService,
 		Email:                emailService,
+		Company:              company.NewCompanyService(repos.Company),
 	}
 }

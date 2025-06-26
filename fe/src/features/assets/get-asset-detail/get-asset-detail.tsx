@@ -91,6 +91,7 @@ const GetAssetDetail = () => {
             <Button
               variant='ghost'
               className='mr-4'
+              onClick={() => navigate(-1)}
             >
               <ArrowLeft className='h-5 w-5' />
             </Button>
@@ -125,12 +126,10 @@ const GetAssetDetail = () => {
         )}
       </div>
 
-      {/* Using grid layout with equal height rows */}
       <div
         className='grid grid-cols-1 gap-6 lg:grid-cols-3'
         style={{ gridAutoRows: '1fr' }}
       >
-        {/* First column - Asset Information */}
         <div className='flex flex-col gap-6 lg:col-span-2'>
           <Card className='w-full'>
             <CardHeader>
@@ -142,7 +141,6 @@ const GetAssetDetail = () => {
             </CardContent>
           </Card>
 
-          {/* Asset History Log */}
           {role !== 'viewer' &&
             role !== 'departmentHead' &&
             (role === 'admin' ||
@@ -165,7 +163,6 @@ const GetAssetDetail = () => {
           )}
         </div>
 
-        {/* Second column - Tabs Container */}
         <div className='flex'>
           <Tabs
             defaultValue='image'
@@ -192,7 +189,6 @@ const GetAssetDetail = () => {
               </TabsTrigger>
             </TabsList>
 
-            {/* Tab content with flex-grow to fill available space */}
             <TabsContent
               value='image'
               className='flex flex-grow'

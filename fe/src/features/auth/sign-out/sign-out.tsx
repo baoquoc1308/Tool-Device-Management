@@ -31,7 +31,7 @@ const SignOut = () => {
   return (
     <div
       onClick={handleSignOut}
-      className='flex w-full cursor-pointer items-center gap-2 rounded-md p-2 text-sm'
+      className='flex w-full cursor-pointer items-center gap-2 rounded-md p-1 text-sm'
     >
       <LogOut />
       {isPending ? <LoadingSpinner className='' /> : 'Sign Out'}

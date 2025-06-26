@@ -10,6 +10,7 @@ type AssetLog struct {
 	ByUserId      *int64    `json:"byUser"`
 	AssetId       int64     `json:"assetId"`
 	ChangeSummary string    `json:"changeSummary"`
+	CompanyId     int64     `json:"-"`
 	ByUser        *Users    `gorm:"foreignKey:ByUserId;references:Id"`
 	AssignUser    *Users    `gorm:"foreignKey:AssignUserId;references:Id"`
 	Asset         Assets    `gorm:"foreignKey:AssetId;references:Id"`

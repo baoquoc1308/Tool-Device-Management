@@ -278,6 +278,7 @@ func CheckAndSenMaintenanceNotification(db *gorm.DB, emailNotifier interfaces.Em
 				ChangeSummary: fmt.Sprintf("Asset %d has started maintenance", asset.Id),
 				Timestamp:     time.Now(),
 				Action:        "Maintenance",
+				CompanyId:     asset.CompanyId,
 			}
 			if _, err := assetLogRepo.Create(&assetLog, tx); err != nil {
 				return fmt.Errorf("error create asset log: %w", err)
@@ -369,6 +370,7 @@ func UpdateStatusWhenFinishMaintenance(db *gorm.DB, assetRepo asset.AssetsReposi
 				ChangeSummary: fmt.Sprintf("Asset %d has started maintenance", a.Id),
 				Timestamp:     time.Now(),
 				Action:        "Maintenance",
+				CompanyId:     a.CompanyId,
 			}
 			if _, err := assetLogRepo.Create(&assetLog, assetLogRepo.GetDB()); err != nil {
 				log.Printf("❌ Error create asset log ")
@@ -476,4 +478,12 @@ func SendEmailsForWarrantyExpiry(db *gorm.DB, emailNotifier interfaces.EmailNoti
 
 func PtrInt64(i int64) *int64 {
 	return &i
+}
+
+func GetSuffixEmail(email string) string {
+	parts := strings.Split(email, "@")
+	if len(parts) != 2 {
+		return ""
+	}
+	return parts[1]
 }

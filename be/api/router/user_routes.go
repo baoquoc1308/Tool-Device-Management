@@ -17,7 +17,7 @@ func registerUserRoutes(api *gin.RouterGroup, h *handler.UserHandler, session re
 	api.GET("/user/session", h.Session)
 	api.POST("/auth/logout", h.Logout)
 	api.GET("/users", h.GetAllUser)
-	api.PATCH("/users/information", h.UpdateInformationUser)
+	api.PATCH("/user/information", h.UpdateInformationUser)
 	api.PATCH("/users/role", middleware.RequirePermission([]string{"role-assignment"}, nil, db), h.UpdateRoleUser)
 	api.PATCH("/user/department", middleware.RequirePermission([]string{"user-management"}, nil, db), h.UpdateDepartment)
 	api.PATCH("/user/head-department/:user_id", middleware.RequirePermission([]string{"user-management"}, nil, db), h.UpdateHeadDep)
