@@ -6,6 +6,7 @@ import (
 	assetLogS "BE_Manage_device/internal/service/asset_log"
 	assignmentS "BE_Manage_device/internal/service/assignment"
 	categoriesS "BE_Manage_device/internal/service/categories"
+	company "BE_Manage_device/internal/service/company"
 	departmentS "BE_Manage_device/internal/service/departments"
 	emailS "BE_Manage_device/internal/service/email"
 	locationS "BE_Manage_device/internal/service/location"
@@ -29,6 +30,7 @@ type Services struct {
 	MaintenanceSchedules *maintenanceSchedulesS.MaintenanceSchedulesService
 	Notification         *notificationS.NotificationService
 	Email                *emailS.EmailService
+	Company              *company.CompanyService
 }
 
 func NewServices(repos *repository.Repository, emailPass string) *Services {
@@ -57,5 +59,6 @@ func NewServices(repos *repository.Repository, emailPass string) *Services {
 		MaintenanceSchedules: maintenanceSchedulesS.NewMaintenanceSchedulesService(repos.MaintenanceSchedules, repos.Assets, repos.User, notificationService),
 		Notification:         notificationService,
 		Email:                emailService,
+		Company:              company.NewCompanyService(repos.Company),
 	}
 }

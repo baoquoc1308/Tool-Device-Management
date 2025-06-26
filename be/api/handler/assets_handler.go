@@ -268,7 +268,7 @@ func (h *AssetsHandler) Update(c *gin.Context) {
 		cost,
 	)
 	if err != nil {
-		pkg.PanicExeption(constant.InvalidRequest, "Failed to update asset")
+		pkg.PanicExeption(constant.InvalidRequest, err.Error())
 	}
 	asset, err := h.service.GetAssetById(userId, assetUpdate.Id)
 	if err != nil {
@@ -334,7 +334,7 @@ func (h *AssetsHandler) GetAssetById(c *gin.Context) {
 	}
 	asset, err := h.service.GetAssetById(userId, assetId)
 	if err != nil {
-		log.Error("Happened error when get asset by id. Error", err)
+		log.Error("Happened error when get asset by id. Error", err.Error())
 		pkg.PanicExeption(constant.UnknownError, "Happened error when get asset by id")
 	}
 	assetResponse := dto.AssetResponse{

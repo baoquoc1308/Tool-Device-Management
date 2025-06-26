@@ -77,7 +77,9 @@ func (service *AssignmentService) Update(userId, assignmentId int64, userIdAssig
 	if err != nil {
 		return nil, err
 	}
-
+	if asset.Status == "Under Maintenance" {
+		return nil, fmt.Errorf("The asset is under maintenance.")
+	}
 	tx := service.Repo.GetDB().Begin()
 	defer func() {
 		if r := recover(); r != nil {

@@ -404,7 +404,9 @@ func (h *UserHandler) GetAllUser(c *gin.Context) {
 // @Tags         Users
 // @Accept       json
 // @Produce      json
-// @Param        Information   body    dto.UpdateInformationUserRequest   true  "Data"
+// @Param firstName formData string true "firstName"
+// @Param lastName formData string true "lastName"
+// @Param image formData file false "Image to upload"
 // @param Authorization header string true "Authorization"
 // @Router       /api/user/information [PATCH]
 // @Success      200   {object}  dto.ApiResponseSuccessStruct
@@ -416,12 +418,15 @@ func (h *UserHandler) GetAllUser(c *gin.Context) {
 func (h *UserHandler) UpdateInformationUser(c *gin.Context) {
 	defer pkg.PanicHandler(c)
 	userId := utils.GetUserIdFromContext(c)
-	var request dto.UpdateInformationUserRequest
-	if err := c.ShouldBindJSON(&request); err != nil {
-		log.Error("Happened error when mapping request from FE. Error", err)
-		pkg.PanicExeption(constant.InvalidRequest)
+	firstName := c.PostForm("firstName")
+	lastName := c.PostForm("lastName")
+	image, err := c.FormFile("avatar")
+	var userUpdated *entity.Users
+	if err != nil {
+		userUpdated, err = h.service.UpdateInformation(userId, firstName, lastName, nil)
+	} else {
+		userUpdated, err = h.service.UpdateInformation(userId, firstName, lastName, image)
 	}
-	userUpdated, err := h.service.UpdateInformation(userId, request.FirstName, request.LastName)
 	if err != nil {
 		log.Error("Happened error when update information user. Error", err)
 		pkg.PanicExeption(constant.UnknownError, err.Error())
