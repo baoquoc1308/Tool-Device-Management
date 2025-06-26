@@ -6,7 +6,7 @@ export const ButtonCancel = ({ isPending }: { isPending: boolean }) => {
   return (
     <Button
       variant='outline'
-      onClick={() => navigate('/assets')}
+      onClick={() => navigate(-1)}
       disabled={isPending}
     >
       Cancel

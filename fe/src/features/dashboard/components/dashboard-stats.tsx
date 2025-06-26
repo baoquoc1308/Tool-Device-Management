@@ -23,9 +23,17 @@ const renderCustomizedLabel = ({ cx, cy, midAngle, outerRadius, percent, fill }:
   if (percent < 0.02 || !showLabels) return null
 
   const RADIAN = Math.PI / 180
-  const isSmallScreen = window.innerWidth < 360
-  const labelRadius = isSmallScreen ? outerRadius + 35 : outerRadius + 50
-  const lineEndOffset = isSmallScreen ? 30 : 45
+  const screenWidth = window.innerWidth
+
+  const getResponsiveConfig = () => {
+    if (screenWidth < 360) return { labelRadius: outerRadius + 25, lineEndOffset: 20 }
+    if (screenWidth < 640) return { labelRadius: outerRadius + 30, lineEndOffset: 25 }
+    if (screenWidth < 1024) return { labelRadius: outerRadius + 28, lineEndOffset: 25 }
+    if (screenWidth < 1440) return { labelRadius: outerRadius + 35, lineEndOffset: 33 }
+    return { labelRadius: outerRadius + 40, lineEndOffset: 38 }
+  }
+
+  const { labelRadius, lineEndOffset } = getResponsiveConfig()
 
   const radius = labelRadius
   const x = cx + radius * Math.cos(-midAngle * RADIAN)
