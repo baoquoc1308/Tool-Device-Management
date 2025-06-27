@@ -25,11 +25,16 @@ func NewRequestTransferService(repo request_transfer.RequestTransferRepository, 
 }
 
 func (service *RequestTransferService) Create(userId int64, categoryId int64, description string) (*entity.RequestTransfer, error) {
+	user, err := service.userRepo.FindByUserId(userId)
+	if err != nil {
+		return nil, err
+	}
 	requestTransfer := entity.RequestTransfer{
 		UserId:      userId,
 		CategoryId:  categoryId,
 		Status:      "Pending",
 		Description: description,
+		CompanyId:   user.CompanyId,
 	}
 	requestTransferCreate, err := service.repo.Create(&requestTransfer)
 	if err != nil {
