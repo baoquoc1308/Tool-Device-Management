@@ -16,6 +16,7 @@ import {
   CreateNewRequestTransferPage,
   ViewAllMaintenanceSchedulePage,
   CreateAssetMaintenanceSchedulePage,
+  AssetComparisonPage,
 } from '@/pages/dashboard'
 import { ProtectedRoute, AuthRoute } from './auth-guard'
 import Layout from '@/layout/layout'
@@ -56,6 +57,10 @@ export const router = createBrowserRouter([
               {
                 path: 'update/:id',
                 element: <UpdateAssetPage />,
+              },
+              {
+                path: 'asset-comparison',
+                element: <AssetComparisonPage />,
               },
               {
                 path: 'maintenance-schedule',
@@ -146,3 +151,13 @@ export const router = createBrowserRouter([
     ],
   },
 ])
+export const AppPaths = {
+  DASHBOARD: '/dashboard',
+  ASSETS: '/assets',
+  ASSET_COMPARISON: '/assets/asset-comparison',
+  CREATE_ASSET: '/assets/create-asset',
+  ASSIGNMENTS: '/assignments',
+  TRANSFERS: '/transfers',
+  LOGIN: '/login',
+  SIGNUP: '/signup',
+} as const

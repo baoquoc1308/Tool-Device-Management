@@ -6,7 +6,7 @@ import { SidebarMenuButton, useSidebar } from '@/components/ui/sidebar'
 export const DarkModeToggle = () => {
   const dispatch = useAppDispatch()
   const theme = useAppSelector((state) => state.theme.mode)
-  const { state } = useSidebar()
+  const { state, isMobile } = useSidebar()
   const isDark = theme === 'dark'
   const isCollapsed = state === 'collapsed'
 
@@ -14,20 +14,22 @@ export const DarkModeToggle = () => {
     dispatch(toggleTheme())
   }
 
+  const showText = isMobile || !isCollapsed
+
   return (
     <SidebarMenuButton
       onClick={handleToggle}
       className='w-full justify-between'
-      tooltip={isCollapsed ? 'Toggle dark mode' : undefined}
+      tooltip={!showText ? 'Toggle dark mode' : undefined}
     >
       <div className='flex items-center gap-2'>
         <Palette className='h-4 w-4' />
-        {!isCollapsed && <span>Dark mode</span>}
+        {showText && <span className='text-sm sm:text-base'>Dark mode</span>}
       </div>
-      {!isCollapsed && (
+      {showText && (
         <div
           className={`relative h-5 w-9 rounded-full transition-colors duration-100 ${
-            isDark ? 'bg-primary' : 'bg-muted'
+            isDark ? 'bg-primary' : 'bg-gray-300'
           }`}
         >
           <div
