@@ -95,13 +95,15 @@ func Int64Ptr(i int64) *int64 {
 	return &i
 }
 
-var users = []entity.Users{{FirstName: "Admin",
-	LastName:  "Admin",
-	RoleId:    1,
-	Email:     "admin@gmail.com",
-	Password:  "$2a$10$uD2Sp/ceVMQs.Fxa9883Lejcy4QSiEsWFIihuosOkCqwQaCrs011.",
-	IsActive:  true,
-	CompanyId: 1},
+var users = []entity.Users{
+	{FirstName: "Admin",
+		LastName:  "Admin",
+		RoleId:    1,
+		Email:     "admin@gmail.com",
+		Password:  "$2a$10$uD2Sp/ceVMQs.Fxa9883Lejcy4QSiEsWFIihuosOkCqwQaCrs011.",
+		IsActive:  true,
+		CompanyId: 1,
+	},
 	{FirstName: "Manager",
 		LastName:       "asset 1",
 		RoleId:         2,
@@ -210,6 +212,69 @@ var users = []entity.Users{{FirstName: "Admin",
 		DepartmentId: Int64Ptr(4),
 		CompanyId:    1,
 	},
+
+	{FirstName: "Admin",
+		LastName:  "Admin",
+		RoleId:    1,
+		Email:     "admin@einrot.com",
+		Password:  "$2a$10$uD2Sp/ceVMQs.Fxa9883Lejcy4QSiEsWFIihuosOkCqwQaCrs011.",
+		IsActive:  true,
+		CompanyId: 2,
+	},
+	{FirstName: "Manager",
+		LastName:       "asset 1",
+		RoleId:         2,
+		Email:          "ManagerAsset1@einrot.com",
+		Password:       "$2a$10$Rkga1eAiQ4xSFSfIA.ZFyuraVz8lAE7/d.OsrVHb8Cd2J/KoVnkWu",
+		IsActive:       true,
+		DepartmentId:   Int64Ptr(5),
+		IsAssetManager: true,
+		CompanyId:      2},
+	{FirstName: "Manager",
+		LastName:       "asset 2",
+		RoleId:         2,
+		Email:          "ManagerAsset2@einrot.com",
+		Password:       "$2a$10$AGvvpScnwlpreNybde2RYOu3YwXWR5upqH4CYgY4kyrR9IUOS/2SC",
+		IsActive:       true,
+		DepartmentId:   Int64Ptr(6),
+		IsAssetManager: true,
+		CompanyId:      2},
+	{FirstName: "Head",
+		LastName:         "Department 1",
+		RoleId:           3,
+		Email:            "HeadDepartment1@einrot.com",
+		Password:         "$2a$10$6FvD1M1qmg77Us8nURZJLu/aAL5b.nmazfg5vWTjF7uyUt4ysnVRC",
+		IsActive:         true,
+		DepartmentId:     Int64Ptr(5),
+		IsHeadDepartment: true,
+		CompanyId:        2},
+	{FirstName: "Head",
+		LastName:         "Department 2",
+		RoleId:           3,
+		Email:            "HeadDepartment2@einrot.com",
+		Password:         "$2a$10$5FwA7C7XsyrWP0hW5CXtfOx8bpLT8aGso6SZbIlMtdVNvvJA/KxWe",
+		IsActive:         true,
+		DepartmentId:     Int64Ptr(6),
+		IsHeadDepartment: true,
+		CompanyId:        2},
+	{FirstName: "Viewer",
+		LastName:     "Department 1",
+		RoleId:       4,
+		Email:        "ViewerDepartment1@einrot.com",
+		Password:     "$2a$10$HpKZlAE1EgXm2qSVUzDNY.Jl21nJdJoJF9N8Eo2h07WrFpKgd3hE6",
+		IsActive:     true,
+		DepartmentId: Int64Ptr(5),
+		CompanyId:    2,
+	},
+	{FirstName: "Viewer",
+		LastName:     "Department 2",
+		RoleId:       4,
+		Email:        "ViewerDepartment2@einrot.com",
+		Password:     "$2a$10$FbSLfcYefGmoqUFZWxIF2.TPb3ujjSsHCKhSYMP86VpEYozx6JCr6",
+		IsActive:     true,
+		DepartmentId: Int64Ptr(6),
+		CompanyId:    2,
+	},
 }
 
 var locations = []entity.Locations{
@@ -220,6 +285,12 @@ var departments = []entity.Departments{
 	{LocationId: 1, DepartmentName: "PG2", CompanyId: 1},
 	{LocationId: 1, DepartmentName: "PG3", CompanyId: 1},
 	{LocationId: 1, DepartmentName: "PG4", CompanyId: 1},
+	{LocationId: 1, DepartmentName: "EN1", CompanyId: 2},
+	{LocationId: 1, DepartmentName: "EN2", CompanyId: 2},
+}
+var company = []entity.Company{
+	{CompanyName: "Google", Email: "gmail.com"},
+	{CompanyName: "einrot", Email: "einrot.com"},
 }
 
 func ConnectToDB() *gorm.DB {
@@ -246,6 +317,10 @@ func ConnectToDB() *gorm.DB {
 	err = db.AutoMigrate(&entity.Roles{}, &entity.Permission{}, &entity.RolePermission{}, &entity.Users{}, &entity.UsersSessions{}, &entity.UserRbac{}, &entity.Locations{}, &entity.Departments{}, &entity.Categories{}, &entity.Assets{}, &entity.AssetLog{}, &entity.Assignments{}, &entity.RequestTransfer{}, &entity.Notifications{}, &entity.MaintenanceSchedules{}, &entity.MaintenanceNotifications{}, &entity.Company{})
 	if err != nil {
 		log.Fatal("Error migrate to database. Error:", err)
+	}
+	for _, company := range company {
+		var existing entity.Company
+		db.Where("company_name = ?", existing.CompanyName).FirstOrCreate(&existing, company)
 	}
 
 	for _, role := range roles {

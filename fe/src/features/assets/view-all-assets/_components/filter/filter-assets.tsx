@@ -3,7 +3,7 @@ import { Button } from '@/components/ui'
 import { FilterX } from 'lucide-react'
 import type { FilterType } from '../../model'
 import type { AssetsType } from '../../model'
-import { ExportButton } from '../../../../dashboard/components/export-button'
+import { ExportAssets } from '@/components/ui/export/export-assets'
 
 import { AssetNameInputFilter, CategoriesFilter, DepartmentsFilter, StatusFilter } from './_components'
 
@@ -66,17 +66,10 @@ export const FilterAssets = ({
             Clear filters
           </Button>
           {showExportButtons && (
-            <>
-              <ExportButton
-                format='csv'
-                assets={assets}
-              />
-
-              <ExportButton
-                format='pdf'
-                assets={assets}
-              />
-            </>
+            <ExportAssets
+              assets={assets}
+              type='all-assets'
+            />
           )}
         </div>
       </div>
