@@ -32,6 +32,7 @@ import {
 } from './_components'
 import { ViewAssetLog } from '../view-asset-log'
 import { toast } from 'sonner'
+import { CompareSimilarAssets } from './_components/compare-similar-assets'
 
 const GetAssetDetail = () => {
   const { id } = useParams()
@@ -84,27 +85,41 @@ const GetAssetDetail = () => {
   }
 
   return (
-    <div className='container mx-auto px-4 py-8'>
-      <div className='mb-6 flex items-center justify-between'>
+    <div className='container mx-auto px-4 py-4 sm:py-8'>
+      <div className='mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between'>
         <div className='flex items-center'>
           <Link to='/assets'>
             <Button
               variant='ghost'
-              className='mr-4'
+              className='mr-2 sm:mr-4'
               onClick={() => navigate(-1)}
             >
               <ArrowLeft className='h-5 w-5' />
             </Button>
           </Link>
-          <h1 className='text-3xl font-semibold'>{asset.assetName}</h1>
-          <AssetBadge asset={asset} />
+          <div className='flex flex-col sm:flex-row sm:items-center sm:gap-2'>
+            <h1 className='text-xl font-semibold sm:text-2xl lg:text-3xl'>{asset.assetName}</h1>
+            <AssetBadge asset={asset} />
+          </div>
         </div>
+
         {asset.status !== 'Disposed' && canEditAsset() && (
-          <div className='flex items-center space-x-2'>
-            <Link to={`/assets/update/${id}`}>
-              <Button variant='outline'>
-                <Pencil className='mr-2 h-4 w-4' />
-                Update Asset
+          <div className='flex flex-col gap-2 sm:flex-row sm:items-center sm:space-x-2'>
+            <CompareSimilarAssets
+              currentAsset={asset}
+              className='flex-1'
+            />
+            <Link
+              to={`/assets/update/${id}`}
+              className='flex-1'
+            >
+              <Button
+                variant='outline'
+                className='w-full'
+              >
+                <Pencil className='mr-1 h-4 w-4' />
+                <span className='hidden sm:inline'>Update Asset</span>
+                <span className='sm:hidden'>Update</span>
               </Button>
             </Link>
 
@@ -112,13 +127,15 @@ const GetAssetDetail = () => {
               variant='destructive'
               onClick={deletingAsset}
               disabled={isDeleting}
+              className='flex-1'
             >
               {isDeleting ? (
                 <LoadingSpinner className='mr-2 h-4 w-4 animate-spin' />
               ) : (
                 <>
-                  <Trash2 className='mr-2 h-4 w-4' />
-                  Delete Asset
+                  <Trash2 className='mr-1 h-4 w-4' />
+                  <span className='hidden sm:inline'>Delete Asset</span>
+                  <span className='sm:hidden'>Delete</span>
                 </>
               )}
             </Button>
@@ -126,17 +143,14 @@ const GetAssetDetail = () => {
         )}
       </div>
 
-      <div
-        className='grid grid-cols-1 gap-6 lg:grid-cols-3'
-        style={{ gridAutoRows: '1fr' }}
-      >
-        <div className='flex flex-col gap-6 lg:col-span-2'>
+      <div className='grid grid-cols-1 gap-4 sm:gap-6 xl:grid-cols-3'>
+        <div className='flex flex-col gap-4 sm:gap-6 xl:col-span-2'>
           <Card className='w-full'>
             <CardHeader>
-              <CardTitle>Asset Information</CardTitle>
+              <CardTitle className='text-lg sm:text-xl'>Asset Information</CardTitle>
               <CardDescription>Details about the hardware asset</CardDescription>
             </CardHeader>
-            <CardContent className='space-y-6'>
+            <CardContent className='space-y-4 sm:space-y-6'>
               <AssetInformation asset={asset} />
             </CardContent>
           </Card>
@@ -151,7 +165,7 @@ const GetAssetDetail = () => {
             <Card className='w-full'>
               <div className='flex items-center justify-between'>
                 <CardHeader className='flex-1'>
-                  <CardTitle>Maintenance Schedule</CardTitle>
+                  <CardTitle className='text-lg sm:text-xl'>Maintenance Schedule</CardTitle>
                   <CardDescription>Upcoming and past maintenance schedules</CardDescription>
                 </CardHeader>
               </div>
@@ -163,27 +177,28 @@ const GetAssetDetail = () => {
           )}
         </div>
 
-        <div className='flex'>
+        <div className='flex xl:col-span-1'>
           <Tabs
             defaultValue='image'
             className='flex w-full flex-col'
           >
-            <TabsList className='w-full'>
+            <TabsList className='grid w-full grid-cols-3'>
               <TabsTrigger
                 value='image'
-                className='flex-1'
+                className='text-xs sm:text-sm'
               >
                 Image
               </TabsTrigger>
               <TabsTrigger
                 value='documents'
-                className='flex-1'
+                className='text-xs sm:text-sm'
               >
-                Documents
+                <span className='hidden sm:inline'>Documents</span>
+                <span className='sm:hidden'>Docs</span>
               </TabsTrigger>
               <TabsTrigger
                 value='qr'
-                className='flex-1'
+                className='text-xs sm:text-sm'
               >
                 QR
               </TabsTrigger>
@@ -191,10 +206,10 @@ const GetAssetDetail = () => {
 
             <TabsContent
               value='image'
-              className='flex flex-grow'
+              className='mt-2 flex flex-grow sm:mt-4'
             >
               <Card className='w-full'>
-                <CardContent className='flex h-full items-center justify-center py-4'>
+                <CardContent className='flex h-full min-h-[200px] items-center justify-center py-4 sm:min-h-[300px]'>
                   <AssetImage asset={asset} />
                 </CardContent>
               </Card>
@@ -202,10 +217,10 @@ const GetAssetDetail = () => {
 
             <TabsContent
               value='documents'
-              className='mt-4 flex flex-grow'
+              className='mt-2 flex flex-grow sm:mt-4'
             >
               <Card className='w-full'>
-                <CardContent className='flex h-full items-center justify-center py-4'>
+                <CardContent className='flex h-full min-h-[200px] items-center justify-center py-4 sm:min-h-[300px]'>
                   <AssetFile asset={asset} />
                 </CardContent>
               </Card>
@@ -213,10 +228,10 @@ const GetAssetDetail = () => {
 
             <TabsContent
               value='qr'
-              className='mt-4 flex flex-grow'
+              className='mt-2 flex flex-grow sm:mt-4'
             >
               <Card className='w-full'>
-                <CardContent className='flex h-full items-center justify-center py-4'>
+                <CardContent className='flex h-full min-h-[200px] items-center justify-center py-4 sm:min-h-[300px]'>
                   <AssetQR asset={asset} />
                 </CardContent>
               </Card>
