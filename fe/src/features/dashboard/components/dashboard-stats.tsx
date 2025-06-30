@@ -318,7 +318,7 @@ export const DashboardStats = ({ stats, assets, isPending }: DashboardStatsProps
               <div className='space-y-3 sm:space-y-4'>
                 {assets
                   .sort((a, b) => a.id - b.id)
-                  .slice(assets.length - 5, assets.length)
+                  .slice(0 - 5)
                   .reverse()
                   .map((asset) => (
                     <div

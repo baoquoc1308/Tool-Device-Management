@@ -33,12 +33,14 @@ import {
 import { ViewAssetLog } from '../view-asset-log'
 import { toast } from 'sonner'
 import { CompareSimilarAssets } from './_components/compare-similar-assets'
+import { ConfirmDeleteModal } from '@/components/ui/confirm-delete-modal'
 
 const GetAssetDetail = () => {
   const { id } = useParams()
   const [isPending, setIsPending] = useState(false)
   const [isDeleting, setIsDeleting] = useState(false)
   const [asset, setAsset] = useState<AssetsType>()
+  const [showDeleteModal, setShowDeleteModal] = useState(false)
 
   const navigate = useNavigate()
   const user = useAppSelector((state) => state.auth.user)
@@ -62,11 +64,26 @@ const GetAssetDetail = () => {
     const response = await tryCatch(deleteAsset(id))
     if (response.error) {
       toast.error(response.error.message || 'Failed to delete asset')
+      setIsDeleting(false)
+      setShowDeleteModal(false)
       return
     }
     toast.success('Asset deleted successfully')
     navigate('/assets')
     setIsDeleting(false)
+    setShowDeleteModal(false)
+  }
+
+  const handleDeleteClick = () => {
+    setShowDeleteModal(true)
+  }
+
+  const handleDeleteConfirm = () => {
+    deletingAsset()
+  }
+
+  const handleDeleteCancel = () => {
+    setShowDeleteModal(false)
   }
 
   useEffect(() => {
@@ -119,13 +136,13 @@ const GetAssetDetail = () => {
               >
                 <Pencil className='mr-1 h-4 w-4' />
                 <span className='hidden sm:inline'>Update Asset</span>
-                <span className='sm:hidden'>Update</span>
+                <span className='sm:hidden'>Update Asset</span>
               </Button>
             </Link>
 
             <Button
               variant='destructive'
-              onClick={deletingAsset}
+              onClick={handleDeleteClick}
               disabled={isDeleting}
               className='flex-1'
             >
@@ -135,7 +152,7 @@ const GetAssetDetail = () => {
                 <>
                   <Trash2 className='mr-1 h-4 w-4' />
                   <span className='hidden sm:inline'>Delete Asset</span>
-                  <span className='sm:hidden'>Delete</span>
+                  <span className='sm:hidden'>Delete Asset</span>
                 </>
               )}
             </Button>
@@ -239,6 +256,14 @@ const GetAssetDetail = () => {
           </Tabs>
         </div>
       </div>
+      <ConfirmDeleteModal
+        isOpen={showDeleteModal}
+        onClose={handleDeleteCancel}
+        onConfirm={handleDeleteConfirm}
+        title='Confirm Delete'
+        itemName={asset?.assetName}
+        isLoading={isDeleting}
+      />
     </div>
   )
 }

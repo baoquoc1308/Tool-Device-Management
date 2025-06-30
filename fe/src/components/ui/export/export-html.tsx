@@ -66,9 +66,12 @@ const generateComparisonHTML = (normalizedAssets: ReturnType<typeof normalizeAss
           th, td { padding: 12px; text-align: left; border-bottom: 1px solid #ddd; }
           th { background-color: #f5f5f5; font-weight: bold; }
           .currency { font-weight: bold; color: #059669; }
-          .status { padding: 4px 8px; border-radius: 4px; font-size: 12px; }
-          .status-new { background-color: #dcfce7; color: #166534; }
-          .status-in-use { background-color: #f3f4f6; color: #374151; }
+          .status { padding: 4px 8px; border-radius: 4px; font-size: 12px; font-weight: 500; }
+          .status-new { background-color: #dcfce7; color: #166534; border: 1px solid #bbf7d0; }
+          .status-in-use { background-color: #dbeafe; color: #1e40af; border: 1px solid #bfdbfe; }
+          .status-under-maintenance { background-color: #fef3c7; color: #92400e; border: 1px solid #fde68a; }
+          .status-retired { background-color: #f1f5f9; color: #475569; border: 1px solid #e2e8f0; }
+          .status-disposed { background-color: #fee2e2; color: #dc2626; border: 1px solid #fecaca; }
         </style>
       </head>
       <body>
@@ -138,12 +141,12 @@ const generateAllAssetsHTML = (normalizedAssets: ReturnType<typeof normalizeAsse
           th, td { padding: 12px; text-align: left; border-bottom: 1px solid #ddd; }
           th { background-color: #f5f5f5; font-weight: bold; }
           .currency { font-weight: bold; color: #059669; }
-          .status { padding: 4px 8px; border-radius: 4px; font-size: 12px; }
-          .status-new { background-color: #dcfce7; color: #166534; }
-          .status-in-use { background-color: #f3f4f6; color:rgb(82, 134, 218); }
-          .status-under-maintenance { background-color: #fef3c7; color: #92400e; }
-          .status-retired { background-color: #f3f4f6; color: #dc2626; }
-          .status-disposed { background-color: #fee2e2; color: #dc2626; }
+          .status { padding: 4px 8px; border-radius: 4px; font-size: 12px; font-weight: 500; }
+          .status-new { background-color: #dcfce7; color: #166534; border: 1px solid #bbf7d0; }
+          .status-in-use { background-color: #dbeafe; color: #1e40af; border: 1px solid #bfdbfe; }
+          .status-under-maintenance { background-color: #fef3c7; color: #92400e; border: 1px solid #fde68a; }
+          .status-retired { background-color: #f1f5f9; color: #475569; border: 1px solid #e2e8f0; }
+          .status-disposed { background-color: #fee2e2; color: #dc2626; border: 1px solid #fecaca; }
         </style>
       </head>
       <body>
