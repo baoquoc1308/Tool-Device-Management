@@ -21,6 +21,7 @@ import (
 	asset "BE_Manage_device/internal/repository/assets"
 	user "BE_Manage_device/internal/repository/user"
 
+	"github.com/sirupsen/logrus"
 	log "github.com/sirupsen/logrus"
 	"github.com/skip2/go-qrcode"
 	"gorm.io/gorm"
@@ -178,6 +179,18 @@ func GenerateAssetQR(assetID int64, urlFrontend string) (string, error) {
 	}
 
 	return qrURL, nil
+}
+
+func GenQrAndUpdate(repo asset.AssetsRepository, assetId int64, url string) {
+	qrUrl, err := GenerateAssetQR(assetId, url)
+	if err != nil {
+		logrus.Info("Error when create qrurl")
+		return
+	}
+	err = repo.UpdateQrURL(assetId, qrUrl)
+	if err != nil {
+		logrus.Info("Error when update qrurl into asset")
+	}
 }
 
 type notificationJob struct {

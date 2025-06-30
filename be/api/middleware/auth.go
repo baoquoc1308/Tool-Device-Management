@@ -47,8 +47,6 @@ func AuthMiddleware(secretKey string, session repository.UsersSessionRepository)
 					return
 				}
 			}
-			a := claims["userId"]
-			logrus.Info(a)
 			c.Set("userID", claims["userId"])
 			userID, exists := c.Get("userID")
 			if !exists {
