@@ -1,16 +1,20 @@
 import { useEffect, useState } from 'react'
-import { useDebounce } from '@/hooks'
+import { useAppSelector, useDebounce } from '@/hooks'
 import type { FilterType, AssetsType } from '../assets/view-all-assets'
 import { DashboardFilter } from './components/dashboard-filter'
 import { DashboardStats } from './components/dashboard-stats'
+import { MonthlyReport } from './components/monthly-report'
 import { getAllAssets, getDataAssetsFilter } from '../assets/api'
 import { tryCatch } from '@/utils'
 import type { DashboardData } from './api/type'
 import { useSearchParams } from 'react-router-dom'
-import { AreaChart } from 'lucide-react'
+import { AreaChart, FileText } from 'lucide-react'
+import { Button } from '@/components/ui'
 
 export const Dashboard = () => {
   const [searchParam, setSearchParam] = useSearchParams()
+  const [activeView, setActiveView] = useState<'dashboard' | 'reports'>('dashboard')
+
   const [filteredAssets, setFilteredAssets] = useState<FilterType>({
     assetName: searchParam.get('assetName') || '',
     categoryId: searchParam.get('categoryId') || null,
@@ -28,6 +32,15 @@ export const Dashboard = () => {
   const [isPending, setIsPending] = useState(false)
 
   const filterData = useDebounce(filteredAssets, 1000)
+  const user = useAppSelector((state) => state.auth.user)
+  const role = user.role.slug
+  const isAdmin = role === 'admin'
+
+  useEffect(() => {
+    if (activeView === 'reports' && !isAdmin) {
+      setActiveView('dashboard')
+    }
+  }, [activeView, isAdmin])
 
   const calculateStats = (assets: AssetsType[]) => {
     const newStats: DashboardData = {
@@ -59,6 +72,7 @@ export const Dashboard = () => {
       setIsPending(false)
     }
   }
+
   useEffect(() => {
     if (filteredAssets.assetName) {
       searchParam.set('assetName', filteredAssets.assetName)
@@ -82,28 +96,74 @@ export const Dashboard = () => {
     }
     setSearchParam(searchParam)
   }, [filterData])
+
   useEffect(() => {
     fetchAssets()
   }, [filterData])
 
+  const views = [
+    {
+      key: 'dashboard',
+      label: 'Dashboard',
+      icon: AreaChart,
+    },
+    ...(isAdmin
+      ? [
+          {
+            key: 'reports',
+            label: 'Statistical Reports',
+            icon: FileText,
+          },
+        ]
+      : []),
+  ]
+
   return (
     <div className='space-y-4 p-4 sm:space-y-6 sm:p-6'>
-      <h1 className='flex items-center gap-2 text-2xl font-bold sm:text-3xl'>
-        <AreaChart className='h-6 w-6 sm:h-8 sm:w-8' />
-        Dashboard
-      </h1>
+      <div className='flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between'>
+        <h1 className='flex items-center gap-2 text-2xl font-bold sm:text-3xl'>
+          {activeView === 'dashboard' ? (
+            <AreaChart className='h-6 w-6 sm:h-8 sm:w-8' />
+          ) : (
+            <FileText className='h-6 w-6 sm:h-8 sm:w-8' />
+          )}
+          {activeView === 'dashboard' ? 'Dashboard' : 'Statistical Reports'}
+        </h1>
 
-      <DashboardFilter
-        filteredAssets={filteredAssets}
-        setFilteredAssets={setFilteredAssets}
-        assets={assets}
-      />
+        {views.length > 1 && (
+          <div className='flex gap-2'>
+            {views.map((view) => (
+              <Button
+                key={view.key}
+                variant={activeView === view.key ? 'default' : 'outline'}
+                onClick={() => setActiveView(view.key as any)}
+                className='flex items-center gap-2'
+              >
+                <view.icon className='h-4 w-4' />
+                {view.label}
+              </Button>
+            ))}
+          </div>
+        )}
+      </div>
 
-      <DashboardStats
-        stats={stats}
-        assets={assets}
-        isPending={isPending}
-      />
+      {activeView === 'dashboard' ? (
+        <>
+          <DashboardFilter
+            filteredAssets={filteredAssets}
+            setFilteredAssets={setFilteredAssets}
+            assets={assets}
+          />
+
+          <DashboardStats
+            stats={stats}
+            assets={assets}
+            isPending={isPending}
+          />
+        </>
+      ) : (
+        isAdmin && <MonthlyReport assets={assets} />
+      )}
     </div>
   )
 }
