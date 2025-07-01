@@ -220,8 +220,12 @@ func (service *UserService) UpdateInvoked(userSession entity.UsersSessions) erro
 	return err
 }
 
-func (service *UserService) GetAllUser() []*entity.Users {
-	users := service.repo.GetAllUser()
+func (service *UserService) GetAllUser(userId int64) []*entity.Users {
+	user, err := service.repo.FindByUserId(userId)
+	if err != nil {
+		return nil
+	}
+	users := service.repo.GetAllUser(user.CompanyId)
 	return users
 }
 

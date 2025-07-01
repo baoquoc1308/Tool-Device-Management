@@ -1,6 +1,6 @@
-import { FilterAssets } from '@/features/assets/view-all-assets/_components'
-import type { FilterType } from '@/features/assets/view-all-assets'
-import type { AssetsType } from '@/features/assets/view-all-assets/model'
+import type { FilterType } from '../../assets/view-all-assets/model'
+import type { AssetsType } from '../../assets/view-all-assets/model'
+import { FilterAssets } from '../../assets/view-all-assets/_components/filter/filter-assets'
 
 interface DashboardFilterProps {
   filteredAssets: FilterType

@@ -15,6 +15,7 @@ import {
   AvatarImage,
   AvatarFallback,
 } from '@/components/ui'
+import { cn } from '@/lib'
 import type { AssetsType } from '../../view-all-assets/model'
 import type { ComparisonAsset } from '../model'
 
@@ -24,6 +25,22 @@ interface AssetSelectorProps {
   onAssetSelect: (asset: ComparisonAsset) => void
   onAssetRemove: (assetId: number) => void
   maxSelection?: number
+}
+
+const getStatusBadgeClasses = (status: string) => {
+  return cn(
+    'flex items-center gap-1',
+    status === 'New' &&
+      'border-green-200 bg-green-100 text-green-800 dark:border-green-800 dark:bg-green-900/30 dark:text-green-400',
+    status === 'In Use' &&
+      'border-blue-200 bg-blue-100 text-blue-800 dark:border-blue-800 dark:bg-blue-900/30 dark:text-blue-400',
+    status === 'Under Maintenance' &&
+      'border-amber-200 bg-amber-100 text-amber-800 dark:border-amber-800 dark:bg-amber-900/30 dark:text-amber-400',
+    status === 'Retired' &&
+      'border-slate-200 bg-slate-100 text-slate-800 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-300',
+    status === 'Disposed' &&
+      'border-red-200 bg-red-100 text-red-800 dark:border-red-800 dark:bg-red-900/30 dark:text-red-400'
+  )
 }
 
 export const AssetSelector = ({
@@ -87,6 +104,11 @@ export const AssetSelector = ({
     }
   }
 
+  const handleCloseModal = () => {
+    setIsOpen(false)
+    setSearchTerm('')
+  }
+
   return (
     <div className='space-y-4 py-0'>
       <div className='grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4'>
@@ -114,7 +136,7 @@ export const AssetSelector = ({
                 <Button
                   size='sm'
                   variant='ghost'
-                  className='h-6 w-6 flex-shrink-0 p-0'
+                  className='text-muted-foreground hover:bg-muted absolute top-1 right-1 h-6 w-6 flex-shrink-0 p-0'
                   onClick={() => onAssetRemove(asset.id)}
                 >
                   <X className='h-3 w-3' />
@@ -125,12 +147,12 @@ export const AssetSelector = ({
         ))}
 
         {selectedAssets.length < maxSelection && (
-          <Dialog
-            open={isOpen}
-            onOpenChange={setIsOpen}
-          >
+          <Dialog open={isOpen}>
             <DialogTrigger asChild>
-              <Card className='hover:bg-muted/50 cursor-pointer border-dashed'>
+              <Card
+                className='hover:bg-muted/50 cursor-pointer border-dashed'
+                onClick={() => setIsOpen(true)}
+              >
                 <CardContent className='flex h-full items-center justify-center p-3'>
                   <div className='text-muted-foreground flex items-center gap-2 py-3'>
                     <Plus className='h-4 w-4' />
@@ -139,27 +161,35 @@ export const AssetSelector = ({
                 </CardContent>
               </Card>
             </DialogTrigger>
-            <DialogContent className='max-w-2xl'>
+
+            <DialogContent
+              className='max-w-2xl'
+              onInteractOutside={(e) => e.preventDefault()}
+              onEscapeKeyDown={(e) => e.preventDefault()}
+              showCloseButton={false}
+            >
               <DialogHeader>
-                <DialogTitle>
+                <DialogTitle className='flex items-center justify-between'>
                   <div className='flex items-center gap-2'>
                     <Plus className='h-4 w-4' />
-                    <span className='text-sm'>
-                      {selectedCategory
-                        ? `Select ${selectedCategory.categoryName} to Compare`
-                        : 'Select Asset to Compare'}
-                    </span>
+                    <span className='text-sm'>Select Device to Compare</span>
                   </div>
+                  <Button
+                    variant='ghost'
+                    size='sm'
+                    onClick={handleCloseModal}
+                    className='hover:bg-muted h-6 w-6 p-0'
+                  >
+                    <X className='h-4 w-4' />
+                  </Button>
                 </DialogTitle>
               </DialogHeader>
 
               <div className='space-y-4'>
                 <div className='relative'>
-                  <Search className='text-muted-foreground absolute top-3 left-3 h-4 w-4' />
+                  <Search className='text-muted-foreground absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2' />
                   <Input
-                    placeholder={
-                      selectedCategory ? `Search ${selectedCategory.categoryName} assets...` : 'Search assets...'
-                    }
+                    placeholder='Search device...'
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
                     className='pl-10'
@@ -169,15 +199,13 @@ export const AssetSelector = ({
                 <div className='max-h-96 space-y-2 overflow-y-auto'>
                   {filteredAssets.length === 0 ? (
                     <div className='text-muted-foreground py-8 text-center'>
-                      {selectedCategory
-                        ? `No more ${selectedCategory.categoryName} assets available for comparison`
-                        : 'No assets found'}
+                      No more devices available for comparison
                     </div>
                   ) : (
                     filteredAssets.map((asset) => (
                       <Card
                         key={asset.id}
-                        className='hover:bg-muted/50 cursor-pointer'
+                        className='bg-card hover:bg-muted/50 dark:bg-card/50 dark:hover:bg-muted/80 cursor-pointer transition-colors'
                         onClick={() => handleAssetClick(asset)}
                       >
                         <CardContent className='p-3 py-0'>
@@ -191,7 +219,12 @@ export const AssetSelector = ({
                               <p className='text-muted-foreground text-sm'>{asset.serialNumber}</p>
                               <div className='mt-1 flex gap-2'>
                                 <Badge variant='outline'>{asset.category.categoryName}</Badge>
-                                <Badge variant={asset.status === 'New' ? 'default' : 'secondary'}>{asset.status}</Badge>
+                                <Badge
+                                  variant='outline'
+                                  className={getStatusBadgeClasses(asset.status)}
+                                >
+                                  {asset.status}
+                                </Badge>
                               </div>
                             </div>
                             <div className='text-right'>

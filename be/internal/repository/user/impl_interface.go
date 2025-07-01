@@ -77,9 +77,9 @@ func (r *PostgreSQLUserRepository) GetDB() *gorm.DB {
 	return r.db
 }
 
-func (r *PostgreSQLUserRepository) GetAllUser() []*entity.Users {
+func (r *PostgreSQLUserRepository) GetAllUser(companyId int64) []*entity.Users {
 	var users = []*entity.Users{}
-	result := r.db.Model(entity.Users{}).Preload("Role").Preload("Department").Find(&users)
+	result := r.db.Model(entity.Users{}).Where("company_id = ?", companyId).Preload("Role").Preload("Department").Find(&users)
 	if result.Error != nil {
 		return nil
 	}

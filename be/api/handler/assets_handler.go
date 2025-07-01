@@ -140,6 +140,11 @@ func (h *AssetsHandler) Create(c *gin.Context) {
 		log.Error("Happened error when get asset by id. Error", err.Error())
 		pkg.PanicExeption(constant.UnknownError, "Happened error when get asset by id")
 	}
+	var qrURL string
+	if asset.QrUrl != nil {
+		qrURL = *asset.QrUrl
+	}
+
 	assetResponse := dto.AssetResponse{
 		ID:             asset.Id,
 		AssetName:      asset.AssetName,
@@ -150,7 +155,7 @@ func (h *AssetsHandler) Create(c *gin.Context) {
 		SerialNumber:   asset.SerialNumber,
 		FileAttachment: *asset.FileAttachment,
 		ImageUpload:    *asset.ImageUpload,
-		QrURL:          *asset.QrUrl,
+		QrURL:          qrURL,
 		Category: dto.CategoryResponse{
 			ID:           asset.Category.Id,
 			CategoryName: asset.Category.CategoryName,

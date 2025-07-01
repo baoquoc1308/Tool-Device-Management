@@ -25,11 +25,16 @@ func NewRequestTransferService(repo request_transfer.RequestTransferRepository, 
 }
 
 func (service *RequestTransferService) Create(userId int64, categoryId int64, description string) (*entity.RequestTransfer, error) {
+	user, err := service.userRepo.FindByUserId(userId)
+	if err != nil {
+		return nil, err
+	}
 	requestTransfer := entity.RequestTransfer{
 		UserId:      userId,
 		CategoryId:  categoryId,
 		Status:      "Pending",
 		Description: description,
+		CompanyId:   user.CompanyId,
 	}
 	requestTransferCreate, err := service.repo.Create(&requestTransfer)
 	if err != nil {
@@ -141,6 +146,7 @@ func (service *RequestTransferService) Filter(userId int64, status *string) ([]d
 	if users.Role.Slug != "admin" {
 		filter.DepId = users.DepartmentId
 	}
+	filter.CompanyId = users.CompanyId
 	db := service.repo.GetDB()
 	dbFilter := filter.ApplyFilter(db.Model(&entity.RequestTransfer{}), userId)
 	var requests []entity.RequestTransfer

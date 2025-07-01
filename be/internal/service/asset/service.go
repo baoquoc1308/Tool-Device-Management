@@ -14,6 +14,8 @@ import (
 	userRBAC "BE_Manage_device/internal/repository/user_rbac"
 	notificationS "BE_Manage_device/internal/service/notification"
 	"BE_Manage_device/pkg/utils"
+	"context"
+	"sync"
 
 	"errors"
 	"fmt"
@@ -21,8 +23,6 @@ import (
 	"strconv"
 	"strings"
 	"time"
-
-	"github.com/sirupsen/logrus"
 )
 
 type AssetsService struct {
@@ -57,24 +57,75 @@ func (service *AssetsService) Create(userId int64, assetName string, purchaseDat
 	uniqueName = fmt.Sprintf("%d_%s", time.Now().UnixNano(), fileAttachment.Filename)
 	filePath := "files/" + uniqueName
 	uploader := utils.NewSupabaseUploader()
-	imageUrl, err := uploader.Upload(imagePath, imgFile, image.Header.Get("Content-Type"))
-	if err != nil {
+	var (
+		wg      sync.WaitGroup
+		errChan = make(chan error, 2)
+	)
+	var imageUrl string
+	var fileUrl string
+	_, cancel := context.WithCancel(context.Background())
+	defer cancel()
+	wg.Add(2)
+	go func() {
+		defer wg.Done()
+		i, err := uploader.Upload(imagePath, imgFile, image.Header.Get("Content-Type"))
+		if err != nil {
+			errChan <- err
+			cancel()
+			return
+		}
+		imageUrl = i
+	}()
+	go func() {
+		defer wg.Done()
+		f, err := uploader.Upload(filePath, fileFile, fileAttachment.Header.Get("Content-Type"))
+		if err != nil {
+			errChan <- err
+			cancel()
+			return
+		}
+		fileUrl = f
+	}()
+	wg.Wait()
+	close(errChan)
+	if err, ok := <-errChan; ok {
 		return nil, err
 	}
-	fileUrl, err := uploader.Upload(filePath, fileFile, fileAttachment.Header.Get("Content-Type"))
-	if err != nil {
-		return nil, err
-	}
-	userAssetManager, err := service.userRepository.GetUserAssetManageOfDepartment(departmentId)
-	if err != nil {
-		return nil, err
-	}
-	user, err := service.userRepository.FindByUserId(userId)
-	if err != nil {
-		return nil, err
-	}
-	company, err := service.companyRepo.GetCompanyBySuffixEmail(utils.GetSuffixEmail(user.Email))
-	if err != nil {
+	wg = sync.WaitGroup{}
+	errChan = make(chan error, 2)
+	var userAssetManager *entity.Users
+	var company *entity.Company
+	wg.Add(1)
+	go func() {
+		defer wg.Done()
+		uam, err := service.userRepository.GetUserAssetManageOfDepartment(departmentId)
+		if err != nil {
+			errChan <- err
+			cancel()
+			return
+		}
+		userAssetManager = uam
+	}()
+	wg.Add(1)
+	go func() {
+		defer wg.Done()
+		u, err := service.userRepository.FindByUserId(userId)
+		if err != nil {
+			errChan <- err
+			cancel()
+			return
+		}
+		c, err := service.companyRepo.GetCompanyBySuffixEmail(utils.GetSuffixEmail(u.Email))
+		if err != nil {
+			errChan <- err
+			cancel()
+			return
+		}
+		company = c
+	}()
+	wg.Wait()
+	close(errChan)
+	if err, ok := <-errChan; ok {
 		return nil, err
 	}
 	tx := service.repo.GetDB().Begin()
@@ -133,14 +184,7 @@ func (service *AssetsService) Create(userId int64, assetName string, purchaseDat
 		return nil, err
 	}
 	go service.SetRole(assetCreate.Id)
-	qrUrl, err := utils.GenerateAssetQR(assetCreate.Id, url)
-	if err != nil {
-		logrus.Info("Error when create qrurl")
-	}
-	err = service.repo.UpdateQrURL(assetCreate.Id, qrUrl)
-	if err != nil {
-		logrus.Info("Error when update qrurl into asset")
-	}
+	go utils.GenQrAndUpdate(service.repo, assetCreate.Id, url)
 	return assetCreate, nil
 }
 
@@ -174,11 +218,11 @@ func (service *AssetsService) GetAllAsset(userId int64) ([]*entity.Assets, error
 
 func (service *AssetsService) SetRole(assetId int64) error {
 	db := service.repo.GetDB()
-	users := service.userRepository.GetAllUser()
 	assets, err := service.repo.GetAssetById(assetId)
 	if err != nil {
 		return err
 	}
+	users := service.userRepository.GetAllUser(assets.CompanyId)
 	for _, user := range users {
 		if service.roleRepository.GetSlugByRoleId(user.RoleId) == "department-head" && user.IsHeadDepartment {
 			if assets.DepartmentId == *user.DepartmentId {
