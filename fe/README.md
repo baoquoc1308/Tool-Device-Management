@@ -68,12 +68,15 @@ fe/
 
 ## 📜 Future Improvements
 
-- Dark mode and theme customization support. (Done)
-- User can update their personal information like upload avatar, change information. (Done)
-- Enable side-by-side comparison of multiple assets, including specs, costs, and performance (Done)
-- Admins can save bills after creating assets, and generate a monthly summary bill for printing at the end of the month.
-- Admins can view statistical reports filtered by month and year.
-- Admin assign asset -> Manager -> user
-- 3 roles: employee (see assets, assign asset, assign to manager then assign to another employee), admin (save records when buy,update,.. ), manager (assign asset to employee)
-- Admin doesn't have to approve
-- Improve UI/UX: Form create , update asset, button, font, size,....
+`Dark mode and theme customization support.` (Done)
+`User can update their personal information like upload avatar, change information. ` (Done)
+`Enable side-by-side comparison of multiple assets, including specs, costs, and performance ` (Done)
+`Admins can view statistical reports filtered by month and year. ` (Done)
+`Admins can create bills after creating assets, and generate a monthly summary bill for printing at the end of the month. ` (Done)
+`Admin (save records when buy, update,... ) ` (Done)
+`Manager (assign asset to employee) ` (Done)
+`Employee (see assets ,` `assign asset ,` (Done)
+`Admin doesn't have to approve ` (Done)
+`Admin assign asset -> Manager -> Employee` (Done)
+`Employee assign to another employee in the same department` (Done)
+`Improve UI/UX: Form create , Update asset , Assignment Details , button, font, size,....`(Done)

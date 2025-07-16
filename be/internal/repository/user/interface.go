@@ -18,9 +18,9 @@ type UserRepository interface {
 	GetDB() *gorm.DB
 	GetAllUser(companyId int64) []*entity.Users
 	UpdateUser(user *entity.Users) (*entity.Users, error)
-	GetUserHeadDepartment(departmentId int64) (*entity.Users, error)
 	GetUserAssetManageOfDepartment(departmentId int64) (*entity.Users, error)
-	GetAllUserOfDepartment(departmentTd int64) ([]*entity.Users, error)
+	GetAllUserRoleEmployeeOfDepartment(departmentTd int64) ([]*entity.Users, error)
+	GetAllUserRoleManagerOfDepartment(departmentTd int64) ([]*entity.Users, error)
 	UpdateDepartment(userId int64, departmentId int64) error
 	CheckHeadDep(depId int64) error
 	CheckManagerDep(depId int64) error
@@ -29,4 +29,5 @@ type UserRepository interface {
 	UpdateCanExport(id int64, canExport bool) error
 	GetUserNotHaveDep() ([]*entity.Users, error)
 	GetUserRoleAdmin() ([]*entity.Users, error)
+	FindManager(userId int64) (*entity.Users, error)
 }

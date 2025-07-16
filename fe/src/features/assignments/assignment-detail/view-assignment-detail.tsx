@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { Card, CardHeader, CardTitle, CardContent, CardFooter, Button, Separator, Form } from '@/components/ui'
-import { ArrowLeft, MapPin, User, Package, Loader2 } from 'lucide-react'
+import { ArrowLeft, MapPin, User, Package, Loader2, FileText, Undo } from 'lucide-react'
 import type { AssignmentData } from '../get-all-assignments/model/type'
 import { getData, tryCatch } from '@/utils'
 import { getAssignmentData, UpdateAssignment } from '../api'
@@ -16,15 +16,18 @@ import {
   AssignmentUserAssign,
   AssignmentUserAssignUpdate,
 } from './_components'
-import { getAllUsersOfDepartment, type UserType } from '@/features/user'
+import { getAllUsersOfDepartment, type UserProfile, type UserType } from '@/features/user'
 import { getAllDepartment } from '@/features/assets/api'
 import type { DepartmentType } from '@/features/assets'
 import { FormProvider, useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { type UpdateAssignmentForm, updateAssignmentSchema } from './model'
 import { toast } from 'sonner'
+import { useAppSelector } from '@/hooks'
 
 const ViewAssignmentDetail = () => {
+  const user = useAppSelector((state) => state.auth.user) as unknown as UserProfile
+  const userRole = user?.role?.slug
   const { id } = useParams()
   const navigate = useNavigate()
   const [isPending, setIsPending] = useState(true)
@@ -60,6 +63,14 @@ const ViewAssignmentDetail = () => {
     setIsLoadingUsers(false)
   }
 
+  const loadEmployeeDepartmentUsers = async () => {
+    if (userRole === 'employee' && user?.department?.id) {
+      setIsLoadingUsers(true)
+      await getData(() => getAllUsersOfDepartment(user?.department?.id.toString() || ''), setUsers)
+      setIsLoadingUsers(false)
+    }
+  }
+
   useEffect(() => {
     const loadInitialData = async () => {
       setIsPending(true)
@@ -71,11 +82,15 @@ const ViewAssignmentDetail = () => {
   }, [id])
 
   useEffect(() => {
-    if (departmentId) {
+    if (departmentId && userRole !== 'employee') {
       getUserOfDepartment(departmentId)
     }
-  }, [departmentId])
-
+  }, [departmentId, userRole])
+  useEffect(() => {
+    if (isUpdate && userRole === 'employee') {
+      loadEmployeeDepartmentUsers()
+    }
+  }, [isUpdate, userRole])
   const onSubmit = async (data: UpdateAssignmentForm) => {
     setIsSubmitting(true)
     const response = await tryCatch(UpdateAssignment(id || '', data))
@@ -93,6 +108,7 @@ const ViewAssignmentDetail = () => {
     setDepartmentId(newDepartmentId)
     form.setValue('userId', '')
   }
+  const isEmployee = userRole === 'employee'
   if (isPending) {
     return (
       <div className='flex h-[70vh] items-center justify-center'>
@@ -106,7 +122,7 @@ const ViewAssignmentDetail = () => {
   }
 
   return (
-    <div className='container mx-auto px-4 py-6 md:px-6'>
+    <div className='container mx-auto max-w-6xl px-4 py-6 md:px-6'>
       <div className='flex flex-col gap-6'>
         <div className='flex flex-col justify-between gap-4 sm:flex-row sm:items-center'>
           <Button
@@ -122,7 +138,9 @@ const ViewAssignmentDetail = () => {
 
         <Card>
           <CardHeader>
-            <CardTitle className='text-2xl'>Assignment Details</CardTitle>
+            <CardTitle className='flex items-center text-2xl'>
+              <FileText className='mr-2 h-5 w-5' /> Assignment Details
+            </CardTitle>
           </CardHeader>
           <FormProvider {...form}>
             <Form {...form}>
@@ -131,102 +149,121 @@ const ViewAssignmentDetail = () => {
                 aria-disabled={isSubmitting}
               >
                 <CardContent className='space-y-6'>
-                  <div className='space-y-4'>
-                    <h3 className='flex items-center text-lg font-semibold'>
-                      <Package className='mr-2 h-5 w-5' />
-                      Asset Information
-                    </h3>
-                    <Separator />
-
-                    <div className='grid grid-cols-1 gap-6 md:grid-cols-2'>
-                      <AssignmentAssetName assignmentDetail={assignmentDetail} />
-                      <AssignmentAssetStatus assignmentDetail={assignmentDetail} />
-                      <AssignmentAssetImage assignmentDetail={assignmentDetail} />
-                      <AssignmentAssetFile assignmentDetail={assignmentDetail} />
+                  <div className='grid grid-cols-1 gap-8 md:grid-cols-2'>
+                    <div className='space-y-4'>
+                      <h3 className='flex items-center text-lg font-semibold'>
+                        <Package className='mr-2 h-5 w-5' />
+                        Asset Information
+                      </h3>
+                      <Separator />
+                      <div className='grid grid-cols-1 gap-6'>
+                        <div className='flex items-center gap-20'>
+                          <AssignmentAssetName assignmentDetail={assignmentDetail} />
+                          <AssignmentAssetStatus assignmentDetail={assignmentDetail} />
+                        </div>
+                        <AssignmentAssetImage assignmentDetail={assignmentDetail} />
+                        <AssignmentAssetFile assignmentDetail={assignmentDetail} />
+                      </div>
                     </div>
-                  </div>
-                  <div className='space-y-4'>
-                    <h3 className='flex items-center text-lg font-semibold'>
-                      <User className='mr-2 h-5 w-5' />
-                      Assignment Users
-                    </h3>
-                    <Separator />
-                    <div>
-                      {isUpdate ? (
-                        <AssignmentUserAssignUpdate
-                          departmentId={departmentId}
-                          users={users}
-                          assignmentDetail={assignmentDetail}
-                          isLoading={isLoadingUsers}
-                        />
-                      ) : (
-                        <AssignmentUserAssign assignmentDetail={assignmentDetail} />
-                      )}
+                    <div className='space-y-8'>
+                      <div className='space-y-4'>
+                        <h3 className='flex items-center text-lg font-semibold'>
+                          <User className='mr-2 h-5 w-5' />
+                          Assignment Users
+                        </h3>
+                        <Separator />
+                        <div>
+                          {isUpdate ? (
+                            <AssignmentUserAssignUpdate
+                              departmentId={departmentId}
+                              users={users}
+                              assignmentDetail={assignmentDetail}
+                              isLoading={isLoadingUsers}
+                              isEmployee={isEmployee}
+                            />
+                          ) : (
+                            <AssignmentUserAssign assignmentDetail={assignmentDetail} />
+                          )}
+                        </div>
+                      </div>
+                      <div className='space-y-4'>
+                        <h3 className='flex items-center text-lg font-semibold'>
+                          <MapPin className='mr-2 h-5 w-5' />
+                          Department Information
+                        </h3>
+                        <Separator />
+                        <div className='grid w-full grid-cols-1 gap-4'>
+                          {isUpdate ? (
+                            <AssignmentDepartmentUpdate
+                              departments={departments}
+                              assignmentDetail={assignmentDetail}
+                              setDepartmentId={handleDepartmentChange}
+                              isEmployee={isEmployee}
+                            />
+                          ) : (
+                            <AssignmentDepartment assignmentDetail={assignmentDetail} />
+                          )}
+                        </div>
+                      </div>
                     </div>
-                  </div>
-
-                  <div className='space-y-4'>
-                    <h3 className='flex items-center text-lg font-semibold'>
-                      <MapPin className='mr-2 h-5 w-5' />
-                      Department Information
-                    </h3>
-                    <Separator />
-
-                    {isUpdate ? (
-                      <AssignmentDepartmentUpdate
-                        departments={departments}
-                        assignmentDetail={assignmentDetail}
-                        setDepartmentId={handleDepartmentChange}
-                      />
-                    ) : (
-                      <AssignmentDepartment assignmentDetail={assignmentDetail} />
-                    )}
                   </div>
                 </CardContent>
               </form>
             </Form>
           </FormProvider>
           {isUpdate ? (
-            <CardFooter className='flex flex-col justify-end gap-3 sm:flex-row'>
-              <Button
-                variant='outline'
-                onClick={() => setIsUpdate(false)}
-                disabled={isSubmitting}
-              >
-                Cancel
-              </Button>
-              <Button
-                onClick={form.handleSubmit(onSubmit)}
-                disabled={isSubmitting || !form.formState.isDirty}
-              >
-                {isSubmitting ? (
-                  <>
-                    <Loader2 className='mr-2 h-4 w-4 animate-spin' />
-                    Updating...
-                  </>
-                ) : (
-                  'Done'
-                )}
-              </Button>
+            <CardFooter className='flex justify-end'>
+              <div className='flex gap-3'>
+                <Button
+                  variant='outline'
+                  onClick={() => setIsUpdate(false)}
+                  disabled={isSubmitting}
+                  className='border-primary text-primary hover:text-primary/80'
+                  size='sm'
+                >
+                  <Undo className='h-4 w-4' />
+                  Cancel
+                </Button>
+                <Button
+                  onClick={form.handleSubmit(onSubmit)}
+                  disabled={isSubmitting || !form.formState.isDirty}
+                  size='sm'
+                >
+                  {isSubmitting ? (
+                    <>
+                      <Loader2 className='mr-2 h-4 w-4 animate-spin' />
+                      Updating...
+                    </>
+                  ) : (
+                    'Done'
+                  )}
+                </Button>
+              </div>
             </CardFooter>
           ) : (
-            <CardFooter className='flex flex-col justify-end gap-3 sm:flex-row'>
-              <Button
-                variant='outline'
-                onClick={() => navigate('/assignments')}
-              >
-                Cancel
-              </Button>
-              <Button
-                onClick={() => {
-                  setIsUpdate(true)
-                  form.setValue('departmentId', '')
-                  form.setValue('userId', '')
-                  setDepartmentId('')
-                }}
-              >
-                Edit Assignment
-              </Button>
+            <CardFooter className='flex justify-end'>
+              <div className='flex gap-3'>
+                <Button
+                  variant='outline'
+                  onClick={() => navigate('/assignments')}
+                  className='border-primary text-primary hover:text-primary/80'
+                  size='sm'
+                >
+                  <Undo className='h-4 w-4' />
+                  Cancel
+                </Button>
+                <Button
+                  onClick={() => {
+                    setIsUpdate(true)
+                    form.setValue('departmentId', '')
+                    form.setValue('userId', '')
+                    setDepartmentId('')
+                  }}
+                  size='sm'
+                >
+                  Edit Assignment
+                </Button>
+              </div>
             </CardFooter>
           )}
         </Card>

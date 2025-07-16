@@ -1,8 +1,9 @@
 package filter
 
 import (
+	"BE_Manage_device/pkg/utils"
 	"fmt"
-	"strconv"
+	"strings"
 
 	"gorm.io/gorm"
 )
@@ -33,10 +34,6 @@ func (f *AssetFilter) ApplyFilter(db *gorm.DB, userId int64) *gorm.DB {
 		Joins("JOIN permissions on permissions.id = role_permissions.permission_id").
 		Joins("JOIN users on users.id = assets.owner").
 		Where("user_rbacs.user_id = ? and permissions.slug = ?", userId, "view-assets")
-		// Join các bảng liên quan đến filter
-	if f.CategoryId != nil {
-		db = db.Joins("JOIN categories ON categories.id = assets.category_id")
-	}
 	if f.Status != nil {
 		db = db.Where("status = ?", *f.Status)
 	}
@@ -46,15 +43,18 @@ func (f *AssetFilter) ApplyFilter(db *gorm.DB, userId int64) *gorm.DB {
 		db = db.Where("LOWER(assets.asset_name) LIKE LOWER(?)", str)
 	}
 	if f.CategoryId != nil {
-		parsedID, _ := strconv.ParseInt(*f.CategoryId, 10, 64)
+		db = db.Joins("join categories on categories.id = assets.category_id")
+		parsedID, _ := utils.ParseInt64Ptr(f.CategoryId)
 		db = db.Where("categories.id = ?", parsedID)
 	}
 	if f.Cost != nil {
-		if *f.Cost == "DESC" {
+		order := strings.ToUpper(strings.TrimSpace(*f.Cost))
+		switch order {
+		case "DESC":
 			db = db.Order("assets.cost DESC")
-		} else if *f.Cost == "ASC" {
+		case "ASC":
 			db = db.Order("assets.cost ASC")
-		} else {
+		default:
 			db = db.Order("assets.id ASC")
 		}
 	}
@@ -69,7 +69,7 @@ func (f *AssetFilter) ApplyFilter(db *gorm.DB, userId int64) *gorm.DB {
 		db = db.Where("LOWER(users.email) LIKE LOWER(?)", str)
 	}
 	if f.DepartmentId != nil {
-		parsedID, _ := strconv.ParseInt(*f.DepartmentId, 10, 64)
+		parsedID, _ := utils.ParseInt64Ptr(f.DepartmentId)
 		db = db.Where("assets.department_id = ?", parsedID)
 	}
 	return db.Preload("Category").Preload("Department").Preload("OnwerUser").Preload("Department.Location")
@@ -77,11 +77,11 @@ func (f *AssetFilter) ApplyFilter(db *gorm.DB, userId int64) *gorm.DB {
 
 func (f *AssetFilterDashboard) ApplyFilterDashBoard(db *gorm.DB, userId int64) *gorm.DB {
 	if f.CategoryId != nil {
-		parsedID, _ := strconv.ParseInt(*f.CategoryId, 10, 64)
+		parsedID, _ := utils.ParseInt64Ptr(f.CategoryId)
 		db = db.Where("categories.id = ?", parsedID)
 	}
 	if f.DepartmentId != nil {
-		parsedID, _ := strconv.ParseInt(*f.DepartmentId, 10, 64)
+		parsedID, _ := utils.ParseInt64Ptr(f.DepartmentId)
 		db = db.Where("assets.department_id = ?", parsedID)
 	}
 	if f.Status != nil {

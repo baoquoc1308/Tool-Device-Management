@@ -1,6 +1,8 @@
 package service
 
 import (
+	"BE_Manage_device/config"
+	"BE_Manage_device/constant"
 	"BE_Manage_device/internal/domain/dto"
 	"BE_Manage_device/internal/domain/entity"
 	"BE_Manage_device/internal/domain/filter"
@@ -13,7 +15,10 @@ import (
 	user "BE_Manage_device/internal/repository/user"
 	userRBAC "BE_Manage_device/internal/repository/user_rbac"
 	notificationS "BE_Manage_device/internal/service/notification"
+	"BE_Manage_device/pkg"
 	"BE_Manage_device/pkg/utils"
+	"encoding/json"
+
 	"context"
 	"sync"
 
@@ -23,6 +28,8 @@ import (
 	"strconv"
 	"strings"
 	"time"
+
+	log "github.com/sirupsen/logrus"
 )
 
 type AssetsService struct {
@@ -196,23 +203,35 @@ func (service *AssetsService) GetAssetById(userId int64, assertId int64) (*entit
 	return assert, err
 }
 
-func (service *AssetsService) GetAllAsset(userId int64) ([]*entity.Assets, error) {
+func (service *AssetsService) GetAllAsset(userId int64, cacheKey string) ([]*entity.Assets, error) {
 	user, err := service.userRepository.FindByUserId(userId)
 	if err != nil {
 		return nil, err
 	}
+	cacheKeyAssetCompanyId := fmt.Sprintf("%v:%v", cacheKey, user.CompanyId)
+	val, err := config.Rdb.Get(config.Ctx, cacheKeyAssetCompanyId).Result()
 	var assets []*entity.Assets
-	if user.Role.Slug == "departmentHead" {
-		assets, err = service.repo.GetAllAssetOfDep(*user.DepartmentId)
+	if err == nil {
+		var cached []entity.Assets
+		if err := json.Unmarshal([]byte(val), &cached); err == nil {
+			for _, a := range cached {
+				copy := a
+				assets = append(assets, &copy)
+			}
+		} else {
+			log.Error("Happened error when get all asset. Error", err)
+			pkg.PanicExeption(constant.UnknownError, "Happened error when get all asset in redis")
+		}
 	} else {
 		assets, err = service.repo.GetAllAsset(user.CompanyId)
 		if err != nil {
-			return nil, err
+			log.Error("Happened error when get all asset. Error", err)
+			pkg.PanicExeption(constant.UnknownError, "Happened error when get all asset")
 		}
 	}
-	if err != nil {
-		return nil, err
-	}
+	// ✅ Cache lại dữ liệu
+	bytes, _ := json.Marshal(assets)
+	config.Rdb.Set(config.Ctx, cacheKeyAssetCompanyId, bytes, 10*time.Minute)
 	return assets, err
 }
 
@@ -224,28 +243,14 @@ func (service *AssetsService) SetRole(assetId int64) error {
 	}
 	users := service.userRepository.GetAllUser(assets.CompanyId)
 	for _, user := range users {
-		if service.roleRepository.GetSlugByRoleId(user.RoleId) == "department-head" && user.IsHeadDepartment {
-			if assets.DepartmentId == *user.DepartmentId {
-				userRbac := entity.UserRbac{
-					AssetId: assetId,
-					UserId:  user.Id,
-					RoleId:  user.RoleId,
-				}
-				err := service.userRBACRepository.Create(&userRbac, db)
-				if err != nil {
-					return err
-				}
-			}
-		} else {
-			userRbac := entity.UserRbac{
-				AssetId: assetId,
-				UserId:  user.Id,
-				RoleId:  user.RoleId,
-			}
-			err := service.userRBACRepository.Create(&userRbac, db)
-			if err != nil {
-				return err
-			}
+		userRbac := entity.UserRbac{
+			AssetId: assetId,
+			UserId:  user.Id,
+			RoleId:  user.RoleId,
+		}
+		err := service.userRBACRepository.Create(&userRbac, db)
+		if err != nil {
+			return err
 		}
 	}
 	return nil
@@ -284,12 +289,38 @@ func (service *AssetsService) UpdateAsset(userId int64, assetId int64, assetName
 		_ = uploader.Delete(oldFilePath)
 		filedUpdate = append(filedUpdate, "file")
 	}
-	imageUrl, err := uploader.Upload(imagePath, imgFile, image.Header.Get("Content-Type"))
-	if err != nil {
-		return nil, err
-	}
-	fileUrl, err := uploader.Upload(filePath, fileFile, fileAttachment.Header.Get("Content-Type"))
-	if err != nil {
+	var (
+		wg      sync.WaitGroup
+		errChan = make(chan error, 2)
+	)
+	var imageUrl string
+	var fileUrl string
+	_, cancel := context.WithCancel(context.Background())
+	defer cancel()
+	wg.Add(2)
+	go func() {
+		defer wg.Done()
+		i, err := uploader.Upload(imagePath, imgFile, image.Header.Get("Content-Type"))
+		if err != nil {
+			errChan <- err
+			cancel()
+			return
+		}
+		imageUrl = i
+	}()
+	go func() {
+		defer wg.Done()
+		f, err := uploader.Upload(filePath, fileFile, fileAttachment.Header.Get("Content-Type"))
+		if err != nil {
+			errChan <- err
+			cancel()
+			return
+		}
+		fileUrl = f
+	}()
+	wg.Wait()
+	close(errChan)
+	if err, ok := <-errChan; ok {
 		return nil, err
 	}
 	if oldAsset.AssetName != assetName {
@@ -360,14 +391,10 @@ func (service *AssetsService) UpdateAsset(userId int64, assetId int64, assetName
 	if err = tx.Commit().Error; err != nil {
 		return nil, fmt.Errorf("commit failed: %w", err)
 	}
-	userHeadDepart, _ := service.userRepository.GetUserHeadDepartment(assetUpdated.DepartmentId)
 	userManagerAsset, _ := service.userRepository.GetUserAssetManageOfDepartment(assetUpdated.DepartmentId)
 	usersToNotifications := []*entity.Users{}
 	if assetUpdated.OnwerUser != nil {
 		usersToNotifications = append(usersToNotifications, assetUpdated.OnwerUser)
-	}
-	if userHeadDepart != nil {
-		usersToNotifications = append(usersToNotifications, userHeadDepart)
 	}
 	if userManagerAsset != nil {
 		usersToNotifications = append(usersToNotifications, userManagerAsset)
@@ -424,11 +451,9 @@ func (service *AssetsService) DeleteAsset(userId int64, id int64) error {
 	if err = tx.Commit().Error; err != nil {
 		return fmt.Errorf("commit failed: %w", err)
 	}
-	userHeadDepart, _ := service.userRepository.GetUserHeadDepartment(asset.DepartmentId)
 	userManagerAsset, _ := service.userRepository.GetUserAssetManageOfDepartment(asset.DepartmentId)
 	usersToNotifications := []*entity.Users{}
 	usersToNotifications = append(usersToNotifications, asset.OnwerUser)
-	usersToNotifications = append(usersToNotifications, userHeadDepart)
 	usersToNotifications = append(usersToNotifications, userManagerAsset)
 	message := fmt.Sprintf("The asset '%v' (ID: %v) has just been delete by %v", asset.AssetName, asset.Id, userUpdate.Email)
 	userNotificationUnique := utils.ConvertUsersToNotificationsToMap(userId, usersToNotifications)
@@ -503,11 +528,9 @@ func (service *AssetsService) UpdateAssetRetired(userId int64, id int64, Residua
 	if err = tx.Commit().Error; err != nil {
 		return nil, fmt.Errorf("commit failed: %w", err)
 	}
-	userHeadDepart, _ := service.userRepository.GetUserHeadDepartment(asset.DepartmentId)
 	userManagerAsset, _ := service.userRepository.GetUserAssetManageOfDepartment(asset.DepartmentId)
 	usersToNotifications := []*entity.Users{}
 	usersToNotifications = append(usersToNotifications, asset.OnwerUser)
-	usersToNotifications = append(usersToNotifications, userHeadDepart)
 	usersToNotifications = append(usersToNotifications, userManagerAsset)
 	message := fmt.Sprintf("The asset '%v' (ID: %v) has just been updated by %v", asset.AssetName, asset.Id, userUpdate.Email)
 	userNotificationUnique := utils.ConvertUsersToNotificationsToMap(userId, usersToNotifications)
@@ -602,7 +625,7 @@ func (service *AssetsService) ApplyFilterDashBoard(userId int64, status *string,
 		return nil, nil, err
 	}
 	roleHeadDep := service.roleRepository.GetRoleBySlug("department-head")
-	roleView := service.roleRepository.GetRoleBySlug("viewer")
+	roleView := service.roleRepository.GetRoleBySlug("employee")
 	if user.RoleId == roleHeadDep.Id || user.RoleId == roleView.Id {
 		if user.DepartmentId != nil {
 			// Convert *int64 to string
@@ -645,24 +668,16 @@ func CountDashboard(assets []*entity.Assets) dto.DashboardSummary {
 	return s
 }
 
-func (service *AssetsService) GetAssetsByCateOfDepartment(userId, categoryId, departmentId int64) ([]*entity.Assets, error) {
+func (service *AssetsService) GetAssetsByCateOfDepartment(userId, categoryId int64) ([]*entity.Assets, error) {
 	user, err := service.userRepository.FindByUserId(userId)
 	if err != nil {
 		return nil, err
 	}
-	if user.Role.Slug == "admin" {
-		assets, err := service.repo.GetAssetsByCateOfDepartment(categoryId, departmentId)
-		if err != nil {
-			return nil, err
-		}
-		return assets, nil
-	} else {
-		assets, err := service.repo.GetAssetsByCateOfDepartment(categoryId, *user.DepartmentId)
-		if err != nil {
-			return nil, err
-		}
-		return assets, nil
+	assets, err := service.repo.GetAssetsByCateOfDepartment(categoryId, *user.DepartmentId)
+	if err != nil {
+		return nil, err
 	}
+	return assets, nil
 }
 
 func (service *AssetsService) CheckPermissionForManager(userId int64, depId int64) error {
@@ -685,8 +700,12 @@ func (service *AssetsService) GetUserById(id int64) (entity.Users, error) {
 	return *user, err
 }
 
-func (service *AssetsService) GetAllAssetNotHaveMaintenance() ([]*entity.Assets, error) {
-	assets, err := service.repo.GetAllAssetNotHaveMaintenance()
+func (service *AssetsService) GetAllAssetNotHaveMaintenance(userId int64) ([]*entity.Assets, error) {
+	user, err := service.userRepository.FindByUserId(userId)
+	if err != nil {
+		return nil, err
+	}
+	assets, err := service.repo.GetAllAssetNotHaveMaintenance(user.CompanyId)
 	if err != nil {
 		return nil, err
 	}

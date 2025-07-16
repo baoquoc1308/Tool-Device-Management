@@ -1,16 +1,16 @@
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useEffect } from 'react'
 import { Card, CardContent, CardHeader, CardTitle, Button } from '@/components/ui'
-import { FileText, Calendar, X, GitCompare } from 'lucide-react'
+import { FileText, X, GitCompare, Calendar } from 'lucide-react'
 import type { AssetsType } from '@/features/assets/view-all-assets/model'
 import type { FilterType } from '../../assets/view-all-assets/model'
 import type { DateFilter } from '../model/statistics-types'
 import type { SetStateAction } from 'react'
 import {
-  filterAssetsByDate,
   calculateMonthlyStats,
   generateFilteredTrend,
   generateComparisonData,
   getDateRangeText,
+  filterAssetsByDate,
 } from '../utils'
 import { DateFilter as DateFilterComponent } from './date-filter'
 import { StatisticsCards } from './statistics-cards'
@@ -26,61 +26,86 @@ import {
 interface MonthlyReportProps {
   assets: AssetsType[]
   className?: string
+  initialDateFilter?: DateFilter
+  onDateFilterChange?: (filter: DateFilter) => void
+  assetFilter?: FilterType
+  onAssetFilterChange?: (filter: FilterType) => void
 }
 
-export const MonthlyReport = ({ assets, className = '' }: MonthlyReportProps) => {
+export const MonthlyReport = ({
+  assets,
+
+  className = '',
+  initialDateFilter,
+  onDateFilterChange,
+  assetFilter = { assetName: '', categoryId: null, departmentId: null, status: null },
+  onAssetFilterChange,
+}: MonthlyReportProps) => {
   const [dateFilter, setDateFilter] = useState<DateFilter>({
     dateField: 'purchase',
     month: undefined,
     year: undefined,
   })
 
-  const [assetFilter, setAssetFilter] = useState<FilterType>({
-    assetName: '',
-    categoryId: null,
-    departmentId: null,
-    status: null,
-  })
-
-  const [showComparison, _setShowComparison] = useState(true)
   const [activeTab, setActiveTab] = useState<'overview' | 'comparison'>('overview')
 
+  useEffect(() => {
+    if (initialDateFilter) {
+      setDateFilter(initialDateFilter)
+    }
+  }, [initialDateFilter])
+
+  const handleDateFilterChange = (filter: DateFilter) => {
+    setDateFilter(filter)
+    if (onDateFilterChange) {
+      onDateFilterChange(filter)
+    }
+  }
+
   const handleAssetFilterChange: React.Dispatch<SetStateAction<FilterType>> = (value) => {
-    const newFilter = typeof value === 'function' ? value(assetFilter) : value
-    setAssetFilter(newFilter)
+    if (onAssetFilterChange) {
+      const newFilter = typeof value === 'function' ? value(assetFilter) : value
+      onAssetFilterChange(newFilter)
+    }
   }
 
   const clearDateFilter = () => {
-    setDateFilter({
+    const clearedFilter: DateFilter = {
       dateField: 'purchase',
       month: undefined,
       year: undefined,
       startDate: undefined,
       endDate: undefined,
       singleDate: undefined,
-    })
+    }
+    setDateFilter(clearedFilter)
+    if (onDateFilterChange) {
+      onDateFilterChange(clearedFilter)
+    }
   }
 
   const clearCategoryFilter = () => {
-    setAssetFilter((prev) => ({ ...prev, categoryId: null }))
+    handleAssetFilterChange((prev) => ({ ...prev, categoryId: null }))
   }
 
   const clearDepartmentFilter = () => {
-    setAssetFilter((prev) => ({ ...prev, departmentId: null }))
+    handleAssetFilterChange((prev) => ({ ...prev, departmentId: null }))
   }
 
   const clearStatusFilter = () => {
-    setAssetFilter((prev) => ({ ...prev, status: null }))
+    handleAssetFilterChange((prev) => ({ ...prev, status: null }))
   }
 
   const handleClearAllFilters = () => {
     clearDateFilter()
-    setAssetFilter({
-      assetName: '',
-      categoryId: null,
-      departmentId: null,
-      status: null,
-    })
+    if (onAssetFilterChange) {
+      onAssetFilterChange({
+        assetName: '',
+        categoryId: null,
+        departmentId: null,
+        status: null,
+      })
+    }
   }
 
   const getActiveFilters = () => {
@@ -150,34 +175,14 @@ export const MonthlyReport = ({ assets, className = '' }: MonthlyReportProps) =>
   const hasActiveFilters = activeFilters.length > 0
 
   const filteredAssets = useMemo(() => {
-    let result = filterAssetsByDate(assets, dateFilter)
+    if (!Array.isArray(assets)) return []
 
-    if (assetFilter.categoryId) {
-      result = result.filter((asset) => asset.category.id.toString() === assetFilter.categoryId)
-    }
-
-    if (assetFilter.departmentId) {
-      result = result.filter((asset) => asset.department.id.toString() === assetFilter.departmentId)
-    }
-
-    if (assetFilter.status) {
-      result = result.filter((asset) => asset.status === assetFilter.status)
-    }
-
-    return result
-  }, [assets, dateFilter, assetFilter])
-
-  const departmentOnlyFiltered = useMemo(() => {
     return filterAssetsByDate(assets, dateFilter)
   }, [assets, dateFilter])
 
   const monthlyStats = useMemo(() => {
     return calculateMonthlyStats(filteredAssets)
   }, [filteredAssets])
-
-  const departmentStats = useMemo(() => {
-    return calculateMonthlyStats(departmentOnlyFiltered)
-  }, [departmentOnlyFiltered])
 
   const trendData = useMemo(() => {
     return generateFilteredTrend(assets, dateFilter, assetFilter, 12)
@@ -196,14 +201,56 @@ export const MonthlyReport = ({ assets, className = '' }: MonthlyReportProps) =>
     { key: 'overview', label: 'Overview', icon: FileText },
     { key: 'comparison', label: 'Comparison', icon: GitCompare },
   ]
+  const handleStatClick = (filterType: 'total' | 'new' | 'in-use' | 'maintenance' | 'retired') => {
+    const newFilter = { ...assetFilter }
+
+    switch (filterType) {
+      case 'total':
+        newFilter.status = null
+        break
+      case 'new':
+        newFilter.status = 'New'
+        break
+      case 'in-use':
+        newFilter.status = 'In Use'
+        break
+      case 'maintenance':
+        newFilter.status = 'Under Maintenance'
+        break
+      case 'retired':
+        newFilter.status = 'Disposed'
+        break
+    }
+
+    handleAssetFilterChange(newFilter)
+  }
+  const handleCategoryClick = (categoryName: string) => {
+    const category = assets.find((asset) => asset.category.categoryName === categoryName)
+    if (category) {
+      handleAssetFilterChange((prev) => ({
+        ...prev,
+        categoryId: category.category.id?.toString() || null,
+      }))
+    }
+  }
+
+  const handleDepartmentClick = (departmentName: string) => {
+    const department = assets.find((asset) => asset.department.departmentName === departmentName)
+    if (department) {
+      handleAssetFilterChange((prev) => ({
+        ...prev,
+        departmentId: department.department.id?.toString() || null,
+      }))
+    }
+  }
 
   return (
     <div className={`space-y-6 ${className}`}>
       <Card>
         <CardHeader>
           <div className='flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between'>
-            <CardTitle className='flex items-center gap-2 text-2xl'>
-              <FileText className='h-6 w-6' />
+            <CardTitle className='text-primary flex items-center gap-2 text-2xl'>
+              <FileText className='text-primary h-6 w-6' />
               Reports - {getDateRangeText(dateFilter)}
             </CardTitle>
 
@@ -213,9 +260,10 @@ export const MonthlyReport = ({ assets, className = '' }: MonthlyReportProps) =>
                   variant='outline'
                   size='default'
                   onClick={handleClearAllFilters}
-                  className='h-9 gap-2'
+                  className='h-9 gap-2 border-red-500 text-red-500 hover:bg-red-500/10 hover:text-red-500'
+                  type='button'
                 >
-                  <X className='h-4 w-4' />
+                  <X className='h-4 w-4 text-red-500' />
                   Clear All
                 </Button>
               )}
@@ -235,8 +283,9 @@ export const MonthlyReport = ({ assets, className = '' }: MonthlyReportProps) =>
           <div className='flex flex-wrap items-end gap-4'>
             <DateFilterComponent
               dateFilter={dateFilter}
-              onDateFilterChange={setDateFilter}
+              onDateFilterChange={handleDateFilterChange}
               assets={assets}
+              originalAssets={assets}
             />
 
             <div className='flex flex-col gap-2'>
@@ -281,6 +330,7 @@ export const MonthlyReport = ({ assets, className = '' }: MonthlyReportProps) =>
                   <span>{filter.label}</span>
                   <button
                     onClick={filter.onClear}
+                    type='button'
                     className='ml-1 flex h-4 w-4 items-center justify-center rounded-full bg-blue-200 text-blue-600 hover:bg-blue-300'
                   >
                     <X className='h-3 w-3' />
@@ -299,6 +349,7 @@ export const MonthlyReport = ({ assets, className = '' }: MonthlyReportProps) =>
               <button
                 key={tab.key}
                 onClick={() => setActiveTab(tab.key as typeof activeTab)}
+                type='button'
                 className={`flex items-center gap-2 rounded-md px-3 py-2 text-sm font-medium transition-colors ${
                   activeTab === tab.key
                     ? 'bg-white text-gray-900 shadow dark:bg-gray-600 dark:text-gray-100'
@@ -316,8 +367,13 @@ export const MonthlyReport = ({ assets, className = '' }: MonthlyReportProps) =>
           {activeTab === 'overview' && (
             <div className='space-y-6'>
               <StatisticsCards
+                onCategoryClick={handleCategoryClick}
+                onDepartmentClick={handleDepartmentClick}
+                onStatClick={handleStatClick}
+                currentFilter={assetFilter}
+                assets={filteredAssets}
                 stats={monthlyStats}
-                showComparison={showComparison && !!comparisonData}
+                showComparison={!!comparisonData}
                 comparisonData={
                   comparisonData
                     ? {
@@ -331,22 +387,9 @@ export const MonthlyReport = ({ assets, className = '' }: MonthlyReportProps) =>
               {filteredAssets.length > 0 && (
                 <TrendCharts
                   trendData={trendData}
-                  departmentData={departmentStats.departmentBreakdown}
+                  departmentData={monthlyStats.departmentBreakdown}
                   statusData={monthlyStats.statusDistribution}
-                  showOverview={true}
                 />
-              )}
-
-              {filteredAssets.length === 0 && (
-                <Card>
-                  <CardContent className='py-8'>
-                    <div className='text-center text-gray-500'>
-                      <Calendar className='mx-auto mb-4 h-12 w-12 text-gray-300' />
-                      <h3 className='mb-2 text-lg font-medium'>No data found</h3>
-                      <p className='text-sm'>Try adjusting your filters to see results.</p>
-                    </div>
-                  </CardContent>
-                </Card>
               )}
             </div>
           )}
@@ -368,14 +411,21 @@ export const MonthlyReport = ({ assets, className = '' }: MonthlyReportProps) =>
               )}
             </>
           )}
+
+          {filteredAssets.length === 0 && (
+            <div className='flex flex-col items-center justify-center py-12'>
+              <FileText className='h-12 w-12 text-gray-400' />
+              <h3 className='mt-4 text-lg font-semibold text-gray-900 dark:text-gray-100'>No data available</h3>
+              <p className='mt-2 text-gray-600 dark:text-gray-400'>Try adjusting your filters to see more results.</p>
+            </div>
+          )}
         </CardContent>
       </Card>
-
       <Card>
         <CardHeader>
           <CardTitle>
-            <div className='flex items-center gap-2'>
-              <FileText className='h-5 w-5' />
+            <div className='text-primary flex items-center gap-2'>
+              <FileText className='text-primary h-5 w-5' />
               Report Summary
             </div>
           </CardTitle>

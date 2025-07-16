@@ -16,7 +16,7 @@ import {
   FormDatePicker,
   FormButtonSubmit,
 } from '@/components/ui'
-import { DollarSign, Laptop } from 'lucide-react'
+import { DollarSign, Laptop, Save, Undo } from 'lucide-react'
 import { getAllDepartment, getAllCategories, createNewAsset } from '../api'
 import { type CreateAssetFormType, createAssetFormSchema } from './model/schema'
 import { getData, tryCatch } from '@/utils'
@@ -86,71 +86,84 @@ const CreateNewAsset = () => {
       <Card>
         <FormProvider {...form}>
           <CardHeader>
-            <CardTitle className='flex items-center text-2xl'>
-              <Laptop className='mr-2 h-6 w-6' />
+            <CardTitle className='text-primary flex items-center text-2xl'>
+              <Laptop className='text-primary mr-2 h-6 w-6' />
               Create New Asset
             </CardTitle>
-            <CardDescription>Add a new asset to the inventory system</CardDescription>
+            <CardDescription className='text-primary'>Add a new asset to the inventory system</CardDescription>
           </CardHeader>
           <CardContent>
             <Form {...form}>
               <form
                 onSubmit={form.handleSubmit(onSubmit)}
-                className='space-y-6'
+                className='create-asset-form group space-y-6'
                 aria-disabled={isPendingGetData}
               >
                 <div className='grid grid-cols-1 gap-6 md:grid-cols-2'>
                   <FormInput
+                    highlightOnValue={false}
                     name='assetName'
                     type='text'
                     label='Asset Name'
                     placeholder='Enter asset name'
                   />
                   <FormInput
+                    highlightOnValue={false}
                     name='serialNumber'
                     type='text'
                     label='Serial Number'
                     placeholder='Enter serial number'
                   />
-                  <FormSelect
-                    name='categoryId'
-                    label='Category'
-                    placeholder='Select a category'
-                    data={categories}
-                  />
 
-                  <FormSelect
-                    name='departmentId'
-                    label='Department'
-                    placeholder='Select a department'
-                    data={departments}
-                  />
-                  <FormDatePicker
-                    name='purchaseDate'
-                    label='Purchase Date'
-                    fn={handlePurchaseDateChange}
-                  />
-
-                  <FormDatePicker
-                    name='warrantExpiry'
-                    label='Warranty Expiry'
-                  />
                   <FormInput
+                    highlightOnValue={false}
                     name='cost'
                     type='number'
                     label='Cost'
                     placeholder='Enter asset cost'
                     Icon={DollarSign}
                   />
+
+                  <div className='grid grid-cols-1 gap-8 md:grid-cols-2'>
+                    <FormSelect
+                      highlightOnValue={false}
+                      name='departmentId'
+                      label='Department'
+                      placeholder='Select a department'
+                      data={departments}
+                    />
+                    <FormSelect
+                      highlightOnValue={false}
+                      name='categoryId'
+                      label='Category'
+                      placeholder='Select a category'
+                      data={categories}
+                    />
+                  </div>
+
+                  <FormDatePicker
+                    highlightOnValue={false}
+                    name='purchaseDate'
+                    label='Purchase Date'
+                    fn={handlePurchaseDateChange}
+                  />
+
+                  <FormDatePicker
+                    highlightOnValue={false}
+                    name='warrantExpiry'
+                    label='Warranty Expiry'
+                  />
                 </div>
 
                 <div className='grid grid-cols-1 gap-6 md:grid-cols-2'>
                   <FileField
+                    highlightOnValue={false}
                     form={form}
                     fileName={fileName}
                     setFileName={setFileName}
                   />
                   <ImageField
+                    highlightOnValue={false}
                     form={form}
                     imageName={imageName}
                     setImageName={setImageName}
@@ -159,15 +172,19 @@ const CreateNewAsset = () => {
               </form>
             </Form>
           </CardContent>
-          <CardFooter className='flex justify-between'>
+
+          <CardFooter className='flex justify-end gap-2'>
+            <ButtonCancel
+              isPending={isPending}
+              Icon={<Undo className='h-4 w-4' />}
+            />
             <FormButtonSubmit
               className='w-fit sm:w-auto'
               isPending={isPending}
-              Icon={Laptop}
-              type='Save'
+              Icon={Save}
+              type='Create Asset'
               onSubmit={onSubmit}
             />
-            <ButtonCancel isPending={isPending} />
           </CardFooter>
         </FormProvider>
       </Card>

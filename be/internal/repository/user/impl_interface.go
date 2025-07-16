@@ -115,15 +115,6 @@ func (r *PostgreSQLUserRepository) UpdateUser(user *entity.Users) (*entity.Users
 	return &userUpdate, nil
 }
 
-func (r *PostgreSQLUserRepository) GetUserHeadDepartment(departmentId int64) (*entity.Users, error) {
-	user := entity.Users{}
-	result := r.db.Model(entity.Users{}).Where("department_id = ? and is_head_department = true", departmentId).First(&user)
-	if result.Error != nil {
-		return nil, result.Error
-	}
-	return &user, nil
-}
-
 func (r *PostgreSQLUserRepository) GetUserAssetManageOfDepartment(departmentId int64) (*entity.Users, error) {
 	user := entity.Users{}
 	result := r.db.Model(entity.Users{}).Where("department_id = ? and is_asset_manager = true", departmentId).First(&user)
@@ -142,9 +133,18 @@ func (r *PostgreSQLUserRepository) FindByEmailForLogin(email string) (*entity.Us
 	return users, nil
 }
 
-func (r *PostgreSQLUserRepository) GetAllUserOfDepartment(departmentTd int64) ([]*entity.Users, error) {
+func (r *PostgreSQLUserRepository) GetAllUserRoleEmployeeOfDepartment(departmentTd int64) ([]*entity.Users, error) {
 	users := []*entity.Users{}
-	result := r.db.Model(entity.Users{}).Where("department_id = ?", departmentTd).Preload("Role").Preload("Department").Find(&users)
+	result := r.db.Debug().Model(entity.Users{}).Joins("join roles on roles.id = users.role_id").Where("department_id = ?", departmentTd).Where("roles.slug = ?", "employee").Preload("Role").Preload("Department").Find(&users)
+	if result.Error != nil {
+		return nil, result.Error
+	}
+	return users, nil
+}
+
+func (r *PostgreSQLUserRepository) GetAllUserRoleManagerOfDepartment(departmentTd int64) ([]*entity.Users, error) {
+	users := []*entity.Users{}
+	result := r.db.Debug().Model(entity.Users{}).Joins("join roles on roles.id = users.role_id").Where("department_id = ?", departmentTd).Where("roles.slug = ?", "assetManager").Preload("Role").Preload("Department").Find(&users)
 	if result.Error != nil {
 		return nil, result.Error
 	}
@@ -209,4 +209,19 @@ func (r *PostgreSQLUserRepository) GetUserRoleAdmin() ([]*entity.Users, error) {
 		return nil, result.Error
 	}
 	return users, nil
+}
+
+func (r *PostgreSQLUserRepository) FindManager(userId int64) (*entity.Users, error) {
+	var user entity.Users
+	result := r.db.Model(entity.Users{}).Where("id = ?", userId).First(&user)
+	if result.Error != nil {
+		return nil, result.Error
+	}
+	if user.DepartmentId == nil {
+		return nil, errors.New("user haven't department")
+	}
+	depId := user.DepartmentId
+	var userManager entity.Users
+	result = r.db.Model(entity.Users{}).Where("department_id = ? and is_asset_manager = true", depId).First(&userManager)
+	return &userManager, result.Error
 }

@@ -472,8 +472,8 @@ func (h *UserHandler) UpdateRoleUser(c *gin.Context) {
 }
 
 // Role godoc
-// @Summary      Get all user by department_id
-// @Description  Get all user by department_id
+// @Summary      Get all user role employee by department_id
+// @Description  Get all user role employee by department_id
 // @Tags         Users
 // @Accept       json
 // @Produce      json
@@ -486,13 +486,14 @@ func (h *UserHandler) UpdateRoleUser(c *gin.Context) {
 // @Security JWT
 func (h *UserHandler) GetAllUserOfDepartment(c *gin.Context) {
 	defer pkg.PanicHandler(c)
+	userId := utils.GetUserIdFromContext(c)
 	idStr := c.Param("department_id")
 	departmentId, err := strconv.ParseInt(idStr, 10, 64)
 	if err != nil {
 		log.Error("Happened error when convert assetId to int64. Error", err)
 		pkg.PanicExeption(constant.InvalidRequest, "Happened error when convert assetId to int64")
 	}
-	users, err := h.service.GetAllUserOfDepartment(departmentId)
+	users, err := h.service.GetAllUserOfDepartment(userId, departmentId)
 	if err != nil {
 		log.Error("Happened error when get all user of department. Error", err)
 		pkg.PanicExeption(constant.UnknownError, "Happened error when get all user of department")
@@ -534,39 +535,8 @@ func (h *UserHandler) UpdateDepartment(c *gin.Context) {
 }
 
 // User godoc
-// @Summary      Update head department by userId
-// @Description  Update head department by userId
-// @Tags         Users
-// @Accept       json
-// @Produce      json
-// @Param		user_id	path		string				true	"user_id"
-// @param Authorization header string true "Authorization"
-// @Router       /api/user/head-department/{user_id} [PATCH]
-// @securityDefinitions.apiKey token
-// @in header
-// @name Authorization
-// @Security JWT
-func (h *UserHandler) UpdateHeadDep(c *gin.Context) {
-	defer pkg.PanicHandler(c)
-	idStr := c.Param("user_id")
-	userId, err := strconv.ParseInt(idStr, 10, 64)
-	if err != nil {
-		log.Error("Happened error when convert userId to int64. Error", err)
-		pkg.PanicExeption(constant.InvalidRequest, "Happened error when convert userId to int64")
-	}
-	err = h.service.UpdateHeadDep(userId)
-	if err != nil {
-		log.Error("Happened error when update user is head department. Error", err)
-		pkg.PanicExeption(constant.UnknownError, "Happened error when update user is head department")
-	}
-	cacheKeyUserSessionStr := fmt.Sprintf("%s:%d", cacheKeyUserSession, userId)
-	config.Rdb.Del(config.Ctx, cacheKeyUserSessionStr)
-	c.JSON(http.StatusOK, pkg.BuildReponseSuccessNoData(http.StatusOK, constant.Success))
-}
-
-// User godoc
-// @Summary      Update head department by userId
-// @Description  Update head department by userId
+// @Summary      Update manager department by userId
+// @Description  Update manager department by userId
 // @Tags         Users
 // @Accept       json
 // @Produce      json

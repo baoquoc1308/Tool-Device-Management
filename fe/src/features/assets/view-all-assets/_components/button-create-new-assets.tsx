@@ -6,7 +6,7 @@ export const ButtonCreateNewAssets = () => {
   const navigate = useNavigate()
   const user = useAppSelector((state) => state.auth.user)
 
-  if (user.role.slug === 'viewer' || user.role.slug === 'departmentHead') {
+  if (user.role.slug === 'employee') {
     return null
   }
   return (
@@ -14,7 +14,7 @@ export const ButtonCreateNewAssets = () => {
       size='sm'
       onClick={() => navigate('/assets/create-asset')}
     >
-      <Plus className='mr-2 h-4 w-4' />
+      <Plus className='mr-1 h-4 w-4' />
       Create New Asset
     </Button>
   )

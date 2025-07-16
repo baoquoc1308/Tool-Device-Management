@@ -3,18 +3,16 @@ import { useAppSelector, useDebounce } from '@/hooks'
 import type { FilterType, AssetsType } from '../assets/view-all-assets'
 import { DashboardFilter } from './components/dashboard-filter'
 import { DashboardStats } from './components/dashboard-stats'
-import { MonthlyReport } from './components/monthly-report'
 import { getAllAssets, getDataAssetsFilter } from '../assets/api'
 import { tryCatch } from '@/utils'
 import type { DashboardData } from './api/type'
-import { useSearchParams } from 'react-router-dom'
+import { useNavigate, useSearchParams } from 'react-router-dom'
 import { AreaChart, FileText } from 'lucide-react'
-import { Button } from '@/components/ui'
+import { Button, CardDescription, CardTitle } from '@/components/ui'
 
 export const Dashboard = () => {
   const [searchParam, setSearchParam] = useSearchParams()
-  const [activeView, setActiveView] = useState<'dashboard' | 'reports'>('dashboard')
-
+  const navigate = useNavigate()
   const [filteredAssets, setFilteredAssets] = useState<FilterType>({
     assetName: searchParam.get('assetName') || '',
     categoryId: searchParam.get('categoryId') || null,
@@ -35,12 +33,6 @@ export const Dashboard = () => {
   const user = useAppSelector((state) => state.auth.user)
   const role = user.role.slug
   const isAdmin = role === 'admin'
-
-  useEffect(() => {
-    if (activeView === 'reports' && !isAdmin) {
-      setActiveView('dashboard')
-    }
-  }, [activeView, isAdmin])
 
   const calculateStats = (assets: AssetsType[]) => {
     const newStats: DashboardData = {
@@ -73,6 +65,64 @@ export const Dashboard = () => {
     }
   }
 
+  const handleStatClick = (filterType: 'total' | 'new' | 'in-use' | 'maintenance' | 'retired') => {
+    const newFilter = { ...filteredAssets }
+
+    switch (filterType) {
+      case 'total':
+        newFilter.status = null
+        break
+      case 'new':
+        newFilter.status = 'New'
+        break
+      case 'in-use':
+        newFilter.status = 'In Use'
+        break
+      case 'maintenance':
+        newFilter.status = 'Under Maintenance'
+        break
+      case 'retired':
+        newFilter.status = 'Disposed'
+        break
+    }
+
+    setFilteredAssets(newFilter)
+  }
+
+  const handleCategoryClick = (categoryName: string) => {
+    const category = assets.find((asset) => asset.category.categoryName === categoryName)
+    if (category) {
+      setFilteredAssets((prev) => ({
+        ...prev,
+        categoryId: category.category.id?.toString() || null,
+      }))
+    }
+  }
+
+  const handleDepartmentClick = (departmentName: string) => {
+    const department = assets.find((asset) => asset.department.departmentName === departmentName)
+    if (department) {
+      setFilteredAssets((prev) => ({
+        ...prev,
+        departmentId: department.department.id?.toString() || null,
+      }))
+    }
+  }
+
+  const handleRemoveFilter = (filterType: 'status' | 'category' | 'department') => {
+    setFilteredAssets((prev) => {
+      const newState = { ...prev }
+      if (filterType === 'status') {
+        newState.status = null
+      } else if (filterType === 'category') {
+        newState.categoryId = null
+      } else if (filterType === 'department') {
+        newState.departmentId = null
+      }
+      return newState
+    })
+  }
+
   useEffect(() => {
     if (filteredAssets.assetName) {
       searchParam.set('assetName', filteredAssets.assetName)
@@ -101,11 +151,16 @@ export const Dashboard = () => {
     fetchAssets()
   }, [filterData])
 
+  const handleNavigateToReports = () => {
+    navigate('/statistics-reports')
+  }
+
   const views = [
     {
       key: 'dashboard',
       label: 'Dashboard',
       icon: AreaChart,
+      onClick: () => {},
     },
     ...(isAdmin
       ? [
@@ -113,6 +168,7 @@ export const Dashboard = () => {
             key: 'reports',
             label: 'Statistical Reports',
             icon: FileText,
+            onClick: handleNavigateToReports,
           },
         ]
       : []),
@@ -121,22 +177,23 @@ export const Dashboard = () => {
   return (
     <div className='space-y-4 p-4 sm:space-y-6 sm:p-6'>
       <div className='flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between'>
-        <h1 className='flex items-center gap-2 text-2xl font-bold sm:text-3xl'>
-          {activeView === 'dashboard' ? (
-            <AreaChart className='h-6 w-6 sm:h-8 sm:w-8' />
-          ) : (
-            <FileText className='h-6 w-6 sm:h-8 sm:w-8' />
-          )}
-          {activeView === 'dashboard' ? 'Dashboard' : 'Statistical Reports'}
-        </h1>
-
+        <div>
+          <CardTitle className='text-primary flex items-center text-2xl font-bold'>
+            <AreaChart
+              strokeWidth={2.5}
+              className='text-primary mr-2 h-5 w-5'
+            />
+            Dashboard
+          </CardTitle>
+          <CardDescription className='text-primary'>Overview of key metrics and recent activity</CardDescription>
+        </div>
         {views.length > 1 && (
           <div className='flex gap-2'>
             {views.map((view) => (
               <Button
                 key={view.key}
-                variant={activeView === view.key ? 'default' : 'outline'}
-                onClick={() => setActiveView(view.key as any)}
+                variant={view.key === 'dashboard' ? 'default' : 'outline'}
+                onClick={view.onClick}
                 className='flex items-center gap-2'
               >
                 <view.icon className='h-4 w-4' />
@@ -147,23 +204,22 @@ export const Dashboard = () => {
         )}
       </div>
 
-      {activeView === 'dashboard' ? (
-        <>
-          <DashboardFilter
-            filteredAssets={filteredAssets}
-            setFilteredAssets={setFilteredAssets}
-            assets={assets}
-          />
+      <DashboardFilter
+        filteredAssets={filteredAssets}
+        setFilteredAssets={setFilteredAssets}
+        assets={assets}
+      />
 
-          <DashboardStats
-            stats={stats}
-            assets={assets}
-            isPending={isPending}
-          />
-        </>
-      ) : (
-        isAdmin && <MonthlyReport assets={assets} />
-      )}
+      <DashboardStats
+        onRemoveFilter={handleRemoveFilter}
+        stats={stats}
+        assets={assets}
+        isPending={isPending}
+        onStatClick={handleStatClick}
+        onCategoryClick={handleCategoryClick}
+        onDepartmentClick={handleDepartmentClick}
+        currentFilter={filteredAssets}
+      />
     </div>
   )
 }

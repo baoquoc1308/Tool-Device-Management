@@ -2,7 +2,7 @@ import { FormProvider, useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { type DataLoginType, loginSchema } from './model/schema'
 import { Form, FormButtonSubmit, FormInput } from '@/components/ui'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useLocation } from 'react-router-dom'
 import { toast } from 'sonner'
 import { useAppDispatch } from '@/hooks'
 import { logIn } from '../slice'
@@ -23,6 +23,9 @@ const LoginForm = () => {
       rememberMe: false,
     },
   })
+  const location = useLocation()
+  const params = new URLSearchParams(location.search)
+  const redirectPath = params.get('redirect')
 
   const onSubmit = async (data: DataLoginType) => {
     setIsPending(true)
@@ -39,7 +42,7 @@ const LoginForm = () => {
     Cookies.set('accessToken', result.data.access_token)
     Cookies.set('refreshToken', result.data.refresh_token)
     toast.success('Login successfully')
-    navigate('/')
+    navigate(redirectPath || '/', { replace: true })
     setIsPending(false)
   }
   return (
@@ -56,6 +59,7 @@ const LoginForm = () => {
             className='space-y-4 sm:space-y-5'
           >
             <FormInput
+              highlightOnValue={false}
               name='email'
               type='email'
               label='Email Address'
@@ -64,13 +68,17 @@ const LoginForm = () => {
             />
 
             <FormInput
+              highlightOnValue={false}
               name='password'
               type='password'
               label='Password'
               Icon={Lock}
               placeholder='••••••••'
             />
-            <RememberMeField form={form} />
+            <RememberMeField
+              highlightOnValue={false}
+              form={form}
+            />
             <FormButtonSubmit
               className='bg-primary hover:bg-primary/90 mt-5 flex h-9 w-full items-center justify-center gap-1.5 text-sm font-medium sm:mt-6 sm:h-10 sm:gap-2 sm:text-base'
               isPending={isPending}

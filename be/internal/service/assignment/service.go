@@ -4,6 +4,7 @@ import (
 	"BE_Manage_device/internal/domain/dto"
 	"BE_Manage_device/internal/domain/entity"
 	"BE_Manage_device/internal/domain/filter"
+	"BE_Manage_device/pkg/utils"
 
 	asset_log "BE_Manage_device/internal/repository/asset_log"
 	asset "BE_Manage_device/internal/repository/assets"
@@ -11,7 +12,7 @@ import (
 	department "BE_Manage_device/internal/repository/departments"
 	user "BE_Manage_device/internal/repository/user"
 	notificationS "BE_Manage_device/internal/service/notification"
-	"BE_Manage_device/pkg/utils"
+
 	"fmt"
 	"time"
 )
@@ -65,13 +66,34 @@ func (service *AssignmentService) Update(userId, assignmentId int64, userIdAssig
 		return nil, err
 	}
 	var assignUser *entity.Users
-	if userIdAssign != nil {
+	if byUser.Role.Slug == "employee" {
+		ownAssetUser, err := service.userRepo.FindByUserId(*assignment.UserId)
+		if err != nil {
+			return nil, err
+		}
+		userManager, err := service.userRepo.FindManager(ownAssetUser.Id)
+		if err != nil {
+			return nil, err
+		}
+		if (userIdAssign == nil) || (userManager.Id == *userIdAssign) || (ownAssetUser.DepartmentId == nil) || (byUser.DepartmentId == nil) || (*ownAssetUser.DepartmentId != *byUser.DepartmentId) {
+			return nil, fmt.Errorf("You can only assign to employee within the same department.")
+		}
 		assignUser, err = service.userRepo.FindByUserId(*userIdAssign)
 		if err != nil {
 			return nil, err
 		}
+		if (assignUser.DepartmentId == nil) || (*assignUser.DepartmentId != *ownAssetUser.DepartmentId) {
+			return nil, fmt.Errorf("You can only assign to employee within the same department.")
+		}
 	} else {
-		assignUser = nil
+		if userIdAssign != nil {
+			assignUser, err = service.userRepo.FindByUserId(*userIdAssign)
+			if err != nil {
+				return nil, err
+			}
+		} else {
+			assignUser = nil
+		}
 	}
 	asset, err := service.assetRepo.GetAssetById(assignment.AssetId)
 	if err != nil {
@@ -161,16 +183,14 @@ func (service *AssignmentService) Update(userId, assignmentId int64, userIdAssig
 	if err := tx.Commit().Error; err != nil {
 		return nil, err
 	}
-	var userHeadDepart *entity.Users
 	var userManagerAsset *entity.Users
 	if departmentId != nil {
-		userHeadDepart, _ = service.userRepo.GetUserHeadDepartment(*departmentId)
+
 		userManagerAsset, _ = service.userRepo.GetUserAssetManageOfDepartment(*departmentId)
 	} else {
-		userHeadDepart, _ = service.userRepo.GetUserHeadDepartment(asset.DepartmentId)
 		userManagerAsset, _ = service.userRepo.GetUserAssetManageOfDepartment(asset.DepartmentId)
 	}
-	usersToNotifications := []*entity.Users{asset.OnwerUser, userHeadDepart, userManagerAsset}
+	usersToNotifications := []*entity.Users{asset.OnwerUser, userManagerAsset}
 	message := fmt.Sprintf("The asset '%v' (ID: %v) has just been updated by %v", asset.AssetName, asset.Id, byUser.Email)
 	userNotificationUnique := utils.ConvertUsersToNotificationsToMap(userId, usersToNotifications)
 	go func() {
@@ -190,6 +210,21 @@ func (service *AssignmentService) Filter(userId int64, emailAssigned *string, em
 		EmailAssign:   emailAssign,
 		AssetName:     assetName,
 	}
+	users, err := service.userRepo.FindByUserId(userId)
+	if err != nil {
+		return nil, err
+	}
+	if users.Role.Slug == "employee" {
+		var assignments []entity.Assignments
+		assigment, err := service.Repo.GetAssignmentForEmployee(users.Id)
+		if err != nil {
+			return nil, err
+		}
+		assignments = append(assignments, *assigment)
+		assignmentsRes := utils.ConvertAssignmentsToResponses(assignments)
+		return assignmentsRes, nil
+	}
+	filter.CompanyId = users.CompanyId
 	db := service.Repo.GetDB()
 	dbFilter := filter.ApplyFilter(db.Model(&entity.Assignments{}), userId)
 

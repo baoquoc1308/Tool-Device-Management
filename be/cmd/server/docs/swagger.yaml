@@ -583,13 +583,10 @@ paths:
     get:
       consumes:
       - application/json
-      description: Get asset by category of department
+      description: Get asset by category of manager department
       parameters:
       - in: query
         name: categoryId
-        type: integer
-      - in: query
-        name: departmentId
         type: integer
       - description: Authorization
         in: header
@@ -601,7 +598,7 @@ paths:
       responses: {}
       security:
       - JWT: []
-      summary: Get asset by category of department
+      summary: Get asset by category of manager department
       tags:
       - Assets
   /api/assignments/{id}:
@@ -801,6 +798,144 @@ paths:
       summary: Register user
       tags:
       - Auth
+  /api/bills:
+    post:
+      consumes:
+      - application/json
+      description: Create bill
+      parameters:
+      - description: Asset ID
+        in: formData
+        name: assetId
+        required: true
+        type: string
+      - description: Description
+        in: formData
+        name: description
+        type: string
+      - description: Description
+        in: formData
+        name: statusBill
+        required: true
+        type: string
+      - description: File to upload
+        in: formData
+        name: file
+        type: file
+      - description: Image to upload
+        in: formData
+        name: image
+        type: file
+      - description: Authorization
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses: {}
+      security:
+      - JWT: []
+      summary: Create bill
+      tags:
+      - Bills
+  /api/bills-un-paid/:
+    get:
+      consumes:
+      - application/json
+      description: un paid bill
+      parameters:
+      - description: Authorization
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses: {}
+      security:
+      - JWT: []
+      summary: Get un paid bill
+      tags:
+      - Bills
+  /api/bills/{billNumber}:
+    get:
+      consumes:
+      - application/json
+      description: Get bill by bill number
+      parameters:
+      - description: billNumber
+        in: path
+        name: billNumber
+        required: true
+        type: string
+      - description: Authorization
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses: {}
+      security:
+      - JWT: []
+      summary: Get bill by bill number
+      tags:
+      - Bills
+    patch:
+      consumes:
+      - application/json
+      description: Update paid bill
+      parameters:
+      - description: billNumber
+        in: path
+        name: billNumber
+        required: true
+        type: string
+      - description: Authorization
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses: {}
+      security:
+      - JWT: []
+      summary: Update paid bill
+      tags:
+      - Bills
+  /api/bills/filter:
+    get:
+      consumes:
+      - application/json
+      description: Get all bill have permission
+      parameters:
+      - in: query
+        name: billNumber
+        type: string
+      - in: query
+        name: categoryId
+        type: string
+      - in: query
+        name: companyId
+        type: integer
+      - in: query
+        name: statusBill
+        type: string
+      - description: Authorization
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses: {}
+      security:
+      - JWT: []
+      summary: Get all bill with filter
+      tags:
+      - Bills
   /api/categories:
     get:
       consumes:
@@ -1170,6 +1305,34 @@ paths:
       summary: Update maintenanceSchedules by id
       tags:
       - MaintenanceSchedules
+  /api/monthly-summary/filter:
+    get:
+      consumes:
+      - application/json
+      description: Get monthly summary have permission
+      parameters:
+      - in: query
+        name: '-'
+        type: integer
+      - in: query
+        name: month
+        type: integer
+      - in: query
+        name: year
+        type: integer
+      - description: Authorization
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses: {}
+      security:
+      - JWT: []
+      summary: Get monthly summary with filter
+      tags:
+      - Monthly Summary
   /api/notifications:
     get:
       consumes:
@@ -1475,7 +1638,7 @@ paths:
     get:
       consumes:
       - application/json
-      description: Get all user by department_id
+      description: Get all user role employee by department_id
       parameters:
       - description: department_id
         in: path
@@ -1492,7 +1655,7 @@ paths:
       responses: {}
       security:
       - JWT: []
-      summary: Get all user by department_id
+      summary: Get all user role employee by department_id
       tags:
       - Users
   /api/user/forget-password:
@@ -1519,30 +1682,6 @@ paths:
           schema:
             $ref: '#/definitions/dto.ApiResponseFail'
       summary: Email reset password
-      tags:
-      - Users
-  /api/user/head-department/{user_id}:
-    patch:
-      consumes:
-      - application/json
-      description: Update head department by userId
-      parameters:
-      - description: user_id
-        in: path
-        name: user_id
-        required: true
-        type: string
-      - description: Authorization
-        in: header
-        name: Authorization
-        required: true
-        type: string
-      produces:
-      - application/json
-      responses: {}
-      security:
-      - JWT: []
-      summary: Update head department by userId
       tags:
       - Users
   /api/user/information:
@@ -1590,7 +1729,7 @@ paths:
     patch:
       consumes:
       - application/json
-      description: Update head department by userId
+      description: Update manager department by userId
       parameters:
       - description: user_id
         in: path
@@ -1607,7 +1746,7 @@ paths:
       responses: {}
       security:
       - JWT: []
-      summary: Update head department by userId
+      summary: Update manager department by userId
       tags:
       - Users
   /api/user/password-reset:

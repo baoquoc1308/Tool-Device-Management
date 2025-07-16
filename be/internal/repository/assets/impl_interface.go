@@ -220,7 +220,7 @@ func (r *PostgreSQLAssetsRepository) UpdateAssetOwner(id, ownerId int64, tx *gor
 
 func (r *PostgreSQLAssetsRepository) GetAssetsByCateOfDepartment(categoryId int64, departmentId int64) ([]*entity.Assets, error) {
 	assets := []*entity.Assets{}
-	result := r.db.Model(entity.Assets{}).Where("category_id = ? and department_id != ?", categoryId, departmentId).Preload("Category").Preload("Department").Preload("OnwerUser").Preload("Department.Location").Find(&assets)
+	result := r.db.Model(entity.Assets{}).Where("category_id = ? and department_id = ?", categoryId, departmentId).Preload("Category").Preload("Department").Preload("OnwerUser").Preload("Department.Location").Find(&assets)
 	if result.Error != nil {
 		return nil, result.Error
 	}
@@ -243,13 +243,14 @@ func (r *PostgreSQLAssetsRepository) DeleteOwnerAssetOfOwnerId(ownerId int64) er
 		Update("owner", nil).Error
 	return err
 }
-func (r *PostgreSQLAssetsRepository) GetAllAssetNotHaveMaintenance() ([]*entity.Assets, error) {
+func (r *PostgreSQLAssetsRepository) GetAllAssetNotHaveMaintenance(companyId int64) ([]*entity.Assets, error) {
 	var assets = []*entity.Assets{}
 	today := time.Now()
 	result := r.db.Model(&entity.Assets{}).
 		Joins("LEFT JOIN maintenance_schedules ON maintenance_schedules.asset_id = assets.id").
 		Where("(assets.status = ? OR assets.status = ?)", "In Use", "New").
 		Where("maintenance_schedules.start_date < ? OR maintenance_schedules.start_date IS NULL", today).
+		Where("assets.company_id = ?", companyId).
 		Distinct("assets.id, assets.*").
 		Find(&assets)
 	if result.Error != nil {
