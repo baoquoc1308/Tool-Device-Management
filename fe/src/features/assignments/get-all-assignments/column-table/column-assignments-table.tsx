@@ -1,7 +1,7 @@
 import type { ColumnDef } from '@tanstack/react-table'
 import type { AssignmentData } from '../model/type'
-import { Badge, Button } from '@/components/ui'
-import { CircleIcon, UserIcon, WrenchIcon, ArchiveIcon, TrashIcon } from 'lucide-react'
+import { Badge, Button, TooltipTrigger, Tooltip, TooltipContent } from '@/components/ui'
+import { CircleIcon, UserIcon, WrenchIcon, ArchiveIcon, TrashIcon, Eye } from 'lucide-react'
 import { Link } from 'react-router-dom'
 
 export const columnsAssignmentsTable: ColumnDef<AssignmentData>[] = [
@@ -97,14 +97,24 @@ export const columnsAssignmentsTable: ColumnDef<AssignmentData>[] = [
       const assetId = row.getValue('id') as number
 
       return (
-        <Button
-          variant='outline'
-          className='border-primary text-primary hover:text-primary/80 w-fit'
-        >
-          <Link to={`/assignments/${assetId}`}>
-            <span className='text-sm font-medium'>View Details</span>
-          </Link>
-        </Button>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <Button
+              variant='outline'
+              className='border-primary text-primary hover:text-primary/80 w-fit'
+            >
+              <Link
+                to={`/assignments/${assetId}`}
+                className='flex items-center gap-2 text-sm font-medium'
+              >
+                <Eye className='h-4 w-4' />
+              </Link>
+            </Button>
+          </TooltipTrigger>
+          <TooltipContent>
+            <p>View details</p>
+          </TooltipContent>
+        </Tooltip>
       )
     },
   },

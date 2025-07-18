@@ -68,7 +68,7 @@ export const ComparisonTable = ({ assets }: ComparisonTableProps) => {
     switch (field.type) {
       case 'image':
         return (
-          <div className='bg-muted/50 mx-auto flex h-16 w-16 items-center justify-center overflow-hidden rounded-lg border'>
+          <div className='bg-muted/50 mx-auto flex h-16 w-16 items-center justify-center overflow-hidden rounded-lg border-none'>
             {value ? (
               <img
                 src={value}
@@ -140,7 +140,7 @@ export const ComparisonTable = ({ assets }: ComparisonTableProps) => {
           <div className='comparison-table-container overflow-x-auto'>
             <table className='w-full'>
               <thead>
-                <tr className='comparison-table-header bg-muted/50 border-b'>
+                <tr className='comparison-table-header bg-muted/50 border-t border-b'>
                   <th className='bg-muted/50 sticky left-0 z-20 w-48 p-4 text-left font-medium shadow-sm'>Property</th>
                   {assets.map((asset) => (
                     <th

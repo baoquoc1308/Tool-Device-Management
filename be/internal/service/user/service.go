@@ -231,17 +231,20 @@ func (service *UserService) GetAllUser(userId int64) []*entity.Users {
 }
 
 func (service *UserService) UpdateInformation(id int64, firstName, lastName string, image *multipart.FileHeader) (*entity.Users, error) {
-	imgFile, err := image.Open()
-	if err != nil {
-		return nil, fmt.Errorf("cannot open image: %w", err)
-	}
-	defer imgFile.Close()
-	uniqueName := fmt.Sprintf("%d_%s", time.Now().UnixNano(), image.Filename)
-	imagePath := "avatar/" + uniqueName
-	uploader := utils.NewSupabaseUploader()
-	imageUrl, err := uploader.Upload(imagePath, imgFile, image.Header.Get("Content-Type"))
-	if err != nil {
-		return nil, err
+	var imageUrl string
+	if image != nil {
+		imgFile, err := image.Open()
+		if err != nil {
+			return nil, fmt.Errorf("cannot open image: %w", err)
+		}
+		defer imgFile.Close()
+		uniqueName := fmt.Sprintf("%d_%s", time.Now().UnixNano(), image.Filename)
+		imagePath := "avatar/" + uniqueName
+		uploader := utils.NewSupabaseUploader()
+		imageUrl, err = uploader.Upload(imagePath, imgFile, image.Header.Get("Content-Type"))
+		if err != nil {
+			return nil, err
+		}
 	}
 	user := entity.Users{Id: id, FirstName: firstName, LastName: lastName, Avatar: imageUrl}
 	userUpdated, err := service.repo.UpdateUser(&user)
@@ -278,10 +281,21 @@ func (service *UserService) GetAllUserOfDepartment(userId int64, departmentId in
 		return nil, err
 	}
 	var users []*entity.Users
-	if user.Role.Slug == "admin" {
+	switch user.Role.Slug {
+	case "admin":
 		users, err = service.repo.GetAllUserRoleManagerOfDepartment(departmentId)
-	} else {
-		users, err = service.repo.GetAllUserRoleEmployeeOfDepartment(departmentId)
+	case "assetManager":
+		if *user.DepartmentId == departmentId {
+			users, err = service.repo.GetAllUserRoleEmployeeOfDepartment(departmentId)
+		} else {
+			users, err = service.repo.GetAllUserRoleManagerOfDepartment(departmentId)
+		}
+	case "employee":
+		if *user.DepartmentId == departmentId {
+			users, err = service.repo.GetAllUserRoleEmployeeOfDepartmentExluding(departmentId, userId)
+		}
+	default:
+		return nil, errors.New("User don't have permission.")
 	}
 	if err != nil {
 		return nil, err

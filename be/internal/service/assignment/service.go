@@ -66,41 +66,78 @@ func (service *AssignmentService) Update(userId, assignmentId int64, userIdAssig
 		return nil, err
 	}
 	var assignUser *entity.Users
-	if byUser.Role.Slug == "employee" {
-		ownAssetUser, err := service.userRepo.FindByUserId(*assignment.UserId)
-		if err != nil {
-			return nil, err
-		}
-		userManager, err := service.userRepo.FindManager(ownAssetUser.Id)
-		if err != nil {
-			return nil, err
-		}
-		if (userIdAssign == nil) || (userManager.Id == *userIdAssign) || (ownAssetUser.DepartmentId == nil) || (byUser.DepartmentId == nil) || (*ownAssetUser.DepartmentId != *byUser.DepartmentId) {
-			return nil, fmt.Errorf("You can only assign to employee within the same department.")
-		}
-		assignUser, err = service.userRepo.FindByUserId(*userIdAssign)
-		if err != nil {
-			return nil, err
-		}
-		if (assignUser.DepartmentId == nil) || (*assignUser.DepartmentId != *ownAssetUser.DepartmentId) {
-			return nil, fmt.Errorf("You can only assign to employee within the same department.")
-		}
-	} else {
-		if userIdAssign != nil {
-			assignUser, err = service.userRepo.FindByUserId(*userIdAssign)
-			if err != nil {
-				return nil, err
-			}
-		} else {
-			assignUser = nil
-		}
-	}
 	asset, err := service.assetRepo.GetAssetById(assignment.AssetId)
 	if err != nil {
 		return nil, err
 	}
 	if asset.Status == "Under Maintenance" {
 		return nil, fmt.Errorf("The asset is under maintenance.")
+	}
+	assetOwnerRole := asset.OnwerUser.Role.Slug
+	var assignedUserRole string
+	if userIdAssign != nil {
+		assignUser, err = service.userRepo.FindByUserId(*userIdAssign)
+		if err != nil {
+			return nil, err
+		}
+		assignedUserRole = assignUser.Role.Slug
+	} else {
+		assignUser, err = service.userRepo.GetUserAssetManageOfDepartment(*departmentId)
+		if err != nil {
+			return nil, err
+		}
+	}
+	const (
+		RoleEmployee = "employee"
+		RoleManager  = "assetManager"
+		RoleAdmin    = "admin"
+	)
+	permissionErrorMessage := fmt.Errorf("You are not allowed to assign this user or department.")
+	if byUser.CompanyId != asset.CompanyId {
+		return nil, permissionErrorMessage
+	}
+	if (assignUser != nil) && (assignUser.CompanyId != asset.CompanyId) {
+		return nil, permissionErrorMessage
+	}
+	if departmentId != nil {
+		department, err := service.departmentRepo.GetDepartmentById(*departmentId)
+		if err != nil {
+			return nil, err
+		}
+		if department.CompanyId != asset.CompanyId {
+			return nil, permissionErrorMessage
+		}
+	}
+	switch byUser.Role.Slug {
+	case RoleAdmin:
+		if assetOwnerRole != RoleManager {
+			return nil, permissionErrorMessage
+		}
+		if (userIdAssign != nil) && (assignedUserRole != RoleManager) {
+			return nil, permissionErrorMessage
+		}
+	case RoleManager:
+		if (assetOwnerRole == RoleAdmin) || ((userIdAssign != nil) && (assignedUserRole == RoleAdmin)) {
+			return nil, permissionErrorMessage
+		}
+		if *asset.OnwerUser.DepartmentId != *byUser.DepartmentId {
+			return nil, permissionErrorMessage
+		}
+		if (userIdAssign != nil) && (*assignUser.DepartmentId != *asset.OnwerUser.DepartmentId) && (assignedUserRole == RoleEmployee) {
+			return nil, permissionErrorMessage
+		}
+	case RoleEmployee:
+		if *asset.Owner != userId {
+			return nil, permissionErrorMessage
+		}
+		if userIdAssign == nil {
+			return nil, permissionErrorMessage
+		}
+		if (*asset.OnwerUser.DepartmentId != *assignUser.DepartmentId) || (assignUser.Role.Slug != RoleEmployee) {
+			return nil, permissionErrorMessage
+		}
+	default:
+		return nil, fmt.Errorf("Unauthorized role to perform assignment")
 	}
 	tx := service.Repo.GetDB().Begin()
 	defer func() {
@@ -112,30 +149,30 @@ func (service *AssignmentService) Update(userId, assignmentId int64, userIdAssig
 		}
 	}()
 	var assignmentUpdated *entity.Assignments
-	if departmentId != nil {
-		assignmentUpdated, err = service.Repo.Update(assignmentId, userId, assignment.AssetId, userIdAssign, departmentId, tx)
-	} else {
-		assignmentUpdated, err = service.Repo.Update(assignmentId, userId, assignment.AssetId, userIdAssign, assignUser.DepartmentId, tx)
-	}
+	assignmentUpdated, err = service.Repo.Update(assignmentId, userId, assignment.AssetId, &assignUser.Id, assignUser.DepartmentId, tx)
 	if err != nil {
 		return nil, err
 	}
 
 	// Chuyển phòng ban
-	if departmentId != nil && (*departmentId != asset.DepartmentId) {
+	if departmentId != nil {
 		assetLog := entity.AssetLog{
 			Timestamp: time.Now(),
 			Action:    "Transfer",
 			AssetId:   asset.Id,
 			ByUserId:  &byUser.Id,
-			CompanyId: assignUser.CompanyId,
+			CompanyId: byUser.CompanyId,
 		}
+		assetLog.AssignUserId = &assignUser.Id
 		department, err := service.departmentRepo.GetDepartmentById(*departmentId)
 		if err != nil {
 			return nil, err
 		}
 		assetLog.ChangeSummary = fmt.Sprintf("Transfer from department %v to department %v by user %v\n",
 			asset.Department.DepartmentName, department.DepartmentName, byUser.Email)
+		if err := service.assetRepo.UpdateOwner(assignment.AssetId, assignUser.Id, tx); err != nil {
+			return nil, err
+		}
 		if _, err := service.assetRepo.UpdateAssetDepartment(assignment.AssetId, *departmentId, tx); err != nil {
 			return nil, err
 		}
@@ -145,7 +182,7 @@ func (service *AssignmentService) Update(userId, assignmentId int64, userIdAssig
 	}
 
 	// Chuyển người dùng
-	if userIdAssign != nil && (*userIdAssign != asset.OnwerUser.Id) {
+	if userIdAssign != nil {
 		assetLog := entity.AssetLog{
 			Timestamp: time.Now(),
 			Action:    "Transfer",
@@ -214,26 +251,22 @@ func (service *AssignmentService) Filter(userId int64, emailAssigned *string, em
 	if err != nil {
 		return nil, err
 	}
-	if users.Role.Slug == "employee" {
-		var assignments []entity.Assignments
-		assigment, err := service.Repo.GetAssignmentForEmployee(users.Id)
-		if err != nil {
-			return nil, err
-		}
-		assignments = append(assignments, *assigment)
-		assignmentsRes := utils.ConvertAssignmentsToResponses(assignments)
-		return assignmentsRes, nil
-	}
 	filter.CompanyId = users.CompanyId
 	db := service.Repo.GetDB()
 	dbFilter := filter.ApplyFilter(db.Model(&entity.Assignments{}), userId)
-
-	var total int64
-	dbFilter.Count(&total)
 	var assignments []entity.Assignments
-	result := dbFilter.Find(&assignments)
-	if result.Error != nil {
-		return nil, result.Error
+	switch users.Role.Slug {
+	case "admin":
+		assignments, err = service.Repo.GetAssignmentWithFilterForAdmin(dbFilter)
+	case "assetManager":
+		assignments, err = service.Repo.GetAssignmentWithFilterForManager(*users.DepartmentId, dbFilter)
+	case "employee":
+		assignments, err = service.Repo.GetAssignmentWithFilterForEmployee(userId, dbFilter)
+	default:
+		return nil, fmt.Errorf("Unauthorized role to perform assignment filtering.")
+	}
+	if err != nil {
+		return nil, err
 	}
 	assignmentsRes := utils.ConvertAssignmentsToResponses(assignments)
 	return assignmentsRes, nil
