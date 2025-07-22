@@ -11,6 +11,7 @@ interface BillDetailModalProps {
 }
 
 export const BillDetailModal = ({ bill, open, onClose }: BillDetailModalProps) => {
+  console.log('🚀 ~ BillDetailModal ~ bill:', bill)
   if (!bill) return null
 
   const getStatusColor = (status: string) => {
@@ -35,14 +36,24 @@ export const BillDetailModal = ({ bill, open, onClose }: BillDetailModalProps) =
   }
 
   const getAssetName = () => {
+    if (Array.isArray(bill.assets)) {
+      return bill.assets.map((asset) => asset.assetName).join(', ')
+    }
     return bill.assets?.assetName || 'Unknown Asset'
   }
 
   const getCategoryName = () => {
+    if (Array.isArray(bill.assets)) {
+      const categories = bill.assets.map((asset) => asset.category?.categoryName).filter(Boolean)
+      return [...new Set(categories)].join(', ') || 'No Category'
+    }
     return bill.assets?.category?.categoryName || 'No Category'
   }
 
   const getAssetCost = () => {
+    if (Array.isArray(bill.assets)) {
+      return bill.assets.reduce((total, asset) => total + (asset.cost || 0), 0)
+    }
     if (bill.assets?.cost !== undefined && bill.assets.cost !== null) {
       return bill.assets.cost
     }
@@ -83,25 +94,50 @@ export const BillDetailModal = ({ bill, open, onClose }: BillDetailModalProps) =
   }
 
   const buyerInfo = {
-    name: 'Ho Bao Quoc',
-    address: '533/8 Nguyen Tri Phuong, Ward 8, District 10, Ho Chi Minh City',
-    phoneNumber: '032-35471411',
-    // taxCode: '',
-    // accountNumber: '4568239472356',
-    // paymentMethod: 'Bank Transfer',
+    name: bill.buyer?.buyerName || 'N/A',
+    address: bill.buyer?.buyerAddress || 'N/A',
+    phoneNumber: bill.buyer?.buyerPhone || 'N/A',
+    email: bill.buyer?.buyerEmail || 'N/A',
+  }
+  console.log('🚀 ~ BillDetailModal ~ buyerInfo.address:', buyerInfo.address)
+  console.log('🚀 ~ BillDetailModal ~ buyerInfo.name:', buyerInfo.name)
+
+  const getItems = () => {
+    if (Array.isArray(bill.assets)) {
+      return bill.assets.map((asset, index) => ({
+        stt: index + 1,
+        assetName: asset.assetName,
+        category: asset.category?.categoryName || 'No Category',
+        quantity: 1,
+        unitPrice: asset.cost || 0,
+        amount: asset.cost || 0,
+      }))
+    } else if (bill.assets) {
+      return [
+        {
+          stt: 1,
+          assetName: bill.assets.assetName,
+          category: bill.assets.category?.categoryName || getCategoryName(),
+          quantity: 1,
+          unitPrice: bill.assets.cost || getAssetCost(),
+          amount: bill.assets.cost || getAssetCost(),
+        },
+      ]
+    } else {
+      return [
+        {
+          stt: 1,
+          assetName: getAssetName(),
+          category: getCategoryName(),
+          quantity: 1,
+          unitPrice: getAssetCost(),
+          amount: getAssetCost(),
+        },
+      ]
+    }
   }
 
-  const items = [
-    {
-      stt: 1,
-      assetName: getAssetName(),
-      category: getCategoryName(),
-      quantity: 1,
-      unitPrice: getAssetCost(),
-      amount: getAssetCost(),
-    },
-  ]
-
+  const items = getItems()
   const totalAmount = items.reduce((sum, item) => sum + item.amount, 0)
 
   return (
@@ -174,13 +210,16 @@ export const BillDetailModal = ({ bill, open, onClose }: BillDetailModalProps) =
               Account No.: <span className='font-normal'>{sellerInfo.accountNumber}</span>
             </h3>
             <h3 className='mt-0.5 text-sm font-semibold text-gray-900 max-[500px]:text-xs max-[430px]:text-xs dark:text-gray-100'>
-              Buyer: <span className='font-normal'>{buyerInfo.name}</span>
+              Buyer: <span className='font-normal'>{buyerInfo?.name}</span>
             </h3>
             <h3 className='font-semibold text-gray-900 dark:text-gray-100'>
-              Address: <span className='font-normal'>{buyerInfo.address}</span>
+              Address: <span className='font-normal'>{buyerInfo?.address}</span>
             </h3>
             <h3 className='font-semibold text-gray-900 dark:text-gray-100'>
-              Phone: <span className='font-normal'>{buyerInfo.phoneNumber}</span>
+              Phone: <span className='font-normal'>{buyerInfo?.phoneNumber}</span>
+            </h3>
+            <h3 className='font-semibold text-gray-900 dark:text-gray-100'>
+              Email: <span className='font-normal'>{buyerInfo?.email}</span>
             </h3>
           </div>
         </div>
@@ -236,7 +275,7 @@ export const BillDetailModal = ({ bill, open, onClose }: BillDetailModalProps) =
                     </td>
                   </tr>
                 ))}
-                {[...Array(3)].map((_, index) => (
+                {[...Array(2)].map((_, index) => (
                   <tr
                     key={`empty-${index}`}
                     className='border-b dark:border-gray-600'
@@ -330,9 +369,6 @@ export const BillDetailModal = ({ bill, open, onClose }: BillDetailModalProps) =
           </p>
           <ul className='mt-2 list-disc space-y-1 pl-5 max-[430px]:mt-1 max-[430px]:space-y-0.5 max-[430px]:pl-4'>
             <li>This invoice is valid only when signed and stamped by the seller.</li>
-            <li>Please retain this invoice for warranty and accounting purposes.</li>
-            <li>All prices are inclusive of applicable taxes (if any).</li>
-            <li>Goods/services sold are non-refundable unless otherwise stated.</li>
             <li>Contact our support team if any discrepancies are found.</li>
           </ul>
         </div>
@@ -343,7 +379,7 @@ export const BillDetailModal = ({ bill, open, onClose }: BillDetailModalProps) =
               <p className='mb-1 font-semibold text-gray-900 dark:text-gray-100'>Buyer</p>
               <p className='mb-8 text-xs max-[430px]:mb-4 max-[430px]:text-xs'>(Signature and full name)</p>
               <div className='border-gray-400 pb-2 max-[430px]:pb-1'>
-                <p className='font-semibold'>_________________</p>
+                <p className='font-semibold'>{bill.buyer?.buyerName}</p>
               </div>
             </div>
             <div className='text-center'>
